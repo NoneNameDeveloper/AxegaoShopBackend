@@ -1,0 +1,77 @@
+from fastapi import APIRouter, Depends, HTTPException
+
+from database.models.category import Category, change_category_order
+
+from schemas.categories import CategoryIn_Pydantic, CategoryCreate, CategoryOrderChange, CategoryUpdate
+from security.auth_bearer import JWTBearer
+from utils.users_misc import current_user_is_admin
+
+
+router = APIRouter(tags=["Categories"])
+
+
+@router.post(
+    "/categories",
+    response_model=CategoryIn_Pydantic,
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)]
+)
+async def category_create(category: CategoryCreate):
+    cat = Category(
+        title=category.title,
+        photo=category.photo
+    )
+
+    await cat.save()
+
+    return await CategoryIn_Pydantic.from_queryset_single(Category.filter(id=cat.id).first())
+
+
+@router.get(
+    "/categories",
+    response_model=list[CategoryIn_Pydantic],
+    dependencies=[Depends(JWTBearer())]
+)
+async def category_get():
+    return await CategoryIn_Pydantic.from_queryset(Category.all())
+
+
+@router.patch(
+    "/category/{id}",
+    response_model=CategoryIn_Pydantic,
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)]
+)
+async def category_update(id: int, category_: CategoryUpdate):
+    cat = await Category.get_or_none(id=id)
+
+    if not cat:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    await Category.filter(id=id).update(**category_.model_dump(exclude_unset=True))
+
+    return await CategoryIn_Pydantic.from_queryset_single(Category.filter(id=id).first())
+
+
+@router.delete(
+    "/category/{id}",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    status_code=200
+)
+async def category_delete(id: int):
+    cat = await Category.get_or_none(id=id)
+
+    if not cat:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    await Category.filter(id=id).delete()
+
+
+@router.post(
+    "/category/order",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    status_code=200
+)
+async def change_category_order_router(cat_order: CategoryOrderChange):
+    res = await change_category_order(cat_order.category_1, cat_order.category_2)
+
+    if not res:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
