@@ -2,11 +2,10 @@ import typing
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from database.models.category import Category
 from database.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order
 from database.models.subcategory import Subcategory
 
-from schemas.products import ProductCreate, ProductIn_Pydantic, ProductSorting, ProductOrderChange
+from schemas.products import ProductCreate, ProductIn_Pydantic, ProductOrderChange
 from security.auth_bearer import JWTBearer
 from utils.users_misc import current_user_is_admin
 
@@ -31,7 +30,6 @@ async def get_products(
 
     *query* - вхождение (startswith) в title (название) товара (не чувствителен к регистру)
     """
-    # print(sorting)
 
     if not query:
         sorted_products = (Product.all().prefetch_related()
