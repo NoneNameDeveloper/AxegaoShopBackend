@@ -12,6 +12,10 @@ def random_string(length: int = 16) -> str:
     return "".join([random.choice(string.ascii_letters + string.digits) for _ in range(length)])
 
 
+def random_upper_string(length: int = 8) -> str:
+    return "".join([random.choice(string.ascii_uppercase) for _ in range(length)]).upper()
+
+
 async def handle_image_upload(file: UploadFile) -> str:
     _, ext = os.path.splitext(file.filename)
 
