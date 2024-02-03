@@ -18,9 +18,8 @@ class Promocode(Model):
     class Meta:
         table = "promocodes"
 
-    # class PydanticMeta:
-    #     ...
-    #     # exclude = ("orders", "created_datetime")
+    class PydanticMeta:
+        exclude = ("orders", "created_datetime")
 
     async def use(self):
         """используем промокод"""
