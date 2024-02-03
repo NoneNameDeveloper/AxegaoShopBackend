@@ -2,8 +2,9 @@ from tortoise.models import Model
 from tortoise import fields
 
 
-class Partners(Model):
-    """таблица с партнерами"""
+class Partner(Model):
+    """таблица с партнерами (фоторгафии полноразмерные, сжимаются для
+    админки на фронте)"""
     id = fields.IntField(pk=True)
 
     created_datetime = fields.DatetimeField(auto_now_add=True)
