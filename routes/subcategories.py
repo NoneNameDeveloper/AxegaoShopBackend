@@ -54,8 +54,7 @@ async def subcategory_get(id: int):
 
 @router.get(
     "/category/{category_id}/subcategories",
-    response_model=list[SubcategoryIn_Pydantic],
-    dependencies=[Depends(JWTBearer())]
+    response_model=list[SubcategoryIn_Pydantic]
 )
 async def category_subcategory_get(category_id: int):
     if not await Category.get_or_none(id=category_id):
