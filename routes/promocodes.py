@@ -21,7 +21,6 @@ async def get_promocodes(limit: int = 0, offset: int = 20):
 @router.post(
     path="/promocodes/",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=PromocodeIn_Pydantic,
     status_code=201
 )
 async def create_promocode(promocode: CreatePromocode):
