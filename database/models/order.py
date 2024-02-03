@@ -3,24 +3,28 @@ from datetime import datetime
 from tortoise.models import Model
 from tortoise import fields
 
+from utils.helpers import random_upper_string
+
 
 class Order(Model):
     """таблица с заказами"""
     id = fields.IntField(pk=True)
 
+    number = fields.CharField(max_length=50, unique=True, default=random_upper_string)
+
     promocode = fields.ForeignKeyField("axegaoshop.Promocode", related_name="orders", null=True)
 
     user = fields.ForeignKeyField("axegaoshop.User", related_name="orders", null=False)
 
-    status = fields.CharField(max_length=100)  # статус заказа
+    straight = fields.BooleanField(null=False, default=True)  # True - покупка напрямую, False - через корзину
 
-    email = fields.TextField()  # почта, указанная при заполнении заяви на заказ
+    status = fields.CharField(max_length=100, default="waiting_payment")  # статус заказа  (waiting_payment, canceled, finished)
 
-    payment_type = fields.CharField(max_length=100)  # выбранный способ оплаты  ("sbp", "site_balance")
+    email = fields.TextField(null=False)  # почта, указанная при заполнении заявки на заказ
 
-    is_active = fields.BooleanField(default=True)
+    payment_type = fields.CharField(max_length=100, null=False)  # выбранный способ оплаты  ("sbp", "site_balance")
 
-    review: fields.OneToOneNullableRelation
+    review: fields.OneToOneNullableRelation  # отзыв по этому заказу (может и не быть)
     parameters: fields.ReverseRelation["OrderParameters"]  # параметры заказа
 
     class Meta:
