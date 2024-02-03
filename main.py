@@ -90,7 +90,3 @@ app.include_router(router=uploads.router, prefix="")
 
 
 create_storage()
-
-# @app.get("/", response_model=HealthResponse)
-# async def health():
-#     return HealthResponse(status="Ok")

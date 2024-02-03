@@ -72,10 +72,10 @@ async def subcategory_products_get(
                        .order_by("card_price" if price_sort else "-card_price")
                        .order_by("parameters__reviews__rate" if rating_sort else "-parameters__reviews__rate")
                        )
-    sorted_products = await sorted_products.filter(card_has_sale=True).all() if sale_sort else \
-        await sorted_products.all()
+    sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
+        sorted_products
 
-    return sorted_products
+    return await ProductIn_Pydantic.from_queryset(sorted_products)
 
 
 @router.post(
