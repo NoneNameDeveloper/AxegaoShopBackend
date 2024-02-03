@@ -11,7 +11,6 @@ from schemas.payment_types import PaymentTypesList
 
 class OrderCreate(BaseModel):
     promocode: typing.Optional[str] = None
-    user_id: int
     straight: bool
     email: str
     payment_type: str
