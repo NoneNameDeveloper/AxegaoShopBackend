@@ -64,7 +64,7 @@ register_tortoise(
 )
 
 from routes import users, products, uploads, product_options, product_parameters, product_photos, \
-    shop_cart, categories, subcategories, promocodes
+    shop_cart, categories, subcategories, promocodes, orders
 
 app.include_router(router=users.router, prefix="")
 
@@ -77,7 +77,9 @@ app.include_router(router=product_options.router, prefix="")
 app.include_router(router=product_parameters.router, prefix="")
 app.include_router(router=product_photos.router, prefix="")
 
-app.include_router(router=promocodes.router)
+app.include_router(router=orders.router, prefix="")
+
+app.include_router(router=promocodes.router, prefix="")
 
 app.include_router(router=shop_cart.router, prefix="")
 
