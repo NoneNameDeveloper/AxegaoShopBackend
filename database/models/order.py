@@ -18,7 +18,7 @@ class Order(Model):
 
     straight = fields.BooleanField(null=False, default=True)  # True - покупка напрямую, False - через корзину
 
-    status = fields.CharField(max_length=100, default="waiting_payment")  # статус заказа  (waiting_payment, canceled, finished)
+    status = fields.CharField(max_length=100, default="waiting_payment")  # статус заказа (waiting_payment, canceled, finished)
 
     email = fields.TextField(null=False)  # почта, указанная при заполнении заявки на заказ
 
