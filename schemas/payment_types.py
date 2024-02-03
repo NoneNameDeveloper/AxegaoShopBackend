@@ -5,3 +5,6 @@ class PaymentTypes(BaseModel):
     """модель с доступными способами оплаты"""
     SBP: str = "sbp"
     SITE_BALANCE: str = "site_balance"
+
+
+PaymentTypesList = ["sbp", "site_balance"]
