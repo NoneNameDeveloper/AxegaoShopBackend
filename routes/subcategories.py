@@ -35,10 +35,21 @@ async def subcategory_create(subcategory: SubcategoryCreate):
 @router.get(
     "/subcategories",
     response_model=list[SubcategoryIn_Pydantic],
-    dependencies=[Depends(JWTBearer())]
 )
-async def subcategory_get():
+async def subcategories_get():
     return await SubcategoryIn_Pydantic.from_queryset(Subcategory.all())
+
+
+@router.get(
+    "/subcategory/{id}",
+    response_model=SubcategoryIn_Pydantic
+)
+async def subcategory_get(id: int):
+    subcategory = await Subcategory.get_or_none(id=id)
+    if not subcategory:
+        raise HTTPException(status_code=404, detail="CATEGORY_NOT_FOUND")
+
+    return await SubcategoryIn_Pydantic.from_tortoise_orm(subcategory)
 
 
 @router.get(
