@@ -23,4 +23,5 @@ class UsePromocode(BaseModel):
     name: str
     sale_percent: float
 
-PromocodeIn_Pydantic = pydantic_model_creator(Promocode, exclude=("created_datetime", ))
+
+PromocodeIn_Pydantic = pydantic_model_creator(Promocode)
