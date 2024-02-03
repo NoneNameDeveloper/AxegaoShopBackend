@@ -1,4 +1,5 @@
 from datetime import datetime
+from decimal import Decimal
 
 from tortoise.models import Model
 from tortoise import fields
@@ -18,7 +19,10 @@ class Order(Model):
 
     straight = fields.BooleanField(null=False, default=True)  # True - покупка напрямую, False - через корзину
 
-    status = fields.CharField(max_length=100, default="waiting_payment")  # статус заказа (waiting_payment, canceled, finished)
+    result_price = fields.DecimalField(max_digits=10, decimal_places=2, null=True)
+
+    status = fields.CharField(max_length=100,
+                              default="waiting_payment")  # статус заказа (waiting_payment, canceled, finished)
 
     email = fields.TextField(null=False)  # почта, указанная при заполнении заявки на заказ
 
@@ -31,11 +35,29 @@ class Order(Model):
         table = "orders"
 
     class PydanticMeta:
-        exclude = ("review", )
+        exclude = ("review",)
 
     async def cancel(self):
         """отменить заказ"""
         self.status = "cancelled"
+        await self.save()
+
+    async def set_result_price(self) -> Decimal:
+        """установить итоговую цену исходя из всех товаров / количества одного товара"""
+        result_price = 0
+        await self.fetch_related('order_parameters')
+        if self.straight:
+
+            result_price = await (await self.order_parameters[0].parameter).get_price() * self.order_parameters[0].count
+
+        else:
+            for parameter in self.order_parameters:
+                result_price += (await parameter).get_price() * parameter.count
+
+        if self.promocode:
+            result_price = result_price - (result_price * Decimal.from_float((await self.promocode).sale_percent / 100))
+
+        self.result_price = result_price
         await self.save()
 
 
