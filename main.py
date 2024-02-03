@@ -19,6 +19,7 @@ TORTOISE_MODELS = [
     "database.models.promocode",
     "database.models.order",
     "database.models.review",
+    "database.models.partner",
     "aerich.models"
 ]
 
@@ -64,7 +65,7 @@ register_tortoise(
 )
 
 from routes import users, products, uploads, product_options, product_parameters, product_photos, \
-    shop_cart, categories, subcategories, promocodes, orders
+    shop_cart, categories, subcategories, promocodes, orders, partners
 
 app.include_router(router=users.router, prefix="")
 
@@ -82,6 +83,8 @@ app.include_router(router=orders.router, prefix="")
 app.include_router(router=promocodes.router, prefix="")
 
 app.include_router(router=shop_cart.router, prefix="")
+
+app.include_router(router=partners.router, prefix="")
 
 app.include_router(router=uploads.router, prefix="")
 
