@@ -93,6 +93,12 @@ class Parameter(Model):
 
         await super().save(*args, **kwargs)
 
+    async def get_price(self):
+        """get result price for one parameter"""
+        if self.has_sale:
+            return self.sale_price
+        else:
+            return self.price
 
 class ProductData(Model):
     """таблица с самими товарами (ключами..)"""
