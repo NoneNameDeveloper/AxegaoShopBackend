@@ -11,3 +11,8 @@ avatar-generator
 python-jose[cryptography]
 python-multipart
 uvicorn
+pydantic-settings
+yarl
+sentry-sdk
+loguru
+ujson

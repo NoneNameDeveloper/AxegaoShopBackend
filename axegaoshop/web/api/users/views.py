@@ -1,0 +1,215 @@
+import typing
+from typing import Annotated
+
+from fastapi import APIRouter, HTTPException, Depends
+from fastapi.security import OAuth2PasswordBearer
+
+from pydantic import BaseModel
+
+from axegaoshop.db.models.token import Token
+from axegaoshop.db.models.user import User
+
+from axegaoshop.web.api.tokens.schema import TokenCreated, TokenRequest
+from axegaoshop.web.api.users.schema import UserCreate, UserOutput, UserUpdate, UserIn_Pydantic, UserCart_Pydantic, \
+    UserForAdmin_Pydantic, UserUpdateAdmin
+
+from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
+from axegaoshop.services.security.tools import get_hashed_password, verify_password, create_refresh_token, \
+    create_access_token
+
+from axegaoshop.services.image.avatar import create_user_photo
+from axegaoshop.services.security.users import get_current_user, current_user_is_admin
+
+router = APIRouter()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl='/user/login')
+
+
+class Message(BaseModel):
+    message: str
+
+
+@router.post(
+    "/user/register",
+    status_code=201,
+    response_model=UserOutput,
+    responses={
+        400: {
+            "model": Message, "description": "User with such login already exists."
+        }
+    }
+)
+async def register_user(user: UserCreate, user_check: Annotated[User | None, Depends(get_current_user)]):
+    user_exists: bool = await User.filter(username=user.username).exists()
+
+    if user_exists:
+        raise HTTPException(
+            status_code=401, detail="LOGIN_EXISTS"
+        )
+
+    email_exists: bool = await User.filter(email=user.email).exists()
+
+    if email_exists:
+        raise HTTPException(
+            status_code=401, detail="EMAIL_EXISTS"
+        )
+
+    if not user.password and user_exists:
+        await User.filter(id=user_check.id).update(**user.model_dump(exclude_unset=True), is_anonymous=False)
+
+        return User.filter(id=user_check.id).first()
+
+    elif not user_exists and not user.email and not user.password:
+        new_user = User(
+            username=user.username,
+            is_anonymous=True
+        )
+        await new_user.save()
+        return new_user
+
+    encrypted_password = get_hashed_password(user.password)
+
+    new_user = User(
+        username=user.username,
+        password=encrypted_password,
+        email=user.email
+    )
+    new_user.photo = create_user_photo(user.username)
+    await new_user.save()
+
+    return new_user
+
+
+@router.post("/user/login", response_model=TokenCreated)
+async def login_user(request: TokenRequest):
+    """
+    для получения access token для анонима (неавторизованного человека) передать username без пароля
+    """
+    user = await User.filter(email=request.email).get_or_none()
+
+    if not user:
+        raise HTTPException(status_code=401, detail="User not found")
+
+    if not request.password and user.is_anonymous:
+        access = create_access_token(user.id)
+        refresh = create_refresh_token(user.id)
+
+        token_db = Token(
+            access_token=access,
+            refresh_token=refresh,
+            user_id=user.id
+        )
+        await token_db.save()
+
+        return token_db
+
+    if not request.password:
+        raise HTTPException(status_code=401, detail="Provide password")
+
+    hashed_password: str = user.password
+
+    if not verify_password(request.password, hashed_password):
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect password"
+        )
+
+    access = create_access_token(user.id)
+    refresh = create_refresh_token(user.id)
+
+    token_db = Token(
+        access_token=access,
+        refresh_token=refresh,
+        user_id=user.id
+    )
+    await token_db.save()
+
+    return token_db
+
+
+@router.get(
+    "/user/me",
+    dependencies=[Depends(JWTBearer())],
+    response_model=UserCart_Pydantic
+)
+async def get_current_user_(user: Annotated[User, Depends(get_current_user)]):
+    return await UserCart_Pydantic.from_queryset_single(User.filter(id=user.id).first())
+
+
+@router.get(
+    "/user/{id}",
+    response_model=UserCart_Pydantic,
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)]
+)
+async def get_user_by_id(id: int):
+    if not await User.get_or_none(id=id):
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    return await UserCart_Pydantic.from_queryset_single(User.filter(id=id).first())
+
+
+@router.patch(
+    "/user/me",
+    dependencies=[Depends(JWTBearer())],
+    response_model=UserOutput
+)
+async def update_current_user(user: UserUpdate, user_data: Annotated[User, Depends(get_current_user)]):
+
+    # логин недоступен
+    if user.username and await User.get_or_none(username=user.username):
+        raise HTTPException(status_code=401, detail="LOGIN_ALREADY_EXISTS")
+
+    await User.filter(id=user_data.id).update(**user.model_dump(exclude_unset=True))
+
+    return await User.filter(id=user_data.id).first()
+
+
+@router.delete(
+    "/user/{id}",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    status_code=200
+)
+async def delete_user(id: int):
+    user = await User.get_or_none(id=id)
+    if not user:
+        raise HTTPException(status_code=404, detail="USER_NOT_FOUND")
+
+    await user.delete()
+
+
+@router.patch(
+    "/user/{id}",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    response_model=UserOutput
+)
+async def update_user_by_id(id: int, user: UserUpdateAdmin):
+
+    # пользователь не найден
+    if not await User.get_or_none(id=id):
+        raise HTTPException(status_code=404, detail="USER_NOT_FOUND")
+
+    # логин недоступен
+    if user.username and await User.get_or_none(username=user.username):
+        raise HTTPException(status_code=401, detail="LOGIN_ALREADY_EXISTS")
+
+    await User.filter(id=id).update(**user.model_dump(exclude_unset=True))
+
+    return await UserIn_Pydantic.from_queryset_single(User.filter(id=id).first())
+
+
+@router.get(
+    "/users",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    response_model=list[UserForAdmin_Pydantic]
+)
+async def get_users(query: typing.Optional[str] = None, limit: int = 20, offset: int = 0):
+    """
+    Поиск пользователей в базе данных для админа:
+
+    *query* - вхождение подстроки (startswith) в email (не чувствителен к регистру)
+    """
+    if not query:
+        return await UserForAdmin_Pydantic.from_queryset(User.all().limit(limit).offset(offset))
+
+    else:
+        return await UserForAdmin_Pydantic.from_queryset(User.filter(email__istartswith=query).limit(limit).offset(offset))

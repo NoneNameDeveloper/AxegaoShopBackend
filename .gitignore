@@ -159,14 +159,15 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-migrations/
+axegaoshop/db/migrations/
+axegaoshop/db/migrations
 
-docker-compose.yml
-Dockerfile
+deploy/docker-compose.yml
+deploy/Dockerfile
 pyproject.toml
-deploy.sh
+deploy/deploy.sh
 .dockerignore
-tests/
+axegaoshop/tests/
 
 utils/mailing/
 

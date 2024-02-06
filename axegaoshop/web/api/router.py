@@ -1,0 +1,34 @@
+from fastapi.routing import APIRouter
+
+from axegaoshop.web.api import orders, partners, products, promocodes, \
+    shop_carts, subcategories, uploads, users, categories, healthcheck
+
+from axegaoshop.web.api.products import options
+from axegaoshop.web.api.products import photos
+from axegaoshop.web.api.products import parameters
+
+api_router = APIRouter()
+
+api_router.include_router(router=users.router, prefix="", tags=["Users"])
+
+api_router.include_router(router=categories.router, prefix="", tags=["Category"])
+
+api_router.include_router(router=subcategories.router, prefix="", tags=["Subcategory"])
+
+api_router.include_router(router=products.router, prefix="", tags=["Products"])
+
+api_router.include_router(router=options.router, prefix="", tags=["Product options"])
+api_router.include_router(router=photos.router, prefix="", tags=["Product photos"])
+api_router.include_router(router=parameters.router, prefix="", tags=["Product parameters"])
+
+api_router.include_router(router=orders.router, prefix="", tags=["Orders"])
+
+api_router.include_router(router=promocodes.router, prefix="", tags=["Promocodes"])
+
+api_router.include_router(router=shop_carts.router, prefix="", tags=["Shop Cart"])
+
+api_router.include_router(router=partners.router, prefix="", tags=["Partners"])
+
+api_router.include_router(router=uploads.router, prefix="", tags=["Uploads"])
+
+api_router.include_router(router=healthcheck.router, prefix="", tags=["Healthcheck"])
