@@ -13,6 +13,9 @@ async def get_current_user(request: Request) -> User | None:
     token: str = request.headers.get("Authorization").split()[1]
     user: User = await (await Token.get(access_token=token)).get_user()
 
+    if not user:
+        raise HTTPException(status_code=404, detail="Not authenticated")
+
     if not user.is_active:
         raise HTTPException(status_code=404, detail="INACTIVE")
     return user

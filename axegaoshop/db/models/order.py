@@ -9,6 +9,7 @@ from axegaoshop.services.utils import random_string
 def random_upper_string():
     return random_string(8).upper()
 
+
 class Order(Model):
     """таблица с заказами"""
     id = fields.IntField(pk=True)
@@ -61,6 +62,11 @@ class Order(Model):
 
         self.result_price = result_price
         await self.save()
+
+    async def review_available(self) -> bool:
+        """проверка, есть ли уже отзыв на этот заказ или нет"""
+        review = await self.review.first()
+        return review is None and self.status == "finished"
 
 
 class OrderParameters(Model):

@@ -3,6 +3,7 @@ from datetime import datetime
 from tortoise.models import Model
 from tortoise import fields
 
+from axegaoshop.db.models.order import OrderParameters
 from axegaoshop.services.image.avatar import create_user_photo
 
 
@@ -41,3 +42,15 @@ class User(Model):
         if not self.photo:
             self.photo = create_user_photo(self.username)  # передаем login в create_user_photo
         await super().save(*args, **kwargs)
+
+    async def get_available_products_to_comment(self) -> list[list[str, str]]:
+        """получение товаров (завершенные заказы), по которым не было оставлено комментариев"""
+
+        query = (
+            OrderParameters.filter(order__user_id=self.id, order__status="finished")
+            .distinct()
+            .values_list('parameter__product__id', 'parameter__product__title', 'order__id')
+        )
+
+        return await query
+

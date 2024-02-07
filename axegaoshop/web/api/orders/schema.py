@@ -3,7 +3,7 @@ import typing
 from pydantic import BaseModel, field_validator, model_validator
 from tortoise.contrib.pydantic import pydantic_model_creator
 
-from database.models.order import Order
+from axegaoshop.db.models.order import Order
 
 from axegaoshop.settings import settings
 

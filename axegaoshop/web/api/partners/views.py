@@ -2,10 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from axegaoshop.db.models.partner import Partner
 
+from axegaoshop.web.api.partners.schema import CreatePartner, PartnerIn_Pydantic
+
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
-
-from axegaoshop.web.api.partners.schema import CreatePartner, PartnerIn_Pydantic
 
 
 router = APIRouter()

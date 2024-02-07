@@ -38,6 +38,12 @@ class UserOutput(BaseModel):
         from_attributes = True
 
 
+class UserProductsComment(BaseModel):
+    id: int
+    title: str
+    order_id: int
+
+
 UserIn_Pydantic = pydantic_model_creator(User, exclude=("is_admin", "shop_cart.id", "shop_cart.items.id", "shop_cart.cart_product"))
 
 UserForAdmin_Pydantic = pydantic_model_creator(User, exclude=("shop_cart", "orders", "reviews"))

@@ -29,4 +29,5 @@ class JWTBearer(HTTPBearer):
             payload = None
         if payload:
             isTokenValid = True
+
         return isTokenValid
