@@ -46,6 +46,7 @@ def get_app() -> FastAPI:
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
+        description="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTEyMDgxMDMsInN1YiI6IjUifQ.QdERrV2ukjIbtd8bewyqNMuv_GFJgrYWZxD5coNJmFI"
     )
 
     # Конфигурирование Tortoise ORM

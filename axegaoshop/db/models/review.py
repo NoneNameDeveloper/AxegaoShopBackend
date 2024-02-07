@@ -14,16 +14,15 @@ class Review(Model):
     created_datetime = fields.DatetimeField(null=False, auto_now_add=True)
     approved_datetime = fields.DatetimeField(null=False, auto_now=True)
 
-    order = fields.OneToOneField("axegaoshop.Order", related_name="reviews")
+    order = fields.OneToOneField("axegaoshop.Order", related_name="review")
 
     user = fields.ForeignKeyField("axegaoshop.User", related_name="reviews")
 
-    parameter = fields.ForeignKeyField("axegaoshop.Parameter", related_name="reviews")
-
-    photos: fields.ReverseRelation["ReviewPhoto"]
+    photos: fields.ForeignKeyNullableRelation["ReviewPhoto"]
 
     class Meta:
         table = "reviews"
+        ordering = ["-approved_datetime"]
 
 
 class ReviewPhoto(Model):
