@@ -70,7 +70,6 @@ class Parameter(Model):
                                                                          related_name="parameters")
     order_id = fields.IntField(null=False)
 
-    reviews: fields.ReverseRelation
     shop_cart: fields.ReverseRelation
     data: fields.ReverseRelation["ProductData"]
     order_parameters: fields.ReverseRelation

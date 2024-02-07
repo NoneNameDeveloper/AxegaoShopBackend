@@ -1,3 +1,4 @@
+import datetime
 import typing
 
 from pydantic import BaseModel
@@ -22,9 +23,13 @@ class ReviewCreate(BaseModel):
 
 class ReviewOutput(BaseModel):
     """отзыв на страницы пользователям"""
+    id: int
     rate: int
     text: str
     images: typing.Optional[list[str]] = None
+    product: str
+    user: str
+    created_datetime: datetime.datetime
 
     class Config:
         from_attributes = True

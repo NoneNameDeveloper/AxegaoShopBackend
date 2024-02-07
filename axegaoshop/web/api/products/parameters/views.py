@@ -11,7 +11,6 @@ router = APIRouter()
 
 @router.get(
     path="/product/{id}/parameters",
-    dependencies=[Depends(JWTBearer())],
     response_model=list[ParameterIn_Pydantic]
 )
 async def get_product_parameters(id: int):

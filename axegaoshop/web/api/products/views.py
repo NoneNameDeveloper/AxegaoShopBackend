@@ -1,7 +1,7 @@
 import typing
 
 from fastapi import APIRouter, Depends, HTTPException
-from tortoise.functions import Avg
+from tortoise.functions import Avg, Coalesce
 
 from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order
 from axegaoshop.db.models.subcategory import Subcategory
@@ -20,9 +20,9 @@ router = APIRouter()
     response_model=list[ProductIn_Pydantic]
 )
 async def get_products(
-        price_sort: bool = False,
-        rating_sort: bool = False,
-        sale_sort: bool = False,
+        price_sort: typing.Optional[bool] = None,
+        rating_sort: typing.Optional[bool] = None,
+        sale_sort: typing.Optional[bool] = None,
         query: typing.Optional[str] = None,
         limit: int = 20,
         offset: int = 0,
@@ -31,16 +31,29 @@ async def get_products(
     Поиск карточек товара в базе данных для админа и пользователей:
 
     *query* - вхождение (startswith) в title (название) товара (не чувствителен к регистру)
+
+    если *price_sort*, *rating_sort*, *sale_sort* не переданы, используется стандартный order, заданный админом
+
+    *price_sort*, *rating_sort*, *sale_sort* могут принимать значения true/false или просто их не указывать
     """
 
     if not query:
-        sorted_products = (Product.all().prefetch_related()
+        sorted_products = (Product.filter().all().prefetch_related()
                            .limit(limit)
                            .offset(offset)
-                           .order_by("card_price" if price_sort else "-card_price")
-                           .annotate(param_reviews_count=Avg('parameters__reviews__rate'))
-                           .order_by("param_reviews_count" if rating_sort else "-param_reviews_count")
                            )
+        if price_sort or rating_sort:
+            sorted_products = (sorted_products
+                               .order_by("card_price" if price_sort else "-card_price")
+                               .annotate(
+                                    param_reviews_count=Coalesce(Avg(
+                                        'parameters__order_parameters__order__review__rate'),
+                                        0
+                                    )
+                                )
+                               .order_by("param_reviews_count" if rating_sort else "-param_reviews_count")
+                               )
+
         sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
             sorted_products
 
@@ -57,24 +70,38 @@ async def get_products(
 )
 async def subcategory_products_get(
         subcategory_id: int,
-        price_sort: bool = False,
-        rating_sort: bool = False,
-        sale_sort: bool = False,
+        price_sort: typing.Optional[bool] = None,
+        rating_sort: typing.Optional[bool] = None,
+        sale_sort: typing.Optional[bool] = None,
         limit: int = 20,
         offset: int = 0,
 ):
     """
-    Получение товаров из подкатегории
+    Получение товаров из поджкатегории
+
+    если *price_sort*, *rating_sort*, *sale_sort* не переданы, используется стандартный order, заданный админом
+
+    *price_sort*, *rating_sort*, *sale_sort* могут принимать значения true/false или просто их не указывать
     """
     if not await Subcategory.get_or_none(id=subcategory_id):
         raise HTTPException(status_code=404, detail="SUBCATEGORY_NOT_FOUND")
 
-    sorted_products = (Product.filter(subcategory_id=subcategory_id)
+    sorted_products = (Product.filter(subcategory_id=subcategory_id).all().prefetch_related()
                        .limit(limit)
                        .offset(offset)
-                       .order_by("card_price" if price_sort else "-card_price")
-                       .order_by("parameters__reviews__rate" if rating_sort else "-parameters__reviews__rate")
                        )
+    if price_sort or rating_sort:
+        sorted_products = (sorted_products
+                           .order_by("card_price" if price_sort else "-card_price")
+                           .annotate(
+                                param_reviews_count=Coalesce(Avg(
+                                    'parameters__order_parameters__order__review__rate'),
+                                    0
+                                )
+        )
+                           .order_by("param_reviews_count" if rating_sort else "-param_reviews_count")
+                           )
+
     sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
         sorted_products
 

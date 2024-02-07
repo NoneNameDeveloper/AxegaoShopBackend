@@ -68,6 +68,17 @@ class Order(Model):
         review = await self.review.first()
         return review is None and self.status == "finished"
 
+    async def get_order_products(self) -> list[int]:
+        """получение всех товаров (не версий) из заказа"""
+        order_products = []
+
+        await self.fetch_related('order_parameters')
+
+        for o_p in self.order_parameters:
+            order_products.append(o_p.parameter.product.id)
+
+        return order_products
+
 
 class OrderParameters(Model):
     """таблица с находящимися в заказе това то, но возможно то рами (версиями товара) - параметры заказа"""

@@ -43,4 +43,4 @@ class OrderCreate(BaseModel):
         return self
 
 
-OrderIn_Pydantic = pydantic_model_creator(Order)
+OrderIn_Pydantic = pydantic_model_creator(Order, exclude=("user", ))

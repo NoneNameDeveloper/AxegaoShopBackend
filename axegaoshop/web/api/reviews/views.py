@@ -19,7 +19,7 @@ router = APIRouter()
     dependencies=[Depends(JWTBearer())],
     response_model=list[UserProductsComment]
 )
-async def get_available_reviews_produts(user: User = Depends(get_current_user)):
+async def get_available_reviews_products(user: User = Depends(get_current_user)):
     """получение доступных для написания отзывов товаров"""
     return [UserProductsComment(id=p[0], title=p[1], order_id=p[2]) for p in
             await user.get_available_products_to_comment()]
@@ -78,14 +78,19 @@ async def get_reviews(
         limit: int = 20,
         offset: int = 0
 ):
+
     return [
         ReviewOutput(
+            id=r.id,
             images=[photo.photo for photo in r.review_photos],
             rate=r.rate,
-            text=r.text
+            text=r.text,
+            product=r.order.order_parameters[0].parameter.product.title if r.order.order_parameters else None,
+            user=r.user.username if r.user else None,
+            created_datetime=r.approved_datetime
         ) for r in (
             await Review.filter(status="accepted")
-            .prefetch_related("review_photos")
+            .prefetch_related("review_photos", "order__order_parameters__parameter__product", "user")
             .all()
             .limit(limit)
             .offset(offset)
