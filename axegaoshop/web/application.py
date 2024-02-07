@@ -7,6 +7,7 @@ from fastapi.responses import UJSONResponse
 
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
+from starlette.middleware.cors import CORSMiddleware
 from tortoise import Tortoise
 
 from tortoise.contrib.fastapi import register_tortoise
@@ -46,7 +47,16 @@ def get_app() -> FastAPI:
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
         default_response_class=UJSONResponse,
-        description="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3MTEyMDgxMDMsInN1YiI6IjUifQ.QdERrV2ukjIbtd8bewyqNMuv_GFJgrYWZxD5coNJmFI"
+        description="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleH"
+                    "AiOjE3MTEyMDgxMDMsInN1YiI6IjUifQ.QdERrV2ukjIbtd8bewyqNMuv_GFJgrYWZxD5coNJmFI"
+    )
+
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
     )
 
     # Конфигурирование Tortoise ORM

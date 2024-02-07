@@ -1,7 +1,5 @@
 import smtplib
 
-from string import Template
-
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
@@ -26,4 +24,3 @@ msg.attach(MIMEText(message, 'plain'))
 
 # send the message via the server set up earlier.
 s.send_message(msg)
-

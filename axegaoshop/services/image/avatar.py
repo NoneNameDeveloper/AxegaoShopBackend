@@ -19,4 +19,3 @@ def create_user_photo(username: str) -> str:
         f.write(avatar)
 
     return file_uid
-

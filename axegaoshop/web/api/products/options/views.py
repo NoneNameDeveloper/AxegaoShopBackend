@@ -7,7 +7,7 @@ from axegaoshop.web.api.products.options.schema import OptionIn_Pydantic, Option
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
 
-router = APIRouter(tags=["Product Options"])
+router = APIRouter()
 
 
 @router.get(
@@ -49,7 +49,7 @@ async def create_product_option(id: int, option: OptionCreate):
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     response_model=OptionIn_Pydantic
 )
-async def update_product_option(id:  int, option: OptionUpdate):
+async def update_product_option(id: int, option: OptionUpdate):
     if not await Option.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 

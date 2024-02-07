@@ -4,7 +4,6 @@ from axegaoshop.db.models.product import Product
 from axegaoshop.db.models.shop_cart import add_to_cart
 from axegaoshop.db.models.user import User
 
-from axegaoshop.web.api.products.photos.schema import PhotoIn_Pydantic, PhotoUpdate
 from axegaoshop.web.api.products.schema import ProductToCart
 from axegaoshop.web.api.users.schema import UserCart_Pydantic
 
@@ -20,8 +19,8 @@ router = APIRouter()
     dependencies=[Depends(JWTBearer())],
     response_model=UserCart_Pydantic,
     description="""
-Работа с корзиной пользователя  
-1. В count указывать **полное** количество товара (не инкремент/декремент).  
+Работа с корзиной пользователя
+1. В count указывать **полное** количество товара (не инкремент/декремент).
 2. При передаче count=0 происходит **удаление товара** из корзины.
 """
 )

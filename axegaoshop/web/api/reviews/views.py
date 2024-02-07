@@ -3,7 +3,6 @@ from fastapi import APIRouter, HTTPException, Depends
 from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.review import Review, ReviewPhoto
 from axegaoshop.db.models.user import User
-from axegaoshop.web.api.orders.schema import OrderIn_Pydantic
 
 from axegaoshop.web.api.reviews.schema import ReviewIn_Pydantic, ReviewCreate, ReviewInAdmin_Pydantic, \
     ReviewOutput, ReviewUpdate

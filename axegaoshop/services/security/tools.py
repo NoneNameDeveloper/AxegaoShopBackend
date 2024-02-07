@@ -58,5 +58,5 @@ def decode_jwt(token: str) -> dict:
         decoded_token: dict = jwt.decode(token, settings.jwt_secret_key, algorithms=[ALGORITHM])
 
         return decoded_token if decoded_token["exp"] >= time.time() else None
-    except Exception as e:
+    except:
         return {}

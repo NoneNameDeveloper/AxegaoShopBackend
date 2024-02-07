@@ -50,4 +50,3 @@ async def add_to_cart(user_id: int, product_id: int, parameter_id: int, quantity
             await _cart.save()
 
     return _cart
-

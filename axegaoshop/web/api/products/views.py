@@ -35,12 +35,11 @@ async def get_products(
 
     if not query:
         sorted_products = (Product.all().prefetch_related()
-                               .limit(limit)
-                               .offset(offset)
-
-                               .order_by("card_price" if price_sort else "-card_price")
-                               .annotate(param_reviews_count=Avg('parameters__reviews__rate'))
-                               .order_by("param_reviews_count" if rating_sort else "-param_reviews_count")
+                           .limit(limit)
+                           .offset(offset)
+                           .order_by("card_price" if price_sort else "-card_price")
+                           .annotate(param_reviews_count=Avg('parameters__reviews__rate'))
+                           .order_by("param_reviews_count" if rating_sort else "-param_reviews_count")
                            )
         sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
             sorted_products

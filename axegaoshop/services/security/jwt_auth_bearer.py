@@ -25,7 +25,7 @@ class JWTBearer(HTTPBearer):
 
         try:
             payload = decode_jwt(jwtoken)
-        except Exception as e:
+        except:
             payload = None
         if payload:
             isTokenValid = True

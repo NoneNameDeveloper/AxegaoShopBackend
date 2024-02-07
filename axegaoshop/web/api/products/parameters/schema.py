@@ -7,6 +7,7 @@ from axegaoshop.db.models.product import Parameter
 class ParameterDataCreate(BaseModel):
     value: str
 
+
 class ParameterCreate(BaseModel):
     title: str
     price: float
@@ -45,5 +46,6 @@ class ParameterUpdate(BaseModel):
 class ParameterOrderChange(BaseModel):
     param_1: int
     param_2: int
+
 
 ParameterIn_Pydantic = pydantic_model_creator(Parameter, exclude=("product", ))

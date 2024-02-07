@@ -71,7 +71,6 @@ async def category_subcategory_get(category_id: int):
 async def subcategory_update(id: int, subcategory_: SubcategoryUpdate):
     subcat = await Subcategory.get_or_none(id=id)
 
-
     if not subcat:
         raise HTTPException(status_code=404, detail="SUBCATEGORY_NOT_FOUND")
 

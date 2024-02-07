@@ -212,4 +212,8 @@ async def get_users(query: typing.Optional[str] = None, limit: int = 20, offset:
         return await UserForAdmin_Pydantic.from_queryset(User.all().limit(limit).offset(offset))
 
     else:
-        return await UserForAdmin_Pydantic.from_queryset(User.filter(email__istartswith=query).limit(limit).offset(offset))
+        return await UserForAdmin_Pydantic.from_queryset(
+            User.filter(email__istartswith=query)
+            .limit(limit)
+            .offset(offset)
+        )

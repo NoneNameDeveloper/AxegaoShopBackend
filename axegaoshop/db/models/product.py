@@ -1,5 +1,4 @@
 from datetime import datetime
-from decimal import Decimal
 
 from tortoise.expressions import Q
 from tortoise.models import Model
@@ -44,7 +43,6 @@ class Product(Model):
         table = "products"
         ordering = ["order_id"]
 
-
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
         last_product_id = (await Product.filter(subcategory_id=self.subcategory_id).order_by("id"))
@@ -76,6 +74,7 @@ class Parameter(Model):
     shop_cart: fields.ReverseRelation
     data: fields.ReverseRelation["ProductData"]
     order_parameters: fields.ReverseRelation
+
     class Meta:
         table = "parameters"
         ordering = ["order_id"]
@@ -100,6 +99,7 @@ class Parameter(Model):
             return self.sale_price
         else:
             return self.price
+
 
 class ProductData(Model):
     """таблица с самими товарами (ключами..)"""

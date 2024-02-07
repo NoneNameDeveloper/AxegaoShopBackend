@@ -53,4 +53,3 @@ class User(Model):
         )
 
         return await query
-
