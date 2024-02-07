@@ -30,5 +30,10 @@ class ReviewOutput(BaseModel):
         from_attributes = True
 
 
+class ReviewUpdate(BaseModel):
+    """обновление отзыва (пока только текст)"""
+    text: str
+
+
 ReviewIn_Pydantic = pydantic_model_creator(Order, exclude=("user", "straight", "result_price", "status", ))
 ReviewInAdmin_Pydantic = pydantic_model_creator(Review, exclude=("order", "user.orders", "user.shop_cart"))

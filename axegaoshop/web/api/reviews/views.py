@@ -6,7 +6,7 @@ from axegaoshop.db.models.user import User
 from axegaoshop.web.api.orders.schema import OrderIn_Pydantic
 
 from axegaoshop.web.api.reviews.schema import ReviewIn_Pydantic, ReviewCreate, ReviewInAdmin_Pydantic, \
-     ReviewOutput
+    ReviewOutput, ReviewUpdate
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin, get_current_user
@@ -22,7 +22,8 @@ router = APIRouter()
 )
 async def get_available_reviews_produts(user: User = Depends(get_current_user)):
     """получение доступных для написания отзывов товаров"""
-    return [UserProductsComment(id=p[0], title=p[1], order_id=p[2]) for p in await user.get_available_products_to_comment()]
+    return [UserProductsComment(id=p[0], title=p[1], order_id=p[2]) for p in
+            await user.get_available_products_to_comment()]
 
 
 @router.post(
@@ -63,8 +64,10 @@ async def create_review(review_data: ReviewCreate, user: User = Depends(get_curr
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     response_model=list[ReviewInAdmin_Pydantic]
 )
-async def get_unaccepted_reviews():
-    return await ReviewInAdmin_Pydantic.from_queryset(Review.filter(accepted=False))
+async def get_unaccepted_reviews(limit: int = 20, offset: int = 0):
+    return await ReviewInAdmin_Pydantic.from_queryset(Review.filter(status="wait_for_accept")
+                                                      .limit(limit)
+                                                      .offset(offset))
 
 
 @router.get(
@@ -72,17 +75,90 @@ async def get_unaccepted_reviews():
     response_model=list[ReviewOutput]
 
 )
-async def get_reviews():
+async def get_reviews(
+        limit: int = 20,
+        offset: int = 0
+):
     return [
-        ReviewOutput(images=[photo.photo for photo in r.review_photos], rate=r.rate, text=r.text) for r in await Review.filter(accepted=True).prefetch_related("review_photos").all()
+        ReviewOutput(
+            images=[photo.photo for photo in r.review_photos],
+            rate=r.rate,
+            text=r.text
+        ) for r in (
+            await Review.filter(status="accepted")
+            .prefetch_related("review_photos")
+            .all()
+            .limit(limit)
+            .offset(offset)
+        )
     ]
 
 
 @router.patch(
-    "/reviews/{review_id}",
+    "/reviews/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=ReviewIn_Pydantic
+    response_model=ReviewIn_Pydantic,
+    status_code=200
 )
-async def update_review():
-    """:TODO: НЕ СДЕЛАНО - обновление отзыва из админки и сохранение"""
-    ...
+async def update_review(id: int, review_update: ReviewUpdate):
+    review = await Review.get_or_none(id=id)
+
+    if not review:
+        raise HTTPException(status_code=404, detail="REVIEW_NOT_FOUND")
+
+    await review.update_from_dict(**review_update.model_dump())
+
+
+@router.delete(
+    "/review/{review_id}/photo/{photo_id}",
+    response_model=ReviewIn_Pydantic,
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+
+)
+async def delete_review_photo(review_id: int, photo_id: int):
+    review = await Review.get_or_none(id=review_id)
+
+    if not review:
+        raise HTTPException(status_code=404, detail="REVIEW_NOT_FOUND")
+
+    photo = await ReviewPhoto.get_or_none(id=photo_id)
+
+    if not photo:
+        raise HTTPException(status_code=404, detail="PHOTO_NOT_FOUND")
+
+    await photo.delete()
+
+    await review.refresh_from_db()
+
+    return await ReviewIn_Pydantic.from_tortoise_orm(review)
+
+
+@router.post(
+    "/review/{id}/accept",
+    status_code=200,
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+
+)
+async def accept_review(id: int):
+    """принятие отзыва"""
+    review = await Review.get_or_none(id=id)
+
+    if not review:
+        raise HTTPException(status_code=404, detail="REVIEW_NOT_FOUND")
+
+    await review.set_status("accepted")
+
+
+@router.post(
+    "/review/{id}/decline",
+    status_code=200,
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+)
+async def decline_review(id: int):
+    """отклонение отзыва"""
+    review = await Review.get_or_none(id=id)
+
+    if not review:
+        raise HTTPException(status_code=404, detail="REVIEW_NOT_FOUND")
+
+    await review.set_status("declined")

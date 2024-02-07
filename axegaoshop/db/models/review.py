@@ -5,7 +5,7 @@ from tortoise import fields
 class Review(Model):
     id = fields.IntField(pk=True)
 
-    accepted = fields.BooleanField(null=False, default=False)  # принят ли отзыв админом
+    status = fields.TextField(null=False, default="wait_for_accept")  # статусы: (wait_for_accept, accepted, declined)
 
     text = fields.TextField(null=False)  # текст отзыва
 
@@ -23,6 +23,11 @@ class Review(Model):
     class Meta:
         table = "reviews"
         ordering = ["-approved_datetime"]
+
+    async def set_status(self, status: str):
+        """установка статуса отзыву"""
+        self.status = status
+        await self.save()
 
 
 class ReviewPhoto(Model):
