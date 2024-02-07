@@ -173,3 +173,5 @@ utils/mailing/
 
 data/storage/uploads
 /axegaoshop/data/storage/uploads/
+/axegaoshop/data/storage
+/axegaoshop/data/storage/*
