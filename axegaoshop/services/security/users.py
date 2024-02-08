@@ -11,7 +11,13 @@ async def get_current_user(request: Request) -> User | None:
         return None
 
     token: str = request.headers.get("Authorization").split()[1]
-    user: User = await (await Token.get(access_token=token)).get_user()
+
+    token_: Token | None = await Token.get_or_none(access_token=token)
+
+    if not token_:
+        raise HTTPException(status_code=404, detail="Not authenticated")
+
+    user: User = await token_.get_user()
 
     if not user:
         raise HTTPException(status_code=404, detail="Not authenticated")
