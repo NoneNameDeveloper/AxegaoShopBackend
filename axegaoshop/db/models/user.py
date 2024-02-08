@@ -47,7 +47,7 @@ class User(Model):
         """получение товаров (завершенные заказы), по которым не было оставлено комментариев"""
 
         query = (
-            OrderParameters.filter(order__user_id=self.id, order__status="finished")
+            OrderParameters.filter(order__user_id=self.id, order__status="finished", order__review__isnull=True)
             .distinct()
             .values_list('parameter__product__id', 'parameter__product__title', 'order__id')
         )
