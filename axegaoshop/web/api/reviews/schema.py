@@ -29,6 +29,7 @@ class ReviewOutput(BaseModel):
     images: typing.Optional[list[str]] = None
     product: str
     user: str
+    user_photo: str
     created_datetime: datetime.datetime
 
     class Config:
