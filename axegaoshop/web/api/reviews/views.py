@@ -64,9 +64,24 @@ async def create_review(review_data: ReviewCreate, user: User = Depends(get_curr
     response_model=list[ReviewInAdmin_Pydantic]
 )
 async def get_unaccepted_reviews(limit: int = 20, offset: int = 0):
-    return await ReviewInAdmin_Pydantic.from_queryset(Review.filter(status="wait_for_accept")
-                                                      .limit(limit)
-                                                      .offset(offset))
+    return [
+        ReviewOutput(
+            id=r.id,
+            images=[photo.photo for photo in r.review_photos],
+            rate=r.rate,
+            text=r.text,
+            product=r.order.order_parameters[0].parameter.product.title if r.order.order_parameters else None,
+            user=r.user.username if r.user else None,
+            user_photo=r.user.photo,
+            created_datetime=r.approved_datetime
+        ) for r in (
+            await Review.filter(status="wait_for_accept")
+            .prefetch_related("review_photos", "order__order_parameters__parameter__product", "user")
+            .all()
+            .limit(limit)
+            .offset(offset)
+        )
+    ]
 
 
 @router.get(
@@ -87,6 +102,7 @@ async def get_reviews(
             text=r.text,
             product=r.order.order_parameters[0].parameter.product.title if r.order.order_parameters else None,
             user=r.user.username if r.user else None,
+            user_photo=r.user.photo,
             created_datetime=r.approved_datetime
         ) for r in (
             await Review.filter(status="accepted")
