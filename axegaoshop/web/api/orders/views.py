@@ -68,7 +68,7 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
 
 
 @router.post(
-    "order/{id}/approve",
+    "/order/{id}/approve",
     dependencies=[Depends(JWTBearer())],
     summary="ВЫРЕЗАТЬ НА ПРОДЕ",
     status_code=200
@@ -80,4 +80,5 @@ async def approve_order_temp(id: int):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     await order.update_from_dict({"status": "finished"})
+    await order.save()
 
