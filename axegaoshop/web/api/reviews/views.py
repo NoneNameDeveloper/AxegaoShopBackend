@@ -61,7 +61,7 @@ async def create_review(review_data: ReviewCreate, user: User = Depends(get_curr
 @router.get(
     "/reviews/unaccepted",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=list[ReviewInAdmin_Pydantic]
+    response_model=list[ReviewOutput]
 )
 async def get_unaccepted_reviews(limit: int = 20, offset: int = 0):
     return [
@@ -87,7 +87,6 @@ async def get_unaccepted_reviews(limit: int = 20, offset: int = 0):
 @router.get(
     "/reviews",
     response_model=list[ReviewOutput]
-
 )
 async def get_reviews(
         limit: int = 20,
