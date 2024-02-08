@@ -65,3 +65,19 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         await ShopCart.filter(user_id=user.shop_cart).delete()
 
     return await OrderIn_Pydantic.from_tortoise_orm(order)
+
+
+@router.post(
+    "order/{id}/approve",
+    dependencies=[Depends(JWTBearer())],
+    summary="ВЫРЕЗАТЬ НА ПРОДЕ",
+    status_code=200
+)
+async def approve_order_temp(id: int):
+    order = await Order.get_or_none(id=id)
+
+    if not order:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    await order.update_from_dict({"status": "finished"})
+
