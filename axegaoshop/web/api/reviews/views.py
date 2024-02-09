@@ -129,6 +129,10 @@ async def update_review(id: int, review_update: ReviewUpdate):
         {"text": review_update.text}
     )
 
+    await review.refresh_from_db()
+
+    return await ReviewIn_Pydantic.from_tortoise_orm(review)
+
 
 @router.delete(
     "/review/{review_id}/photo/{photo_id}",
