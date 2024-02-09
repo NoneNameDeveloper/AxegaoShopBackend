@@ -39,9 +39,9 @@ class UserOutput(BaseModel):
 
 
 class UserProductsComment(BaseModel):
-    id: int
-    title: str
-    order_id: int
+    product_id: int  # айди товара, на который отзыв
+    title: str  # название товраа
+    order_id: int  # айди заказа
 
 
 UserIn_Pydantic = pydantic_model_creator(User, exclude=("is_admin", "shop_cart.id", "shop_cart.items.id", "shop_cart.cart_product"))

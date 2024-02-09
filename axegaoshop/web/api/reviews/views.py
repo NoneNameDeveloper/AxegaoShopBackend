@@ -21,8 +21,10 @@ router = APIRouter()
 )
 async def get_available_reviews_products(user: User = Depends(get_current_user)):
     """получение доступных для написания отзывов товаров"""
-    return [UserProductsComment(id=p[0], title=p[1], order_id=p[2]) for p in
-            await user.get_available_products_to_comment()]
+    return [
+        UserProductsComment(product_id=p[0], title=p[1], order_id=p[2]) for p in
+        await user.get_available_products_to_comment()
+    ]
 
 
 @router.post(
