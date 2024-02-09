@@ -125,7 +125,9 @@ async def update_review(id: int, review_update: ReviewUpdate):
     if not review:
         raise HTTPException(status_code=404, detail="REVIEW_NOT_FOUND")
 
-    await review.update_from_dict(**review_update.model_dump())
+    await review.update_from_dict(
+        {"text": review_update.text}
+    )
 
 
 @router.delete(
