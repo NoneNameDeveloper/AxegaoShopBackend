@@ -15,10 +15,11 @@ class ReviewPhotoCreate(BaseModel):
 
 class ReviewCreate(BaseModel):
     """тело отзыва"""
-    rate: int
-    text: str
+    rate: int  # кол-во звезд в отзыве
+    text: str  # текст отзыва
     images: typing.Optional[list[ReviewPhotoCreate]] = None
-    order_id: int
+    order_id: int  # айди заказа, по которому пишется отзыв
+    product_id: int  # айди товара, по которому пишется отзыв
 
 
 class ReviewOutput(BaseModel):
@@ -27,10 +28,10 @@ class ReviewOutput(BaseModel):
     rate: int
     text: str
     images: typing.Optional[list[str]] = None
-    product: str
-    user: str
-    user_photo: str
-    created_datetime: datetime.datetime
+    product: str  # название товара
+    user: str  # логин пользователя
+    user_photo: str  # ава пользователя
+    created_datetime: datetime.datetime  # дата создания
 
     class Config:
         from_attributes = True
@@ -41,5 +42,5 @@ class ReviewUpdate(BaseModel):
     text: str
 
 
-ReviewIn_Pydantic = pydantic_model_creator(Order, exclude=("user", "straight", "result_price", "status", ))
-ReviewInAdmin_Pydantic = pydantic_model_creator(Review, exclude=("order", "user.orders", "user.shop_cart"))
+ReviewIn_Pydantic = pydantic_model_creator(Review, exclude=("user", "straight", "result_price", "status", "order", "product"))
+ReviewInAdmin_Pydantic = pydantic_model_creator(Review, exclude=("order", "user.orders", "user.shop_cart", "order", "product"))

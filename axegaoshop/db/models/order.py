@@ -3,6 +3,7 @@ from decimal import Decimal
 from tortoise.models import Model
 from tortoise import fields
 
+from axegaoshop.db.models.review import Review
 from axegaoshop.services.utils import random_string
 
 
@@ -31,14 +32,14 @@ class Order(Model):
 
     payment_type = fields.CharField(max_length=100, null=False)  # выбранный способ оплаты  ("sbp", "site_balance")
 
-    review: fields.OneToOneNullableRelation  # отзыв по этому заказу (может и не быть)
+    reviews: fields.ForeignKeyNullableRelation  # отзывы по этому заказу (может и не быть, может быть максимум столько, сколько в заказе товаров)
     parameters: fields.ReverseRelation["OrderParameters"]  # параметры заказа
 
     class Meta:
         table = "orders"
 
     class PydanticMeta:
-        exclude = ("review",)
+        exclude = ("reviews",)
 
     async def cancel(self):
         """отменить заказ"""
@@ -63,20 +64,23 @@ class Order(Model):
         self.result_price = result_price
         await self.save()
 
-    async def review_available(self) -> bool:
-        """проверка, есть ли уже отзыв на этот заказ или нет"""
-        review = await self.review.first()
-        return review is None and self.status == "finished"
+    async def review_available(self, product_id: int) -> bool:
+        """проверка, доступен ли отзыв на этот товар из заказа"""
+        existing_reviews = await Review.filter(order=self, product_id=product_id).count()
+        if existing_reviews > 0:
+            return False  # Отзыв уже существует для одного из товаров в заказе
 
-    async def get_order_products(self) -> list[int]:
+        return True  # Нет отзывов для всех товаров в заказе
+
+    async def get_order_products(self) -> tuple[int]:
         """получение всех товаров (не версий) из заказа"""
-        order_products = []
+        order_products = set()
 
         await self.fetch_related('order_parameters')
 
         for o_p in self.order_parameters:
-            order_products.append(o_p.parameter.product.id)
-
+            order_products.add((await (await o_p.parameter.first()).product).id)
+        print(order_products)
         return order_products
 
 

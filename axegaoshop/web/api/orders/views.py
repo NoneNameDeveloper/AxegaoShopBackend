@@ -27,9 +27,10 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         if not promocode or not promocode.active():
             raise HTTPException(status_code=404, detail="INVALID_PROMOCODE")
 
-    parameter = await Parameter.get_or_none(id=order_.parameter_id)
-    if not parameter:
-        raise HTTPException(status_code=404, detail="PARAMETER_NOT_FOUND")
+    if order_.straight:
+        parameter = await Parameter.get_or_none(id=order_.parameter_id)
+        if not parameter:
+            raise HTTPException(status_code=404, detail="PARAMETER_NOT_FOUND")
 
     order = Order(
         promocode=order_.promocode,
@@ -49,7 +50,7 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         await order_params.save()
 
     else:
-        user_cart = await ShopCart.filter(user_id=user).all()
+        user_cart = await ShopCart.filter(user=user).all()
 
         if not user_cart:
             raise HTTPException(status_code=404, detail="EMPTY_SHOP_CART")
@@ -62,7 +63,7 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
             )
             await order_param.save()
 
-        await ShopCart.filter(user_id=user.shop_cart).delete()
+        await ShopCart.filter(user=user).delete()
 
     return await OrderIn_Pydantic.from_tortoise_orm(order)
 

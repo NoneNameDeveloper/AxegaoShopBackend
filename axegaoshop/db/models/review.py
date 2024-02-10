@@ -3,6 +3,7 @@ from tortoise import fields
 
 
 class Review(Model):
+    """таблица с отзывами на Product"""
     id = fields.IntField(pk=True)
 
     status = fields.TextField(null=False, default="wait_for_accept")  # статусы: (wait_for_accept, accepted, declined)
@@ -14,7 +15,8 @@ class Review(Model):
     created_datetime = fields.DatetimeField(null=False, auto_now_add=True)
     approved_datetime = fields.DatetimeField(null=False, auto_now=True)
 
-    order = fields.OneToOneField("axegaoshop.Order", related_name="review")
+    order = fields.ForeignKeyField("axegaoshop.Order", related_name="reviews", unique=False)
+    product = fields.ForeignKeyField("axegaoshop.Product", related_name="reviews", unique=False)
 
     user = fields.ForeignKeyField("axegaoshop.User", related_name="reviews")
 

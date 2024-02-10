@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 
 from axegaoshop.db.models.order import Order
+from axegaoshop.db.models.product import Product
 from axegaoshop.db.models.review import Review, ReviewPhoto
 from axegaoshop.db.models.user import User
 
@@ -21,6 +22,7 @@ router = APIRouter()
 )
 async def get_available_reviews_products(user: User = Depends(get_current_user)):
     """получение доступных для написания отзывов товаров"""
+
     return [
         UserProductsComment(product_id=p[0], title=p[1], order_id=p[2]) for p in
         await user.get_available_products_to_comment()
@@ -37,12 +39,18 @@ async def create_review(review_data: ReviewCreate, user: User = Depends(get_curr
     order = await Order.get_or_none(id=review_data.order_id)
 
     if not order:
-        raise HTTPException(status_code=404, detail="NOT_FOUND")
+        raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
 
     if not (await order.user.get_or_none()).id == user.id:
         raise HTTPException(status_code=404, detail="FORIBDDEN")
 
-    if not await order.review_available():
+    if not await Product.get_or_none(id=review_data.product_id):
+        raise HTTPException(status_code=404, detail="PRODUCT_NOT_FOUND")
+
+    if review_data.product_id not in await order.get_order_products():
+        raise HTTPException(status_code=404, detail="PRODUCT_NOT_FOUND")
+
+    if not await order.review_available(review_data.product_id):
         raise HTTPException(status_code=401, detail="NOT_AVAILABLE")
 
     review = await Review.create(
@@ -50,6 +58,7 @@ async def create_review(review_data: ReviewCreate, user: User = Depends(get_curr
         text=review_data.text,
         user=user,
         order_id=review_data.order_id,
+        product_id=review_data.product_id
     )
 
     if review_data.images:
@@ -72,16 +81,17 @@ async def get_unaccepted_reviews(limit: int = 20, offset: int = 0):
             images=[photo.photo for photo in r.review_photos],
             rate=r.rate,
             text=r.text,
-            product=r.order.order_parameters[0].parameter.product.title if r.order.order_parameters else None,
+            product=r.product.title,
             user=r.user.username if r.user else None,
             user_photo=r.user.photo,
             created_datetime=r.approved_datetime
         ) for r in (
             await Review.filter(status="wait_for_accept")
-            .prefetch_related("review_photos", "order__order_parameters__parameter__product", "user")
+            .prefetch_related("review_photos", "product", "user")
             .all()
             .limit(limit)
             .offset(offset)
+            .order_by("created_datetime")
         )
     ]
 
@@ -94,21 +104,21 @@ async def get_reviews(
         limit: int = 20,
         offset: int = 0
 ):
-
     return [
         ReviewOutput(
             id=r.id,
             images=[photo.photo for photo in r.review_photos],
             rate=r.rate,
             text=r.text,
-            product=r.order.order_parameters[0].parameter.product.title if r.order.order_parameters else None,
+            product=r.product.title,
             user=r.user.username if r.user else None,
             user_photo=r.user.photo,
             created_datetime=r.approved_datetime
         ) for r in (
             await Review.filter(status="accepted")
-            .prefetch_related("review_photos", "order__order_parameters__parameter__product", "user")
+            .prefetch_related("review_photos", "product", "user")
             .all()
+            .order_by("-approved_datetime")
             .limit(limit)
             .offset(offset)
         )
@@ -118,7 +128,6 @@ async def get_reviews(
 @router.patch(
     "/reviews/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=ReviewIn_Pydantic,
     status_code=200
 )
 async def update_review(id: int, review_update: ReviewUpdate):
@@ -130,10 +139,7 @@ async def update_review(id: int, review_update: ReviewUpdate):
     await review.update_from_dict(
         {"text": review_update.text}
     )
-
-    await review.refresh_from_db()
-
-    return await ReviewIn_Pydantic.from_tortoise_orm(review)
+    await review.save()
 
 
 @router.delete(
