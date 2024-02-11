@@ -16,3 +16,4 @@ yarl
 sentry-sdk
 loguru
 ujson
+aiohttp
