@@ -192,7 +192,7 @@ async def accept_review(id: int):
             user_photo=r.user.photo,
             created_datetime=r.approved_datetime
         ) for r in (
-            await Review.filter(status="wait_for_accept")
+            await Review.filter(status="accepted")
             .prefetch_related("review_photos", "product", "user")
             .all()
             .order_by("created_datetime")
