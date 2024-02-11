@@ -1,11 +1,17 @@
 import typing
 
-from pydantic import BaseModel, field_validator, model_validator
+from pydantic import BaseModel, field_validator, model_validator, Field
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from axegaoshop.db.models.order import Order
 
 from axegaoshop.settings import settings
+
+
+class OrderStatus:
+    WAIT_FOR_PAYMENT = 'waiting_payment'
+    CANCELED = 'canceled'
+    FINISHED = 'finished'
 
 
 class OrderCreate(BaseModel):
@@ -41,6 +47,28 @@ class OrderCreate(BaseModel):
                 raise ValueError("parameter_id or count shouldn't be used in non-straight payment!")
 
         return self
+
+
+class OrderStatusOut(BaseModel):
+    status: str
+
+
+# class OrderDataItemsOut(BaseModel):
+#     key: str
+
+
+class OrderDataOut(BaseModel):
+    id: int = Field(description="Айди параметра (версии товара)")
+    title: str
+    count: int
+    items: list[str]
+
+
+class OrderFinishOut(BaseModel):
+    id: int
+    number: str
+    total_price: float
+    order_data: list[OrderDataOut]
 
 
 OrderIn_Pydantic = pydantic_model_creator(Order, exclude=("user", ))

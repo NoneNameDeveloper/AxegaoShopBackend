@@ -25,7 +25,7 @@ router = APIRouter()
 """
 )
 async def add_or_create_cart(data: ProductToCart, user: User = Depends(get_current_user)):
-    if not await Product.get_or_none(id=data.product_id):
+    if not await Product.get_or_none(id=data.product_id, parameters__id=data.parameter_id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     await add_to_cart(user.id, data.product_id, data.parameter_id, data.count)

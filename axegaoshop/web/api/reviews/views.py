@@ -170,7 +170,7 @@ async def delete_review_photo(review_id: int, photo_id: int):
     "/review/{id}/accept",
     status_code=200,
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-
+    response_model=list[ReviewOutput]
 )
 async def accept_review(id: int):
     """принятие отзыва"""
@@ -181,11 +181,30 @@ async def accept_review(id: int):
 
     await review.set_status("accepted")
 
+    return [
+        ReviewOutput(
+            id=r.id,
+            images=[photo.photo for photo in r.review_photos],
+            rate=r.rate,
+            text=r.text,
+            product=r.product.title,
+            user=r.user.username if r.user else None,
+            user_photo=r.user.photo,
+            created_datetime=r.approved_datetime
+        ) for r in (
+            await Review.filter(status="wait_for_accept")
+            .prefetch_related("review_photos", "product", "user")
+            .all()
+            .order_by("created_datetime")
+        )
+    ]
+
 
 @router.post(
     "/review/{id}/decline",
     status_code=200,
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    response_model=list[ReviewOutput]
 )
 async def decline_review(id: int):
     """отклонение отзыва"""
@@ -195,3 +214,21 @@ async def decline_review(id: int):
         raise HTTPException(status_code=404, detail="REVIEW_NOT_FOUND")
 
     await review.set_status("declined")
+
+    return [
+        ReviewOutput(
+            id=r.id,
+            images=[photo.photo for photo in r.review_photos],
+            rate=r.rate,
+            text=r.text,
+            product=r.product.title,
+            user=r.user.username if r.user else None,
+            user_photo=r.user.photo,
+            created_datetime=r.approved_datetime
+        ) for r in (
+            await Review.filter(status="wait_for_accept")
+            .prefetch_related("review_photos", "product", "user")
+            .all()
+            .order_by("created_datetime")
+        )
+    ]

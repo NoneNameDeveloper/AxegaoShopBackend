@@ -1,8 +1,12 @@
+import random
+import asyncio
 from decimal import Decimal
+from typing import Any
 
 from tortoise.models import Model
 from tortoise import fields
 
+from axegaoshop.db.models.product import Parameter, get_items_data_for_order
 from axegaoshop.db.models.review import Review
 from axegaoshop.services.utils import random_string
 
@@ -25,6 +29,8 @@ class Order(Model):
 
     result_price = fields.DecimalField(max_digits=10, decimal_places=2, null=True)
 
+    created_datetime = fields.DatetimeField(auto_now_add=True)
+
     status = fields.CharField(max_length=100,
                               default="waiting_payment")  # статус заказа (waiting_payment, canceled, finished)
 
@@ -33,7 +39,8 @@ class Order(Model):
     payment_type = fields.CharField(max_length=100, null=False)  # выбранный способ оплаты  ("sbp", "site_balance")
 
     reviews: fields.ForeignKeyNullableRelation  # отзывы по этому заказу (может и не быть, может быть максимум столько, сколько в заказе товаров)
-    parameters: fields.ReverseRelation["OrderParameters"]  # параметры заказа
+    order_parameters: fields.ReverseRelation["OrderParameters"]  # параметры заказа
+    payment: fields.OneToOneRelation
 
     class Meta:
         table = "orders"
@@ -43,7 +50,7 @@ class Order(Model):
 
     async def cancel(self):
         """отменить заказ"""
-        self.status = "cancelled"
+        self.status = "canceled"
         await self.save()
 
     async def set_result_price(self) -> Decimal:
@@ -56,13 +63,24 @@ class Order(Model):
 
         else:
             for parameter in self.order_parameters:
-                result_price += (await parameter).get_price() * parameter.count
+                result_price += await (await parameter.parameter).get_price() * parameter.count
 
         if self.promocode:
             result_price = result_price - (result_price * Decimal.from_float((await self.promocode).sale_percent / 100))
 
-        self.result_price = result_price
+        ord_prices = await select_order_prices()
+
+        price_postfix: float = await generate_unique_sum_postfix(ord_prices)
+
+        self.result_price = float(result_price) + float(price_postfix)
+
         await self.save()
+
+    async def order_timer(self):
+        """отмена заказа по истечению срока"""
+        await asyncio.sleep(60 * 11)
+
+        await self.cancel()
 
     async def review_available(self, product_id: int) -> bool:
         """проверка, доступен ли отзыв на этот товар из заказа"""
@@ -72,7 +90,7 @@ class Order(Model):
 
         return True  # Нет отзывов для всех товаров в заказе
 
-    async def get_order_products(self) -> tuple[int]:
+    async def get_order_products(self) -> set[Any]:
         """получение всех товаров (не версий) из заказа"""
         order_products = set()
 
@@ -80,8 +98,46 @@ class Order(Model):
 
         for o_p in self.order_parameters:
             order_products.add((await (await o_p.parameter.first()).product).id)
-        print(order_products)
+
         return order_products
+
+    async def get_items(self) -> dict:
+        """получение товаров из заказа"""
+        # получение всей инфы на итоговую страницу, кроме самих товаров
+        order_data = await Parameter.filter(order_parameters__order=self).values_list(
+            'title',  # название версии товара
+            'id',  # айди параметра
+            'order_parameters__count',  # количество товаров в заказе
+            'order_parameters__order__number',  # номер заказа
+            'order_parameters__order__id',  # айди заказа
+            'order_parameters__order__result_price',  # итоговая цена в заказе
+        )
+        items_dict = {}
+
+        [items_dict.setdefault(
+            data[0], await get_items_data_for_order(data[1], data[2])) for data in order_data]
+
+        result_dict = {
+            "id": order_data[0][4],
+            "number": order_data[0][3],
+            "total_price": order_data[0][5],
+            "order_data": [
+                {
+                    "id": res_data[1],
+                    "title": res_data[0],
+                    "count": res_data[2],
+                    "items": [item.value for item in items_dict[res_data[0]]]
+
+                } for res_data in order_data
+            ]
+        }
+
+        return result_dict
+
+    async def finish_order(self):
+        """завершение заказа, выдача товара"""
+        self.status = 'finished'
+        await self.save()
 
 
 class OrderParameters(Model):
@@ -96,3 +152,21 @@ class OrderParameters(Model):
 
     class Meta:
         table = "order_parameters"
+
+
+async def select_order_prices():
+    """получение суммы на оплату по зааказам, чтобы исключить копейки повторяющиеся"""
+    res = await (Order.filter(status="waiting_payment", result_price__isnull=False)
+                 .values_list("result_price", flat=True)
+                 )
+
+    return (i - int(i) for i in res if i)
+
+
+async def generate_unique_sum_postfix(ord_prices):
+    """генерация уникального значения копеек"""
+    value = random.uniform(0, 0.99)
+    if value not in ord_prices:
+        return '{0:.2f}'.format(value)
+    else:
+        return await generate_unique_sum_postfix(ord_prices)

@@ -110,6 +110,8 @@ class ProductData(Model):
 
     value = fields.TextField(null=False)
 
+    is_active = fields.BooleanField(default=True, null=False)
+
     class PydanticMeta:
         exclude = ("parameer",)
 
@@ -211,3 +213,13 @@ async def change_parameter_order(parameter_1: int, parameter_2: int) -> bool:
     await parameter2.save()
 
     return True
+
+
+async def get_items_data_for_order(parameter_id: int, count: int) -> list[ProductData]:
+    """получение данных по товару из заказа и удаление этих ключей из базы данных (архивирование)"""
+    items = await ProductData.filter(parameter__id=parameter_id, is_active=True).limit(count)
+
+    for item in items:
+        await item.update_from_dict({"is_active": False})
+
+    return items
