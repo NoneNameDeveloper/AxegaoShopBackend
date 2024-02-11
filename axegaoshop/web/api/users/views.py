@@ -167,7 +167,7 @@ async def update_current_user(user: UserUpdate, user_data: Annotated[User, Depen
 @router.delete(
     "/user/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=UserForAdmin_Pydantic,
+    response_model=list[UserForAdmin_Pydantic],
     status_code=200
 )
 async def delete_user(id: int):
@@ -177,7 +177,7 @@ async def delete_user(id: int):
 
     await user.delete()
 
-    return await UserForAdmin_Pydantic.from_queryset(User.all())
+    return await UserForAdmin_Pydantic.from_queryset(User.all().limit(20).offset(0))
 
 
 @router.patch(
