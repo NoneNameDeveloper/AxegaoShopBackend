@@ -36,7 +36,7 @@ class Product(Model):
         return int((self.card_sale_price * 100) / self.card_price)
 
     class PydanticMeta:
-        exclude = ("subcategory", "shop_cart", "created_datetime")
+        exclude = ("subcategory", "shop_cart", "created_datetime", "reviews")
         computed = ["sale_percent", ]
 
     class Meta:

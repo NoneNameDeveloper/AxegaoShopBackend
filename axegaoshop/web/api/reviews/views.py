@@ -15,6 +15,33 @@ from axegaoshop.web.api.users.schema import UserProductsComment
 router = APIRouter()
 
 
+async def get_reviews(status: str = "accepted", limit: int = 20, offset: int = 0) -> list[ReviewOutput]:
+    """
+    функия для получения отзывов из бд по параметру status:
+        - accepted
+        - wait_for_accept
+    """
+    return [
+        ReviewOutput(
+            id=r.id,
+            images=[photo.photo for photo in r.review_photos],
+            rate=r.rate,
+            text=r.text,
+            product=r.product.title,
+            user=r.user.username if r.user else None,
+            user_photo=r.user.photo,
+            created_datetime=r.approved_datetime
+        ) for r in (
+            await Review.filter(status=status)
+            .prefetch_related("review_photos", "product", "user")
+            .all()
+            .limit(limit)
+            .offset(offset)
+            .order_by("created_datetime")
+        )
+    ]
+
+
 @router.post(
     "/reviews/available",
     dependencies=[Depends(JWTBearer())],
@@ -75,54 +102,18 @@ async def create_review(review_data: ReviewCreate, user: User = Depends(get_curr
     response_model=list[ReviewOutput]
 )
 async def get_unaccepted_reviews(limit: int = 20, offset: int = 0):
-    return [
-        ReviewOutput(
-            id=r.id,
-            images=[photo.photo for photo in r.review_photos],
-            rate=r.rate,
-            text=r.text,
-            product=r.product.title,
-            user=r.user.username if r.user else None,
-            user_photo=r.user.photo,
-            created_datetime=r.approved_datetime
-        ) for r in (
-            await Review.filter(status="wait_for_accept")
-            .prefetch_related("review_photos", "product", "user")
-            .all()
-            .limit(limit)
-            .offset(offset)
-            .order_by("created_datetime")
-        )
-    ]
+    return await get_reviews(status="wait_for_accept", limit=limit, offset=offset)
 
 
 @router.get(
     "/reviews",
     response_model=list[ReviewOutput]
 )
-async def get_reviews(
+async def get_reviews_handler(
         limit: int = 20,
         offset: int = 0
 ):
-    return [
-        ReviewOutput(
-            id=r.id,
-            images=[photo.photo for photo in r.review_photos],
-            rate=r.rate,
-            text=r.text,
-            product=r.product.title,
-            user=r.user.username if r.user else None,
-            user_photo=r.user.photo,
-            created_datetime=r.approved_datetime
-        ) for r in (
-            await Review.filter(status="accepted")
-            .prefetch_related("review_photos", "product", "user")
-            .all()
-            .order_by("-approved_datetime")
-            .limit(limit)
-            .offset(offset)
-        )
-    ]
+    return await get_reviews("accepted", limit, offset)
 
 
 @router.patch(
@@ -181,23 +172,8 @@ async def accept_review(id: int):
 
     await review.set_status("accepted")
 
-    return [
-        ReviewOutput(
-            id=r.id,
-            images=[photo.photo for photo in r.review_photos],
-            rate=r.rate,
-            text=r.text,
-            product=r.product.title,
-            user=r.user.username if r.user else None,
-            user_photo=r.user.photo,
-            created_datetime=r.approved_datetime
-        ) for r in (
-            await Review.filter(status="accepted")
-            .prefetch_related("review_photos", "product", "user")
-            .all()
-            .order_by("created_datetime")
-        )
-    ]
+    return await get_reviews("accepted")
+
 
 
 @router.post(
@@ -215,20 +191,4 @@ async def decline_review(id: int):
 
     await review.set_status("declined")
 
-    return [
-        ReviewOutput(
-            id=r.id,
-            images=[photo.photo for photo in r.review_photos],
-            rate=r.rate,
-            text=r.text,
-            product=r.product.title,
-            user=r.user.username if r.user else None,
-            user_photo=r.user.photo,
-            created_datetime=r.approved_datetime
-        ) for r in (
-            await Review.filter(status="wait_for_accept")
-            .prefetch_related("review_photos", "product", "user")
-            .all()
-            .order_by("created_datetime")
-        )
-    ]
+    return await get_reviews("wait_for_accept")

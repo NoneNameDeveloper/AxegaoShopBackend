@@ -53,7 +53,7 @@ class Order(Model):
         self.status = "canceled"
         await self.save()
 
-    async def set_result_price(self) -> Decimal:
+    async def set_result_price(self):
         """установить итоговую цену исходя из всех товаров / количества одного товара"""
         result_price = 0
         await self.fetch_related('order_parameters')
