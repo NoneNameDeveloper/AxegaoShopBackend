@@ -50,14 +50,22 @@ class OzoneBank:
     async def prepare(self):
         """prepare settings data"""
         self.obank_session_token = await self.__refresh_obank_token()
+        if not self.obank_session_token:
+            return None
+
         return self
 
     async def __get_refresh_cookies(self) -> dict:
         """getting cookies for refreshing access token"""
         return {'__Secure-refresh-token': self.secure_refresh_token}
 
-    async def __refresh_obank_token(self):
-        """refreshing ozone bank token for accessing ozone bank"""
+    async def __refresh_obank_token(self) -> str | None:
+        """
+        refreshing ozone bank token for accessing ozone bank
+        :return:
+            token - success
+            None - invalid data
+        """
         json_data = {
             'pincode': '1593',
         }
@@ -72,6 +80,8 @@ class OzoneBank:
                         if "__OBANK_session" in value:
                             token = value.split("=")[1].split(";")[0].strip()
                             return token
+                else:
+                    return None
 
     async def is_valid(self) -> bool:
         """:TODO: проверка отвала озона"""
