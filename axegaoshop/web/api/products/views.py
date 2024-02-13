@@ -169,8 +169,9 @@ async def create_product(
 
     product_photo = [ProductPhoto(
         photo=pp.photo,
-        product=product
-    ) for pp in photos_]
+        product=product,
+        main=True if idx == 0 else False
+    ) for idx, pp in enumerate(photos_, start=0)]
 
     for pht in product_photo:
         await pht.save()
