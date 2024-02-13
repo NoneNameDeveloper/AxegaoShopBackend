@@ -31,3 +31,4 @@ async def get_ozone_bank_data() -> PaymentSettingsOzone | None:
 
     return await p_s_o.first()
 
+
