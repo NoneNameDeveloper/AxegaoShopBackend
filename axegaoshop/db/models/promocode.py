@@ -1,3 +1,4 @@
+from tortoise.exceptions import NoValuesFetched
 from tortoise.fields import ReverseRelation
 from tortoise.models import Model
 from tortoise import fields
@@ -19,7 +20,7 @@ class Promocode(Model):
         table = "promocodes"
 
     class PydanticMeta:
-        exclude = ("orders", "created_datetime")
+        exclude = ("created_datetime", "orders")
 
     async def use(self):
         """используем промокод"""

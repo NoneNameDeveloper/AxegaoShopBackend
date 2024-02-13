@@ -1,8 +1,10 @@
 from fastapi import APIRouter, HTTPException, Depends
+from tortoise.functions import Coalesce, Count
 
+from axegaoshop.db.models import promocode
 from axegaoshop.db.models.promocode import Promocode
 
-from axegaoshop.web.api.promocodes.schema import PromocodeIn_Pydantic, CreatePromocode, UpdatePromocode
+from axegaoshop.web.api.promocodes.schema import PromocodeIn_Pydantic, CreatePromocode, UpdatePromocode, PromocodeIn
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -13,10 +15,19 @@ router = APIRouter()
 @router.get(
     path="/promocodes",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=list[PromocodeIn_Pydantic]
+    response_model=list[PromocodeIn]
 )
-async def get_promocodes(limit: int = 0, offset: int = 20):
-    return await PromocodeIn_Pydantic.from_queryset(Promocode.all().limit(limit).offset(offset))
+async def get_promocodes(limit: int = 20, offset: int = 0):
+    promocodes = await (Promocode.all()
+                        .prefetch_related()
+                        .limit(limit)
+                        .offset(offset)
+                        .annotate(usage_count=Coalesce(Count(
+                                    'orders'),
+                                    0
+                                )))
+
+    return promocodes
 
 
 @router.post(

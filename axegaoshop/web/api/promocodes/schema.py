@@ -24,4 +24,12 @@ class UsePromocode(BaseModel):
     sale_percent: float
 
 
+class PromocodeIn(BaseModel):
+    id: int
+    name: str
+    activations_count: int
+    sale_percent: int
+    usage_count: int
+
+
 PromocodeIn_Pydantic = pydantic_model_creator(Promocode)
