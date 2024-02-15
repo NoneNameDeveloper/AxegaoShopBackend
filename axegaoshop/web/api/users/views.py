@@ -229,7 +229,7 @@ async def get_users(query: typing.Optional[str] = None, limit: int = 20, offset:
     status_code=200
 )
 async def drop_password(request: Request, user_drop_password: UserDropPassword):
-    """:TODO: send email with generated link"""
+    """:TODO: send email with generated link & :TODO: base url change logic!!!"""
     user = await User.get_or_none(email=user_drop_password.email)
 
     if not user:
