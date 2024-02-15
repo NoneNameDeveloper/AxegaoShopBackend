@@ -1,7 +1,7 @@
 import typing
 from decimal import Decimal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, EmailStr
 
 from datetime import datetime
 
@@ -13,12 +13,17 @@ from axegaoshop.db.models.user import User
 class UserCreate(BaseModel):
     username: str
     password: typing.Optional[str] = None
-    email: typing.Optional[str] = None
+    email: typing.Optional[EmailStr] = None
 
 
 class UserUpdate(BaseModel):
     username: typing.Optional[str] = None
     photo: typing.Optional[str] = None
+
+
+class UserDropPassword(BaseModel):
+    email: EmailStr
+    password: str
 
 
 class UserUpdateAdmin(UserUpdate):
@@ -27,7 +32,7 @@ class UserUpdateAdmin(UserUpdate):
 
 class UserOutput(BaseModel):
     username: str
-    email: typing.Optional[str]
+    email: typing.Optional[EmailStr]
     photo: typing.Optional[str]
     is_admin: bool
     balance: Decimal
