@@ -3,11 +3,20 @@ import os
 import aiofiles
 from fastapi import UploadFile, HTTPException
 
-from axegaoshop.settings import settings
+from axegaoshop.settings import settings, ALLOWED_UPLOAD_TYPES
 from axegaoshop.services.utils import random_string
 
 
-async def handle_image_upload(file: UploadFile) -> str:
+async def handle_upload(file: UploadFile) -> str:
+    """
+    обработка загрузки на сайт (принимаются только:
+     - Изображения
+     - Текстовые файлы
+
+     :return:
+       file_name (str) - Имя файла и по совместительству идентификатор для получения файла
+       по гейту /api/upload/{uid}
+    """
     _, ext = os.path.splitext(file.filename)
 
     img_dir: str = settings.storage_folder_images
@@ -17,8 +26,8 @@ async def handle_image_upload(file: UploadFile) -> str:
 
     content: bytes = await file.read()
 
-    if file.content_type not in ['image/jpeg', 'image/png']:
-        raise HTTPException(status_code=406, detail="Only .jpeg or .png  files allowed")
+    if file.content_type not in ALLOWED_UPLOAD_TYPES:
+        raise HTTPException(status_code=406, detail="Only .jpeg or .png or .txt files allowed")
 
     file_name = random_string(16) + ext
 

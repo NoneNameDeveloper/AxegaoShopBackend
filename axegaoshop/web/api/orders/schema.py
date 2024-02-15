@@ -61,7 +61,15 @@ class OrderDataOut(BaseModel):
     id: int = Field(description="Айди параметра (версии товара)")
     title: str
     count: int
+    give_type: typing.Literal["string", "hand", "file"]
     items: list[str]
+
+    @model_validator(mode="after")
+    def set_give_type(self) -> 'OrderDataOut':
+        """если нет товаров - выдача руками"""
+        if not self.items:
+            self.give_type = "hand"
+        return self
 
 
 class OrderFinishOut(BaseModel):

@@ -21,7 +21,7 @@ class Product(Model):
     subcategory: fields.ForeignKeyRelation = fields.ForeignKeyField("axegaoshop.Subcategory",
                                                                     related_name="products")
 
-    give_type = fields.CharField(max_length=30, null=False, default="string")  # string/file - тип выдачи товара
+    give_type = fields.CharField(max_length=30, null=False, default="string")  # string/file/hand - тип выдачи товара
 
     order_id = fields.BigIntField(null=False)
 
@@ -219,6 +219,12 @@ async def get_items_data_for_order(parameter_id: int, count: int) -> list[Produc
     """получение данных по товару из заказа и удаление этих ключей из базы данных (архивирование)"""
     items = await ProductData.filter(parameter__id=parameter_id, is_active=True).limit(count)
 
+    # если количество товаров в базе меньше, чем запросил пользователь
+    # ничего не возвращаем, кидаем на ручную оплату
+    if len(items) < count:
+        return []
+
+    # деактивация товаров
     for item in items:
         await item.update_from_dict({"is_active": False})
 

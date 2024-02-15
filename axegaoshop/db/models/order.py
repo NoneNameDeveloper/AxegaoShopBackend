@@ -111,11 +111,15 @@ class Order(Model):
             'order_parameters__order__number',  # номер заказа
             'order_parameters__order__id',  # айди заказа
             'order_parameters__order__result_price',  # итоговая цена в заказе
+            'product__give_type'  # тип выдачи
         )
+
         items_dict = {}
 
         [items_dict.setdefault(
             data[0], await get_items_data_for_order(data[1], data[2])) for data in order_data]
+
+        print(items_dict)
 
         result_dict = {
             "id": order_data[0][4],
@@ -126,6 +130,7 @@ class Order(Model):
                     "id": res_data[1],
                     "title": res_data[0],
                     "count": res_data[2],
+                    "give_type": order_data[0][6],
                     "items": [item.value for item in items_dict[res_data[0]]]
 
                 } for res_data in order_data

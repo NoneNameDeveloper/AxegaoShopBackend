@@ -1,11 +1,13 @@
-from pydantic import BaseModel
+import typing
+
+from pydantic import BaseModel, model_validator
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from axegaoshop.db.models.product import Parameter
 
-
-class ParameterDataCreate(BaseModel):
-    value: str
+#
+# class ParameterDataCreate(BaseModel):
+#     value: str
 
 
 class ParameterCreate(BaseModel):
@@ -13,7 +15,7 @@ class ParameterCreate(BaseModel):
     price: float
     has_sale: bool = False
     sale_price: float = 0.0
-    data: list[ParameterDataCreate]
+    data: typing.Optional[list[str]] = []
 
     model_config = {
         "json_schema_extra": {
