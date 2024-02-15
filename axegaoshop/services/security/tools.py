@@ -60,3 +60,9 @@ def decode_jwt(token: str) -> dict:
         return decoded_token if decoded_token["exp"] >= time.time() else None
     except:
         return {}
+
+
+def generate_password_drop_link(uid: str):
+    """генерация ссылки для сброса пароля, которая передается в письме на почту"""
+    return f"/user/password/reset/{uid}"
+
