@@ -1,21 +1,23 @@
 import typing
+import uuid
 from typing import Annotated
 
-from fastapi import APIRouter, HTTPException, Depends
 from fastapi.security import OAuth2PasswordBearer
+from fastapi import APIRouter, HTTPException, Depends, Request
 
 from pydantic import BaseModel
 
+from axegaoshop.db.models.password_reset import PasswordReset
 from axegaoshop.db.models.token import Token
 from axegaoshop.db.models.user import User
 
 from axegaoshop.web.api.tokens.schema import TokenCreated, TokenRequest
 from axegaoshop.web.api.users.schema import UserCreate, UserOutput, UserUpdate, UserIn_Pydantic, UserCart_Pydantic, \
-    UserForAdmin_Pydantic, UserUpdateAdmin
+    UserForAdmin_Pydantic, UserUpdateAdmin, UserDropPassword
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.tools import get_hashed_password, verify_password, create_refresh_token, \
-    create_access_token
+    create_access_token, generate_password_drop_link
 
 from axegaoshop.services.image.avatar import create_user_photo
 from axegaoshop.services.security.users import get_current_user, current_user_is_admin
@@ -220,3 +222,57 @@ async def get_users(query: typing.Optional[str] = None, limit: int = 20, offset:
             .limit(limit)
             .offset(offset)
         )
+
+
+@router.post(
+    "/user/password/drop",
+    status_code=200
+)
+async def drop_password(request: Request, user_drop_password: UserDropPassword):
+    """:TODO: send email with generated link"""
+    user = await User.get_or_none(email=user_drop_password.email)
+
+    if not user:
+        raise HTTPException(status_code=404, detail="EMAIL_NOT_FOUND")
+
+    password_reset = await PasswordReset.create(
+        email=user_drop_password.email,
+        hashed_password=get_hashed_password(user_drop_password.password)
+    )
+
+    password_drop_path: str = generate_password_drop_link(
+        password_reset.id
+    )
+
+    password_drop_link: str = (request.base_url.scheme +
+                               "://" +
+                               request.base_url.hostname +
+                               password_drop_path)
+
+    return password_drop_link
+
+
+@router.get(
+    "/user/password/reset/{uid}",
+    status_code=200
+)
+async def reset_password_from_email(
+        uid: str
+):
+    """переход по ссылке в письме и автоматическая смена пароля"""
+    password_reset = await PasswordReset.get_or_none(id=uid)
+
+    # если нет такого запроса на сброс пароля или он деактивирован
+    if not password_reset or not password_reset.is_active:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    user = await User.get_or_none(email=password_reset.email)
+    if not user:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    # обновление пароля
+    await user.update_from_dict({"password": password_reset.hashed_password}).save()
+
+    # деактивация ссылки
+    password_reset.is_active = False
+    await password_reset.save()
