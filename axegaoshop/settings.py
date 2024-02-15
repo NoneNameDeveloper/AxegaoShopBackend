@@ -23,6 +23,15 @@ class PaymentType(enum.StrEnum):
     SITE_BALANCE: str = "site_balance"
 
 
+# разрешенные типы данных для загрузки в /api/upload
+ALLOWED_UPLOAD_TYPES = ['image/jpeg', 'image/png', 'text/plain']
+
+
+class ProductExt:
+    """типы расширений для файлов-товаров для проверки при выдаче"""
+    TXT = ".txt"
+
+
 class Settings(BaseSettings):
     """
     Настройки приложения
