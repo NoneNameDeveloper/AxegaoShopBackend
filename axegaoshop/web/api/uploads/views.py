@@ -6,14 +6,14 @@ from starlette.responses import FileResponse
 from axegaoshop.settings import settings
 from axegaoshop.web.api.uploads.schema import UploadOut
 
-from axegaoshop.services.image.helper import handle_image_upload
+from axegaoshop.services.image.helper import handle_upload
 
 router = APIRouter(tags=["Uploads"])
 
 
 @router.post("/upload", response_model=UploadOut)
 async def create_upload(file: UploadFile = File()):
-    data = await handle_image_upload(file)
+    data = await handle_upload(file)
 
     return UploadOut(upload=data)
 
