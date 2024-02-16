@@ -116,6 +116,19 @@ async def subcategory_products_get(
 async def create_product(
         product_data: ProductCreate
 ):
+    """
+    *give_type* - тип выдачи.
+      - string - обычные строки
+      - file - файлы
+      - hand - ручная выдача из админки
+
+    Если тип выдачи *string* - грузим так же, как и в примере.
+
+    Если тип выдачи *file* требуется сначала загрузить файлы в /api/upload
+    и результат передать в качестве параметров
+
+    Если тип выдачи *hand* можно исключить ['parameters']['data'] из запроса на создание товара
+    """
     photos_ = product_data.photos
     options_ = product_data.options
     parameters_ = product_data.parameters

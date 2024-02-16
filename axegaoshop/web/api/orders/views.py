@@ -84,7 +84,13 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
     status_code=200
 )
 async def check_order(id: int, user: User = Depends(get_current_user), ozone_bank: OzoneBank = Depends(get_ozone_bank)):
-    """срабатывает при нажатии кнопки "Проверить" на странице оплаты"""
+    """
+    срабатывает при нажатии кнопки "Проверить" на странице оплаты
+
+    при успешной оплате возвращаются данные по товарам из заказа
+
+    ОБРАТИТЬ ВНИМАНИЕ НА ['order_data']['items']. Если там пустой массив - обрабатывать как тип выдачи 'hand'.
+    """
     # проверка озон банка :TODO: проверка отвала озона
     if not ozone_bank:
         raise HTTPException(status_code=500, detail="Server error")
@@ -97,8 +103,15 @@ async def check_order(id: int, user: User = Depends(get_current_user), ozone_ban
 
     order = await order.get()
 
+    # проверка на то что заказ НЕ завершен / отменен
+    if order.status == "finished" or order.status == "canceled":
+        raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
+
     has_payment = await ozone_bank.has_payment(order.result_price)
     if has_payment:
+        await order.update_from_dict({"status": "finished"})
+        await order.save()
+
         items = await order.get_items()
 
         return OrderFinishOut.model_validate(items)
