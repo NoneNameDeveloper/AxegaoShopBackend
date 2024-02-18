@@ -23,7 +23,7 @@ class PaymentModel(BaseModel):
     id: str
     operation_id: str = Field(str, alias="operationId")
     sender: str = Field(str, alias="purpose")  # отправитель
-    datetime_: datetime.datetime = Field(alias="time")  # время платежа
+    pay_datetime: datetime.datetime = Field(alias="time")  # время платежа
     merchant_name: str = Field(str, alias="merchantName")  # банк отправителя
     status: str  # должен быть success
     amount_raw: int = Field(int, alias="accountAmount")
@@ -116,14 +116,16 @@ class OzoneBank:
                 else:
                     return None
 
-    async def has_payment(self, total_sum: float) -> bool:
-        """провера на то, что платеж с такими копейками прошел"""
+    async def has_payment(self, total_sum: float, datetime_from: datetime) -> bool:
+        """провера на то, что платеж с заданной суммой есть в истории"""
         client_operations = await self.__get_client_operations()
 
         if not client_operations:
             return False
 
+        client_operations = filter((lambda x: x.pay_datetime > datetime_from), client_operations)
         for client_operation in client_operations:
+
             if str(client_operation.amount) == str(total_sum):
                 return True
 
