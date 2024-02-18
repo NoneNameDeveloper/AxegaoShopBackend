@@ -7,7 +7,9 @@ from datetime import datetime
 
 from tortoise.contrib.pydantic import pydantic_model_creator
 
+from axegaoshop.db.models.replenish import Replenish
 from axegaoshop.db.models.user import User
+from axegaoshop.settings import settings
 
 
 class UserCreate(BaseModel):
@@ -24,6 +26,19 @@ class UserUpdate(BaseModel):
 class UserDropPassword(BaseModel):
     email: EmailStr
     password: str
+
+
+class UserReplenishBalance(BaseModel):
+    payment_type: typing.Literal['sbp']
+    amount: float
+
+
+class UserReplenishOut(BaseModel):
+    number: str
+    result_price: Decimal
+    payment_type: str
+    status: str
+    created_datetime: datetime
 
 
 class UserUpdateAdmin(UserUpdate):
@@ -49,9 +64,9 @@ class UserProductsComment(BaseModel):
     order_id: int  # айди заказа
 
 
-UserIn_Pydantic = pydantic_model_creator(User, exclude=("is_admin", "shop_cart.id", "shop_cart.items.id", "shop_cart.cart_product"))
+UserIn_Pydantic = pydantic_model_creator(User, exclude=("is_admin", "replenishes", "shop_cart.id", "shop_cart.items.id", "shop_cart.cart_product"))
 
-UserForAdmin_Pydantic = pydantic_model_creator(User, exclude=("shop_cart", "orders", "reviews"))
+UserForAdmin_Pydantic = pydantic_model_creator(User, exclude=("shop_cart", "orders", "reviews", "replenishes"))
 
 UserCart_Pydantic = pydantic_model_creator(
     User,
@@ -59,6 +74,11 @@ UserCart_Pydantic = pydantic_model_creator(
         "shop_cart.id", "shop_cart.product.options", "shop_cart.product.category", "shop_cart.product.id",
         "shop_cart.product.parameters", "shop_cart.parameter.data", "shop_cart.parameter.id"
         "shop_cart.product.category_id", "shop_cart.product.product_photos.id",
-        "shop_cart.parameter.product", "shop_cart.reviews", "orders"
+        "shop_cart.parameter.product", "shop_cart.reviews", "orders", "replenishes"
     )
 )
+
+UserReplenish_Pydantic = pydantic_model_creator(
+    Replenish
+)
+
