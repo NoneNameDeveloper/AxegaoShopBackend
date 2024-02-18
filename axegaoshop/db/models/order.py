@@ -1,4 +1,3 @@
-import random
 import asyncio
 from decimal import Decimal
 from typing import Any
@@ -8,11 +7,8 @@ from tortoise import fields
 
 from axegaoshop.db.models.product import Parameter, get_items_data_for_order
 from axegaoshop.db.models.review import Review
-from axegaoshop.services.utils import random_string
-
-
-def random_upper_string():
-    return random_string(8).upper()
+from axegaoshop.services.cache.redis_service import rem_amount
+from axegaoshop.services.utils import random_upper_string, generate_unique_sum_postfix
 
 
 class Order(Model):
@@ -68,19 +64,11 @@ class Order(Model):
         if self.promocode:
             result_price = result_price - (result_price * Decimal.from_float((await self.promocode).sale_percent / 100))
 
-        ord_prices = await select_order_prices()
-
-        price_postfix: float = await generate_unique_sum_postfix(ord_prices)
+        price_postfix: float = await generate_unique_sum_postfix()
 
         self.result_price = float(result_price) + float(price_postfix)
 
         await self.save()
-
-    async def order_timer(self):
-        """отмена заказа по истечению срока"""
-        await asyncio.sleep(60 * 11)
-
-        await self.cancel()
 
     async def review_available(self, product_id: int) -> bool:
         """проверка, доступен ли отзыв на этот товар из заказа"""
@@ -119,8 +107,6 @@ class Order(Model):
         [items_dict.setdefault(
             data[0], await get_items_data_for_order(data[1], data[2])) for data in order_data]
 
-        print(items_dict)
-
         result_dict = {
             "id": order_data[0][4],
             "number": order_data[0][3],
@@ -139,9 +125,10 @@ class Order(Model):
 
         return result_dict
 
-    async def finish_order(self):
+    async def finish(self):
         """завершение заказа, выдача товара"""
         self.status = 'finished'
+        await rem_amount(float(self.result_price))
         await self.save()
 
 
@@ -157,21 +144,3 @@ class OrderParameters(Model):
 
     class Meta:
         table = "order_parameters"
-
-
-async def select_order_prices():
-    """получение суммы на оплату по зааказам, чтобы исключить копейки повторяющиеся"""
-    res = await (Order.filter(status="waiting_payment", result_price__isnull=False)
-                 .values_list("result_price", flat=True)
-                 )
-
-    return (i - int(i) for i in res if i)
-
-
-async def generate_unique_sum_postfix(ord_prices):
-    """генерация уникального значения копеек"""
-    value = random.uniform(0, 0.99)
-    if value not in ord_prices:
-        return '{0:.2f}'.format(value)
-    else:
-        return await generate_unique_sum_postfix(ord_prices)
