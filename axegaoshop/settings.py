@@ -52,7 +52,7 @@ class Settings(BaseSettings):
     # Текущее окружение
     environment: str = "dev"
 
-    log_level: LogLevel = LogLevel.DEBUG
+    log_level: LogLevel = LogLevel.INFO
 
     # типы оплаты (платежки)
     payment_types: list[str] = [PaymentType.SBP, PaymentType.SITE_BALANCE]
@@ -63,7 +63,13 @@ class Settings(BaseSettings):
     db_user: str = "postgres"
     db_password: str = "postgres"
     db_base: str = "axegaoshopdb"
-    db_echo: bool = False
+    db_echo: bool = 0
+
+    # конфигурация Redis
+    redis_host: str = "localhost"
+    redis_port: int = 6379
+
+    redis_amounts_key: str = "payment:amounts"
 
     # конфигурация Sentry SDK
     sentry_dsn: Optional[str] = None
