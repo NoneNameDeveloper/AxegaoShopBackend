@@ -51,6 +51,10 @@ def configure_logging() -> None:  # pragma: no cover
         if logger_name.startswith("uvicorn."):
             logging.getLogger(logger_name).handlers = []
 
+        # отключение логов apscheduler
+        if logger_name.startswith("apscheduler."):
+            logging.getLogger(logger_name).setLevel(logging.WARNING)
+
     # change handler for default uvicorn logger
     logging.getLogger("uvicorn").handlers = [intercept_handler]
     logging.getLogger("uvicorn.access").handlers = [intercept_handler]
