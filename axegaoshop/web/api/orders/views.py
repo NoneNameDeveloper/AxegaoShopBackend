@@ -1,14 +1,17 @@
+import typing
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import UJSONResponse
 from starlette.responses import JSONResponse
 
-from axegaoshop.db.models.order import Order, OrderParameters, select_order_prices
+from axegaoshop.db.models.order import Order, OrderParameters
 from axegaoshop.db.models.product import Parameter
 from axegaoshop.db.models.promocode import Promocode
 from axegaoshop.db.models.shop_cart import ShopCart
 from axegaoshop.db.models.user import User
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
+from axegaoshop.settings import PaymentType
 
 from axegaoshop.web.api.orders.schema import OrderCreate, OrderIn_Pydantic, OrderStatus, OrderStatusOut, OrderFinishOut
 
@@ -21,7 +24,7 @@ router = APIRouter()
 @router.post(
     "/order/",
     dependencies=[Depends(JWTBearer())],
-    response_model=OrderIn_Pydantic
+    response_model=typing.Union[OrderIn_Pydantic, OrderFinishOut]
 )
 async def create_order(order_: OrderCreate, user: User = Depends(get_current_user)):
     if order_.promocode:
@@ -43,9 +46,9 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         email=order_.email
     )
 
-    await order.save()
-
+    # если заказ напрямую - один параметр в заказе
     if order_.straight:
+        await order.save()
         order_params = OrderParameters(
             order_id=order.id,
             parameter_id=order_.parameter_id,
@@ -53,11 +56,15 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         )
         await order_params.save()
 
+    # если через корзину - собираем все параметры ** (очистка корзины позже, при
+    # проверки наличия баланса у юзера на сайте)
     else:
         user_cart = await ShopCart.filter(user=user).all()
 
         if not user_cart:
             raise HTTPException(status_code=404, detail="EMPTY_SHOP_CART")
+
+        await order.save()
 
         for item in user_cart:
             order_param = OrderParameters(
@@ -67,12 +74,30 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
             )
             await order_param.save()
 
-        await ShopCart.filter(user=user).delete()
-
     # установка итоговой цены на заказ
     await order.set_result_price()
 
     await order.refresh_from_db()
+
+    # если человек выбрал баланс сайта - если достаточно баланса - сразу выдаем товар
+    if order_.payment_type == PaymentType.SITE_BALANCE:
+        if user.balance >= int(order.result_price):
+            items = await order.get_items()
+
+            await order.finish()
+            await order.save()
+
+            if not order_.straight:
+                await user.clear_shop_cart()
+
+            # снятие баланса пользователя
+            await user.add_balance(-int(order.result_price))
+
+            return OrderFinishOut.model_validate(items)
+
+        else:
+            await order.cancel()
+            return UJSONResponse(content="NOT_ENOUGH_BALANCE", status_code=200)
 
     return await OrderIn_Pydantic.from_tortoise_orm(order)
 
@@ -107,12 +132,12 @@ async def check_order(id: int, user: User = Depends(get_current_user), ozone_ban
     if order.status == "finished" or order.status == "canceled":
         raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
 
-    has_payment = await ozone_bank.has_payment(order.result_price)
+    has_payment = await ozone_bank.has_payment(order.result_price, order.created_datetime)
     if has_payment:
-        await order.update_from_dict({"status": "finished"})
-        await order.save()
-
         items = await order.get_items()
+
+        await order.finish()
+        await order.save()
 
         return OrderFinishOut.model_validate(items)
 
@@ -131,7 +156,7 @@ async def approve_order_temp(id: int):
     if not order:
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
-    await order.update_from_dict({"status": "finished"})
+    await order.finish()
     await order.save()
 
 

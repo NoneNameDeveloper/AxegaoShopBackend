@@ -7,13 +7,19 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 
 from pydantic import BaseModel
 
+from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.password_reset import PasswordReset
+from axegaoshop.db.models.replenish import Replenish
 from axegaoshop.db.models.token import Token
 from axegaoshop.db.models.user import User
+from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
+from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
+from axegaoshop.web.api.orders.schema import OrderIn_Pydantic
 
 from axegaoshop.web.api.tokens.schema import TokenCreated, TokenRequest
 from axegaoshop.web.api.users.schema import UserCreate, UserOutput, UserUpdate, UserIn_Pydantic, UserCart_Pydantic, \
-    UserForAdmin_Pydantic, UserUpdateAdmin, UserDropPassword
+    UserForAdmin_Pydantic, UserUpdateAdmin, UserDropPassword, UserReplenishBalance, UserReplenishOut, \
+    UserReplenish_Pydantic
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.tools import get_hashed_password, verify_password, create_refresh_token, \
@@ -139,6 +145,30 @@ async def get_current_user_(user: Annotated[User, Depends(get_current_user)]):
 
 
 @router.get(
+    "/user/orders",
+    dependencies=[Depends(JWTBearer())],
+    response_model=list[OrderIn_Pydantic]
+)
+async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
+    if user.is_anonymous:
+        raise HTTPException(status_code=404, detail="AUTHORIZE_REQUIRED")
+
+    return await OrderIn_Pydantic.from_queryset(Order.filter(user_id=user.id, status="finished").all())
+
+
+@router.get(
+    "/user/replenishes",
+    dependencies=[Depends(JWTBearer())],
+    response_model=list[UserReplenish_Pydantic]
+)
+async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
+    if user.is_anonymous:
+        raise HTTPException(status_code=404, detail="AUTHORIZE_REQUIRED")
+
+    return await UserReplenish_Pydantic.from_queryset(Replenish.filter(user_id=user.id, status="finished").all())
+
+
+@router.get(
     "/user/{id}",
     response_model=UserCart_Pydantic,
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)]
@@ -223,6 +253,65 @@ async def get_users(query: typing.Optional[str] = None, limit: int = 20, offset:
             .offset(offset)
         )
 
+
+@router.post(
+    "/user/balance/replenish",
+    status_code=200,
+    dependencies=[Depends(JWTBearer())],
+    response_model=UserReplenishOut
+)
+async def replenish_balance(replenish_data: UserReplenishBalance, user: User = Depends(get_current_user)):
+    replenish = Replenish(
+        payment_type=replenish_data.payment_type,
+        user_id=user.id
+    )
+    await replenish.save()
+
+    await replenish.set_result_price(replenish_data.amount)
+
+    await replenish.refresh_from_db()
+
+    return UserReplenishOut(
+        number=replenish.number,
+        result_price=replenish.result_price,
+        payment_type=replenish.payment_type,
+        status=replenish.status,
+        created_datetime=replenish.created_datetime
+    )
+
+
+@router.get(
+    "/user/balance/replenish/{number}",
+    dependencies=[Depends(JWTBearer())],
+    status_code=200,
+    response_model=UserReplenishOut
+)
+async def replenish_balance_check(
+        number: str,
+        user: User = Depends(get_current_user),
+        ozone_bank: OzoneBank = Depends(get_ozone_bank)
+):
+    if not ozone_bank:
+        raise HTTPException(status_code=500, detail="SERVER_ERROR")
+
+    replenish = await Replenish.get_or_none(number=number, user_id=user.id)
+
+    if not replenish or replenish.status in ["canceled", "finished"]:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    check = await ozone_bank.has_payment(replenish.result_price, replenish.created_datetime)
+
+    if check:
+        await user.add_balance(replenish.result_price)
+        await replenish.finish()
+
+    return UserReplenishOut(
+        number=replenish.number,
+        result_price=replenish.result_price,
+        payment_type=replenish.payment_type,
+        status=replenish.status,
+        created_datetime=replenish.created_datetime
+    )
 
 @router.post(
     "/user/password/drop",
