@@ -16,6 +16,7 @@ import axegaoshop.db.config
 from axegaoshop.db.config import TORTOISE_CONFIG
 from axegaoshop.logging import configure_logging
 from axegaoshop.settings import settings
+from axegaoshop.web.lifetime import register_startup_event
 
 
 def get_app() -> FastAPI:
@@ -58,6 +59,8 @@ def get_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    register_startup_event(app)
 
     # Конфигурирование Tortoise ORM
     Tortoise.init_models(axegaoshop.db.config.MODELS_MODULES, "axegaoshop")
