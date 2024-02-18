@@ -16,7 +16,8 @@ MODELS_MODULES: List[str] = [
     f"{MODELS_MODULES_PREFIX}.review",
     f"{MODELS_MODULES_PREFIX}.partner",
     f"{MODELS_MODULES_PREFIX}.payment_settings",
-    f"{MODELS_MODULES_PREFIX}.password_reset"
+    f"{MODELS_MODULES_PREFIX}.password_reset",
+    f"{MODELS_MODULES_PREFIX}.replenish"
 ]
 
 TORTOISE_CONFIG = {
