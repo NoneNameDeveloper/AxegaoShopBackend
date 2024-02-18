@@ -44,6 +44,15 @@ class User(Model):
             self.photo = create_user_photo(self.username)  # передаем login в create_user_photo
         await super().save(*args, **kwargs)
 
+    async def add_balance(self, amount: float):
+        """добавление баланса к текущему"""
+        self.balance += amount
+        await self.save()
+
+    async def clear_shop_cart(self):
+        """очищение корзины пользователя"""
+        await self.shop_cart.all().delete()
+
     async def get_available_products_to_comment(self):
         """получение товаров (завершенные заказы), по которым не было оставлено комментариев"""
 
@@ -65,17 +74,3 @@ class User(Model):
         ]
 
         return available_products
-
-
-        # products_without_reviews = []
-        #
-        # orders_with_reviews = await Review.all().distinct().values_list("order__id")
-        # all_orders = await Order.all()
-        #
-        # for order in all_orders:
-        #     if order.id not in orders_with_reviews:
-        #         # Заказ без отзывов, получаем все товары из этого заказа
-        #         products = await OrderParameters.filter(order=order).distinct("parameter__product__title")
-        #         products_without_reviews.extend([product.parameter.product.title for product in products])
-        #
-        # return products_without_reviews
