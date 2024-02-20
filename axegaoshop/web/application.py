@@ -60,6 +60,7 @@ def get_app() -> FastAPI:
         allow_headers=["*"],
     )
 
+    # регистрация события startup
     register_startup_event(app)
 
     # Конфигурирование Tortoise ORM
