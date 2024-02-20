@@ -1,5 +1,4 @@
 import typing
-import uuid
 from typing import Annotated
 
 from fastapi.security import OAuth2PasswordBearer
@@ -150,6 +149,7 @@ async def get_current_user_(user: Annotated[User, Depends(get_current_user)]):
     response_model=list[OrderIn_Pydantic]
 )
 async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
+    """получение истории заказов пользователя (текущего)"""
     if user.is_anonymous:
         raise HTTPException(status_code=404, detail="AUTHORIZE_REQUIRED")
 
@@ -162,6 +162,7 @@ async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
     response_model=list[UserReplenish_Pydantic]
 )
 async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
+    """получение истории пополнений пользователя (текущего)"""
     if user.is_anonymous:
         raise HTTPException(status_code=404, detail="AUTHORIZE_REQUIRED")
 
