@@ -180,8 +180,9 @@ async def create_product(
             for opt in options:
                 await opt.save()
 
+    # добавление фото товара и назначение первой фотографии main
     product_photo = [ProductPhoto(
-        photo=pp.photo,
+        photo=pp,
         product=product,
         main=True if idx == 0 else False
     ) for idx, pp in enumerate(photos_, start=0)]

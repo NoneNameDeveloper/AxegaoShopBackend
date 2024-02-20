@@ -24,7 +24,7 @@ class ProductCreate(BaseModel):
     give_type: typing.Optional[str] = "string"
     parameters: list[ParameterCreate]
     options: typing.Optional[list[OptionCreate]] = None
-    photos: typing.Optional[list[PhotoCreate]] = []
+    photos: typing.Optional[list[str]] = []
 
     model_config = {
         "json_schema_extra": {
