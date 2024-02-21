@@ -226,6 +226,6 @@ async def get_items_data_for_order(parameter_id: int, count: int) -> list[Produc
 
     # деактивация товаров
     for item in items:
-        await item.update_from_dict({"is_active": False})
+        await item.update_from_dict({"is_active": False}).save()
 
     return items
