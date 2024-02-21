@@ -26,67 +26,55 @@ class ProductCreate(BaseModel):
     options: typing.Optional[list[OptionCreate]] = None
     photos: typing.Optional[list[str]] = []
 
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "title": "Windows 11",
-                    "description": "Ключи для активации Windows 11",
-                    "card_price": 4000,
-                    "give_type": "string",
-                    "subcategory_id": 1,
-                    "parameters": [
-                        {
-                            "title": "Windows 11 Professional",
-                            "price": 4500,
-                            "has_sale": False,
-                            "data": [
-                                {
-                                    "value": "FWBFIWEF-FWEF-W-EFWE-F-WE"
-                                },
-                                {
-                                    "value": "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
-                                }
-                            ]
-                        },
-                        {
-                            "title": "Windows 11 Home",
-                            "price": 4300,
-                            "has_sale": True,
-                            "sale_price": 4000,
-                            "data": [
-                                {
-                                    "value": "FWBFIWEF-FWEF-W-EFWE-F-WE"
-                                },
-                                {
-                                    "value": "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
-                                }
-                            ]
-                        }
-                    ],
-                    "options": [
-                        {
-                            "title": "Тип поставки",
-                            "value": "Ключ"
-                        },
-                        {
-                            "title": "Код",
-                            "value": "100",
-                            "is_pk": True
-                        }
-                    ],
-                    "photos": [
-                        {
-                            "photo": "grfwefwrgre.jpg",
-                        },
-                        {
-                            "photo": "qlmzvywrge.jpg",
-                        }
-                    ]
-                }
-            ]
-        }
-    }
+    # model_config = {
+    #     "json_schema_extra": {
+    #         "examples": [
+    #             {
+    #                 "title": "Windows 11",
+    #                 "description": "Ключи для активации Windows 11",
+    #                 "card_price": 4000,
+    #                 "give_type": "string",
+    #                 "subcategory_id": 1,
+    #                 "parameters": [
+    #                     {
+    #                         "title": "Windows 11 Professional",
+    #                         "price": 4500,
+    #                         "has_sale": False,
+    #                         "data": [
+    #                                 "FWBFIWEF-FWEF-W-EFWE-F-WE", "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
+    #                         ]
+    #                     },
+    #                     {
+    #                         "title": "Windows 11 Home",
+    #                         "price": 4300,
+    #                         "has_sale": True,
+    #                         "sale_price": 4000,
+    #                         "data": [
+    #                                 "FWBFIWEF-FWEF-W-EFWE-F-WE", "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
+    #                         ]
+    #                     }
+    #                 ],
+    #                 "options": [
+    #                     {
+    #                         "title": "Тип поставки",
+    #                         "value": "Ключ"
+    #                     },
+    #                     {
+    #                         "title": "Код",
+    #                         "value": "100",
+    #                         "is_pk": True
+    #                     }
+    #                 ],
+    #                 "photos": [
+    #
+    #                         "photo": "grfwefwrgre.jpg",
+    #
+    #                         "photo": "qlmzvywrge.jpg",
+    #                 ]
+    #             }
+    #         ]
+    #     }
+    # }
 
 
 class ProductOrderChange(BaseModel):

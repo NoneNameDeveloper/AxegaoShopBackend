@@ -163,7 +163,7 @@ async def create_product(
             for d in p.data:
                 p_d = ProductData(
                     parameter=param,
-                    value=d.value
+                    value=d
                 )
                 await p_d.save()
 
