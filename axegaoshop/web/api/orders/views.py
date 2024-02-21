@@ -1,14 +1,16 @@
+import asyncio
 import typing
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import UJSONResponse
-from starlette.responses import JSONResponse
 
 from axegaoshop.db.models.order import Order, OrderParameters
 from axegaoshop.db.models.product import Parameter
 from axegaoshop.db.models.promocode import Promocode
 from axegaoshop.db.models.shop_cart import ShopCart
 from axegaoshop.db.models.user import User
+from axegaoshop.services.notifications.telegram import TelegramService
+from axegaoshop.services.notifications.telegram.telegram_di import get_telegram_data
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
 from axegaoshop.settings import PaymentType
@@ -87,9 +89,6 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
             await order.finish()
             await order.save()
 
-            if not order_.straight:
-                await user.clear_shop_cart()
-
             # снятие баланса пользователя
             await user.add_balance(-int(order.result_price))
 
@@ -98,6 +97,10 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         else:
             await order.cancel()
             return UJSONResponse(content="NOT_ENOUGH_BALANCE", status_code=200)
+
+    # очищение корзины пользователя после покупки
+    if not order_.straight:
+        await user.clear_shop_cart()
 
     return await OrderIn_Pydantic.from_tortoise_orm(order)
 
@@ -108,7 +111,12 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
     response_model=OrderFinishOut,
     status_code=200
 )
-async def check_order(id: int, user: User = Depends(get_current_user), ozone_bank: OzoneBank = Depends(get_ozone_bank)):
+async def check_order(
+        id: int,
+        user: User = Depends(get_current_user),
+        ozone_bank: OzoneBank = Depends(get_ozone_bank),
+        telegram_service: TelegramService = Depends(get_telegram_data)
+):
     """
     срабатывает при нажатии кнопки "Проверить" на странице оплаты
 
@@ -132,15 +140,21 @@ async def check_order(id: int, user: User = Depends(get_current_user), ozone_ban
     if order.status == "finished" or order.status == "canceled":
         raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
 
-    has_payment = await ozone_bank.has_payment(order.result_price, order.created_datetime)
+    has_payment = True # await ozone_bank.has_payment(order.result_price, order.created_datetime)
     if has_payment:
         items = await order.get_items()
 
         await order.finish()
         await order.save()
 
-        return OrderFinishOut.model_validate(items)
+        res_data = OrderFinishOut.model_validate(items)
 
+        if telegram_service:
+            # добавление для уведы почты пользователя в словарь
+            items['buyer'] = user.email
+            await asyncio.create_task(telegram_service.notify("sell", items))
+
+        return res_data
     return UJSONResponse(status_code=200, content={"status": "waiting"})
 
 

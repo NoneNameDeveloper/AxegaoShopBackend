@@ -5,6 +5,8 @@ from fastapi import APIRouter, HTTPException, Depends
 from axegaoshop.db.models.telegram_settings import get_tg_settings, get_tg_recievers, TelegramSetting, TelegramReciever
 from axegaoshop.services.notifications.telegram import TelegramService
 from axegaoshop.services.notifications.telegram.telegram_di import check_valid, get_telegram_data
+from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
+from axegaoshop.services.security.users import current_user_is_admin
 from axegaoshop.web.api.notifications.telegram.schema import TelegramSettingUpdate, TelegramSettingIn
 
 router = APIRouter()
@@ -12,6 +14,7 @@ router = APIRouter()
 
 @router.get(
     "/telegram/settings",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     response_model=TelegramSettingIn
 )
 async def get_telegram_settings():
@@ -32,6 +35,7 @@ async def get_telegram_settings():
 
 @router.post(
     "/telegram/settings/test",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     status_code=200
 )
 async def test_notify_telegram(tg_service: TelegramService = Depends(get_telegram_data)):
@@ -44,6 +48,7 @@ async def test_notify_telegram(tg_service: TelegramService = Depends(get_telegra
 
 @router.post(
     "/telegram/settings",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     status_code=200
 )
 async def create_or_update_telegram_settings(data: TelegramSettingUpdate):
@@ -71,6 +76,7 @@ async def create_or_update_telegram_settings(data: TelegramSettingUpdate):
 
 @router.delete(
     "/telegram/settings/reciever/{telegram_id}",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     status_code=200
 )
 async def delete_reciever(telegram_id: int):
