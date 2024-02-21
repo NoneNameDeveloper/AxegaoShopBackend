@@ -1,9 +1,15 @@
 SELL_NOTIFY_TEMPLATE = """
 🔔 Продажа
 
-Товар: {ITEM}
-Цена: {PRICE}
-Промокод: {PROMOCODE}
+Покупатель: {BUYER}
+Итоговая цена: {TOTAL_PRICE}
+Номер заказа: {NUMBER}
+
+{APPENDIX}
+"""
+
+NOTIFY_APPENDIX_TEMPLATE = """
+Позиция: {TITLE}
 Количество: {COUNT}
 """
 
