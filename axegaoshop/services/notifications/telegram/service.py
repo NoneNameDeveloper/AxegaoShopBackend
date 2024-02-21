@@ -4,7 +4,7 @@ import typing
 from aiogram import Bot
 from aiogram.utils.token import TokenValidationError
 
-from axegaoshop.services.notifications.telegram.templates import SELL_NOTIFY_TEMPLATE
+from axegaoshop.services.notifications.telegram.templates import SELL_NOTIFY_TEMPLATE, NOTIFY_APPENDIX_TEMPLATE
 
 
 class TelegramService:
@@ -16,7 +16,7 @@ class TelegramService:
         self.s = self.bot.session
         if not self.bot:
             self.error = "INVALID_TOKEN"
-                
+
     def connect_bot(self):
         try:
             return Bot(self.bot_token)
@@ -30,21 +30,30 @@ class TelegramService:
 
     async def notify(self, type_: typing.Literal['sell', 'ticket'], data: dict):
         """отправка уведомлений о покупке либо о новых сообщениях в тикете"""
+        # отправка уведа о заказе успешно завершенном
         if type_ == 'sell':
             for reciever in self.recievers:
                 try:
                     await self.bot.send_message(
                         chat_id=reciever,
                         text=SELL_NOTIFY_TEMPLATE.format(
-                            ITEM=data['item'],
-                            TITLE=data['title'],
-                            PROMOCODE=data['promocode'],
-                            COUNT=data['count']
+                            BUYER=data['buyer'],
+                            TOTAL_PRICE=data['total_price'],
+                            NUMBER=data['number'],
+                            APPENDIX="------------\n".join([
+                                NOTIFY_APPENDIX_TEMPLATE.format(
+                                    TITLE=pos['title'],
+                                    COUNT=pos['count']
+                                )
+                                for pos in data['order_data']
+                            ])
                         )
                     )
-                except:
+                except Exception as e:
+                    print(e)
                     pass
 
+        # отправка уведа о новых сообщениях в тикетах
         elif type == "ticket":
             for reciever in self.recievers:
                 try:
