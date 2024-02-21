@@ -228,6 +228,9 @@ async def update_user_by_id(id: int, user: UserUpdateAdmin):
     if user.username and await User.get_or_none(username=user.username):
         raise HTTPException(status_code=401, detail="LOGIN_ALREADY_EXISTS")
 
+    if user.password:
+        user.password = get_hashed_password(user.password)
+
     await User.filter(id=id).update(**user.model_dump(exclude_unset=True))
 
     return await UserIn_Pydantic.from_queryset_single(User.filter(id=id).first())
