@@ -5,6 +5,8 @@ from axegaoshop.web.api import orders, partners, products, promocodes, \
 
 from axegaoshop.web.api.products import options, photos, parameters
 
+from axegaoshop.web.api.notifications import telegram
+
 from axegaoshop.web.api.payment_settings.sbp import ozone_bank
 
 api_router = APIRouter()
@@ -36,3 +38,5 @@ api_router.include_router(router=reviews.router, prefix="", tags=["Reviews"])
 api_router.include_router(router=ozone_bank.router, prefix="", tags=["SBP Ozone Bank Settings"])
 
 api_router.include_router(router=healthcheck.router, prefix="", tags=["Healthcheck"])
+
+api_router.include_router(router=telegram.router, prefix="", tags=["Telegram Notifications"])
