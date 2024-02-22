@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from axegaoshop.db.models.product import Product, Parameter, change_parameter_order
+from axegaoshop.db.models.product import Product, Parameter, change_parameter_order, update_parameter_data
 from axegaoshop.web.api.products.parameters.schema import ParameterIn_Pydantic, ParameterCreate, ParameterUpdate, ParameterOrderChange
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
@@ -55,6 +55,19 @@ async def update_product_parameter(id: int, parameter: ParameterUpdate):
     await Parameter.filter(id=id).update(**parameter.model_dump(exclude_unset=True))
 
     return await Parameter.filter(id=id).first()
+
+
+@router.patch(
+    path="/parameter/{id}/data",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    status_code=200
+)
+async def update_product_parameter_data(id: int, data: list[str]):
+    """обновление строк параметра товара"""
+    if not await Parameter.get_or_none(id=id):
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    await update_parameter_data(id, data)
 
 
 @router.delete(

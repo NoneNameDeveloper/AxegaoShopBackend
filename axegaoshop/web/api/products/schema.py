@@ -3,7 +3,7 @@ import typing
 from pydantic import BaseModel
 from tortoise.contrib.pydantic import pydantic_model_creator
 
-from axegaoshop.db.models.product import Product
+from axegaoshop.db.models.product import Product, ProductData
 
 from axegaoshop.web.api.products.options.schema import OptionCreate
 from axegaoshop.web.api.products.parameters.schema import ParameterCreate
@@ -88,9 +88,20 @@ class ProductToCart(BaseModel):
     count: typing.Optional[int] = 1
 
 
+class ProductUpdate(BaseModel):
+    title: typing.Optional[str] = None
+    description: typing.Optional[str] = None
+    card_price: typing.Optional[float] = None
+
+
 ProductIn_Pydantic = pydantic_model_creator(
     Product,
     exclude=(
         "parameters.data.id", "parameters.cart_product",
         "cart_product", "product_photos.id"
     ))
+
+
+ProductDataIn_Pydantic = pydantic_model_creator(
+    ProductData
+)

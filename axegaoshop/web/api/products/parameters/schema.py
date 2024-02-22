@@ -26,12 +26,7 @@ class ParameterCreate(BaseModel):
                     "price": 4500,
                     "has_sale": False,
                     "data": [
-                        {
-                            "value": "FWBFIWEF-FWEF-W-EFWE-F-WE"
-                        },
-                        {
-                            "value": "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
-                        }
+                        "FWBFIWEF-FWEF-W-EFWE-F-WE", "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
                     ]
                 }
             ]

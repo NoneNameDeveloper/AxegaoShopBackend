@@ -3,10 +3,12 @@ import typing
 from fastapi import APIRouter, Depends, HTTPException
 from tortoise.functions import Avg, Coalesce
 
-from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order
+from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order, \
+    get_items_data_for_product
 from axegaoshop.db.models.subcategory import Subcategory
 
-from axegaoshop.web.api.products.schema import ProductCreate, ProductIn_Pydantic, ProductOrderChange
+from axegaoshop.web.api.products.schema import ProductCreate, ProductIn_Pydantic, ProductOrderChange, \
+    ProductDataIn_Pydantic, ProductUpdate
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -62,6 +64,34 @@ async def get_products(
         return await ProductIn_Pydantic.from_queryset(Product.filter(title__istartswith=query).
                                                       limit(limit).
                                                       offset(offset))
+
+
+@router.get(
+    "/product/{id}/data",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    response_model=list[ProductDataIn_Pydantic]
+)
+async def items_by_product_get(id: int):
+    """получение данных по товарам (строк) для админки"""
+    if not await Product.get_or_none(id=id):
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    return await ProductDataIn_Pydantic.from_queryset(await get_items_data_for_product(id))
+
+
+@router.patch(
+    "/product/{id}",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    response_model=ProductIn_Pydantic
+)
+async def update_product(id: int, data: ProductUpdate):
+    """обновление данных о товаре (только данных о товаре)"""
+    if not await Product.get_or_none(id=id):
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    await Product.update_from_dict(**data.model_dump(exclude_unset=True))
+
+    return await ProductIn_Pydantic.from_queryset_single(Product.filter(id=id).first())
 
 
 @router.get(

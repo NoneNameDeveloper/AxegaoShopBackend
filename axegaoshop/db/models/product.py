@@ -3,6 +3,7 @@ from datetime import datetime
 from tortoise.expressions import Q
 from tortoise.models import Model
 from tortoise import fields
+from tortoise.queryset import QuerySet
 
 
 class Product(Model):
@@ -114,7 +115,7 @@ class ProductData(Model):
     is_active = fields.BooleanField(default=True, null=False)
 
     class PydanticMeta:
-        exclude = ("parameer",)
+        exclude = ("parameer", "is_active")
 
     class Meta:
         table = "product_data"
@@ -230,3 +231,45 @@ async def get_items_data_for_order(parameter_id: int, count: int) -> list[Produc
         await item.update_from_dict({"is_active": False}).save()
 
     return items
+
+
+async def get_items_data_for_product(product_id: int) -> QuerySet[ProductData]:
+    """получение строк (файлов) по товарам из базы"""
+    items = ProductData.filter(parameter__product_id=product_id, is_active=True).all()
+
+    return items
+
+
+async def update_parameter_data(parameter_id: int, data: list[str]):
+    """обновление строк по товару (сверка и удаление старых, добавление новых)"""
+    # модельки строк
+    items = [u for u in await ProductData.filter(parameter__id=parameter_id, is_active=True).all()]
+    # данные строк
+    items_values = [v.value for v in items]
+
+    new_ = []
+
+    for item in data:
+        if item not in items_values:
+            # добавление нового товара, если его не было в бд
+            new_.append(item)
+
+        try:
+            # удаление из списка строк из бд для дальнейшего удаления из бд
+            items_values.remove(item)
+        except ValueError:
+            pass
+
+    # удаление оставшихся строк
+    await ProductData.filter(value__in=items_values).delete()
+
+    # создание новых строк
+    await ProductData.bulk_create(
+        [
+            ProductData(
+                parameter_id=parameter_id,
+                value=v
+            ) for v in new_
+        ]
+    )
+
