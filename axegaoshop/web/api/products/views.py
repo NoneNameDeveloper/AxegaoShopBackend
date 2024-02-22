@@ -151,6 +151,7 @@ async def create_product(
 
     parameters = [Parameter(
         title=p.title,
+        description=p.description,
         price=p.price,
         has_sale=p.has_sale,
         sale_price=p.sale_price,

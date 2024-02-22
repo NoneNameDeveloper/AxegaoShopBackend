@@ -12,6 +12,7 @@ from axegaoshop.db.models.product import Parameter
 
 class ParameterCreate(BaseModel):
     title: str
+    description: typing.Optional[str] = None
     price: float
     has_sale: bool = False
     sale_price: float = 0.0

@@ -31,6 +31,7 @@ async def create_product_parameter(id: int, parameter: ParameterCreate):
 
     parameter_ = Parameter(
         title=parameter.title,
+        desctiption=parameter.description,
         price=parameter.price,
         has_sale=parameter.has_sale,
         sale_price=parameter.sale_price,

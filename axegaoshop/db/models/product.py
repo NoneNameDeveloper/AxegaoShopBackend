@@ -60,7 +60,7 @@ class Parameter(Model):
     id = fields.IntField(pk=True)
 
     title = fields.TextField(null=False)
-    description = fields.TextField(null=False)
+    description = fields.TextField(null=True)
 
     price = fields.DecimalField(max_digits=10, decimal_places=2, null=False)
 
