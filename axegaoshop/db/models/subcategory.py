@@ -63,6 +63,6 @@ async def change_subcategory_order(subcategory_1: int, subcategory_2: int) -> bo
     subcategory2.order_id = subcategory1_order_id_temp
 
     await subcategory1.save()
-    await subcategory1.save()
+    await subcategory2.save()
 
     return True
