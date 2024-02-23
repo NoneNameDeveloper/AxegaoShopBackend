@@ -104,7 +104,7 @@ async def subcategory_delete(id: int):
     response_model=list[SubcategoryIn_Pydantic]
 )
 async def change_subcategory_order_router(subcat_order: SubcategoryOrderChange):
-    res = await change_subcategory_order(subcat_order.subcategory_1, subcat_order.subcategory_1)
+    res = await change_subcategory_order(subcat_order.subcategory_1, subcat_order.subcategory_2)
 
     if not res:
         raise HTTPException(status_code=404, detail="NOT_FOUND")
