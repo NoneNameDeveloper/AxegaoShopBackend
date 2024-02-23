@@ -39,12 +39,12 @@ class Subcategory(Model):
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
-        last_cat_id = (await Subcategory.filter(category_id=self.category_id).order_by("id"))
-
-        if not last_cat_id:
-            self.order_id = 1
-        else:
-            self.order_id = last_cat_id[-1].id + 1
+        if not kwargs.get("repeat"):
+            last_cat_id = (await Subcategory.filter(category_id=self.category_id).order_by("id"))
+            if not last_cat_id:
+                self.order_id = 1
+            else:
+                self.order_id = last_cat_id[-1].id + 1
 
         await super().save(*args, **kwargs)
 
@@ -54,7 +54,7 @@ async def change_subcategory_order(subcategory_1: int, subcategory_2: int) -> bo
     subcategory1 = await Subcategory.get_or_none(id=subcategory_1)
     subcategory2 = await Subcategory.get_or_none(id=subcategory_2)
 
-    if not subcategory1 or not subcategory1:
+    if not subcategory1 or not subcategory2:
         return False
 
     subcategory1_order_id_temp: int = subcategory1.order_id
@@ -62,7 +62,7 @@ async def change_subcategory_order(subcategory_1: int, subcategory_2: int) -> bo
     subcategory1.order_id = subcategory2.order_id
     subcategory2.order_id = subcategory1_order_id_temp
 
-    await subcategory1.save()
-    await subcategory2.save()
+    await subcategory1.save(repeat=True)
+    await subcategory2.save(repeat=True)
 
     return True

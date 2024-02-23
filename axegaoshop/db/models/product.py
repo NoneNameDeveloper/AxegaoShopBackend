@@ -46,12 +46,14 @@ class Product(Model):
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
-        last_product_id = (await Product.filter(subcategory_id=self.subcategory_id).order_by("id"))
 
-        if not last_product_id:
-            self.order_id = 1
-        else:
-            self.order_id = last_product_id[-1].order_id + 1
+        if not kwargs.get("repeat"):
+            last_product_id = (await Product.filter(subcategory_id=self.subcategory_id).order_by("id"))
+
+            if not last_product_id:
+                self.order_id = 1
+            else:
+                self.order_id = last_product_id[-1].order_id + 1
 
         await super().save(*args, **kwargs)
 
@@ -85,12 +87,13 @@ class Parameter(Model):
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
-        last_param_id = (await Parameter.filter(product_id=self.product_id).order_by("id"))
+        if not kwargs.get("repeat"):
+            last_param_id = (await Parameter.filter(product_id=self.product_id).order_by("id"))
 
-        if not last_param_id:
-            self.order_id = 1
-        else:
-            self.order_id = last_param_id[-1].order_id + 1
+            if not last_param_id:
+                self.order_id = 1
+            else:
+                self.order_id = last_param_id[-1].order_id + 1
 
         await super().save(*args, **kwargs)
 
@@ -192,8 +195,8 @@ async def change_product_order(product_1: int, product_2: int) -> bool:
     product1.order_id = product2.order_id
     product2.order_id = product_1_order_id_temp
 
-    await product1.save()
-    await product2.save()
+    await product1.save(repeat=True)
+    await product2.save(repeat=True)
 
     return True
 
@@ -211,8 +214,8 @@ async def change_parameter_order(parameter_1: int, parameter_2: int) -> bool:
     parameter1.order_id = parameter2.order_id
     parameter2.order_id = param_1_order_id_temp
 
-    await parameter1.save()
-    await parameter2.save()
+    await parameter1.save(repeat=True)
+    await parameter2.save(repeat=True)
 
     return True
 

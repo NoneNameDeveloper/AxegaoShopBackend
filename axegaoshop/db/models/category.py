@@ -37,12 +37,13 @@ class Category(Model):
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
-        last_cat_id = (await Category.all().order_by("id"))
+        if not kwargs.get("repeat"):
+            last_cat_id = (await Category.all().order_by("id"))
 
-        if not last_cat_id:
-            self.order_id = 1
-        else:
-            self.order_id = last_cat_id[-1].order_id + 1
+            if not last_cat_id:
+                self.order_id = 1
+            else:
+                self.order_id = last_cat_id[-1].order_id + 1
 
         await super().save(*args, **kwargs)
 
@@ -60,7 +61,7 @@ async def change_category_order(category_1: int, category_2: int) -> bool:
     category1.order_id = category2.order_id
     category2.order_id = cat_1_order_id_temp
 
-    await category1.save()
-    await category2.save()
+    await category1.save(repeat=True)
+    await category2.save(repeat=True)
 
     return True
