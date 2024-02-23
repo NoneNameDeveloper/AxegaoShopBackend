@@ -54,7 +54,8 @@ class Product(Model):
                 self.order_id = 1
             else:
                 self.order_id = last_product_id[-1].order_id + 1
-
+        else:
+            del kwargs['repeat']
         await super().save(*args, **kwargs)
 
 
@@ -94,7 +95,8 @@ class Parameter(Model):
                 self.order_id = 1
             else:
                 self.order_id = last_param_id[-1].order_id + 1
-
+        else:
+            del kwargs['repeat']
         await super().save(*args, **kwargs)
 
     async def get_price(self):

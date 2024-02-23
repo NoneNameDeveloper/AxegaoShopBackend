@@ -44,7 +44,8 @@ class Category(Model):
                 self.order_id = 1
             else:
                 self.order_id = last_cat_id[-1].order_id + 1
-
+        else:
+            del kwargs['repeat']
         await super().save(*args, **kwargs)
 
 
