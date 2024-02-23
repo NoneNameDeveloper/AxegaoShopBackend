@@ -67,10 +67,13 @@ async def category_delete(id: int):
 @router.post(
     "/category/order",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
+    response_model=list[CategoryIn_Pydantic]
 )
 async def change_category_order_router(cat_order: CategoryOrderChange):
     res = await change_category_order(cat_order.category_1, cat_order.category_2)
 
     if not res:
         raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    return await CategoryIn_Pydantic.from_queryset(Category.all())

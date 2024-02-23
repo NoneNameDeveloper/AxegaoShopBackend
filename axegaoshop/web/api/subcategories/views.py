@@ -100,10 +100,13 @@ async def subcategory_delete(id: int):
 @router.post(
     "/subcategory/order",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
+    response_model=list[SubcategoryIn_Pydantic]
 )
 async def change_subcategory_order_router(subcat_order: SubcategoryOrderChange):
     res = await change_subcategory_order(subcat_order.subcategory_1, subcat_order.subcategory_1)
 
     if not res:
         raise HTTPException(status_code=404, detail="NOT_FOUND")
+
+    return await SubcategoryIn_Pydantic.from_queryset(Subcategory.all())
