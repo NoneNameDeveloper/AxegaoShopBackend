@@ -49,7 +49,7 @@ async def get_products(
                                .order_by("card_price" if price_sort else "-card_price")
                                .annotate(
                                     param_reviews_count=Coalesce(Avg(
-                                        'parameters__order_parameters__order__review__rate'),
+                                        'parameters__order_parameters__order__reviews__rate'),
                                         0
                                     )
                                 )
@@ -125,7 +125,7 @@ async def subcategory_products_get(
                            .order_by("card_price" if price_sort else "-card_price")
                            .annotate(
                                 param_reviews_count=Coalesce(Avg(
-                                    'parameters__order_parameters__order__review__rate'),
+                                    'parameters__order_parameters__order__reviews__rate'),
                                     0
                                 )
         )
