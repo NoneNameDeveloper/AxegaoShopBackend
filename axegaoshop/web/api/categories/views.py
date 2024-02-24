@@ -70,8 +70,8 @@ async def category_delete(id: int):
     status_code=200,
     response_model=list[CategoryIn_Pydantic]
 )
-async def change_category_order_router(cat_order: CategoryOrderChange):
-    res = await change_category_order(cat_order.category_1, cat_order.category_2)
+async def change_category_order_router(category_ids: list[int]):
+    res = await change_category_order(category_ids)
 
     if not res:
         raise HTTPException(status_code=404, detail="NOT_FOUND")

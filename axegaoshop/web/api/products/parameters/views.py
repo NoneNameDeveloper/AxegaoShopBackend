@@ -87,8 +87,8 @@ async def delete_product_parameter(id: int):
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     status_code=200
 )
-async def change_product_order_router(param_order: ParameterOrderChange):
-    res = await change_parameter_order(param_order.param_1, param_order.param_2)
+async def change_product_order_router(parameter_ids: list[int]):
+    res = await change_parameter_order(parameter_ids)
 
     if not res:
         raise HTTPException(status_code=404, detail="NOT_FOUND")

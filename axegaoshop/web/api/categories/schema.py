@@ -21,4 +21,4 @@ class CategoryUpdate(BaseModel):
     photo: typing.Optional[str] = None
 
 
-CategoryIn_Pydantic = pydantic_model_creator(Category)
+CategoryIn_Pydantic = pydantic_model_creator(Category, exclude=("subcategories.products", "subcategories.product_count"))

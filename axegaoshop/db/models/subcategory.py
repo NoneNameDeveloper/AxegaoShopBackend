@@ -29,7 +29,7 @@ class Subcategory(Model):
         """получение количество товаров в подкатегории"""
         try:
             return len(self.products)
-        except NoValuesFetched:
+        except (NoValuesFetched, AttributeError):
             return 0
 
     class PydanticMeta:
@@ -50,20 +50,34 @@ class Subcategory(Model):
         await super().save(*args, **kwargs)
 
 
-async def change_subcategory_order(subcategory_1: int, subcategory_2: int) -> bool:
-    """смена порядка в подкатегориях"""
-    subcategory1 = await Subcategory.get_or_none(id=subcategory_1)
-    subcategory2 = await Subcategory.get_or_none(id=subcategory_2)
+async def change_subcategory_order(ids: list[int]) -> bool:
+    """
+    смена порядка в подкатегориях
 
-    if not subcategory1 or not subcategory2:
+    Алгоритм:
+        На вход принимается список ID подкатегорий в измененном порядке,
+        затем по порядку этих ID изменяется поле order_id в бд
+
+    :param ids: список айдишников подкатегорий из бд
+    :return: True - успех / False - ошибка
+
+    """
+    if not len(ids) == await Subcategory.all().count():
         return False
 
-    subcategory1_order_id_temp: int = subcategory1.order_id
+    subcategories: list[Subcategory] = []
 
-    subcategory1.order_id = subcategory2.order_id
-    subcategory2.order_id = subcategory1_order_id_temp
+    # провера на существование категорий с таким ID
+    for id_ in ids:
+        subcat = await Subcategory.get_or_none(id=id_)
+        if not subcat:
+            return False
 
-    await subcategory1.save(repeat=True)
-    await subcategory2.save(repeat=True)
+        subcategories.append(subcat)
+
+    for cat, order_id in zip(subcategories, range(1, len(subcategories) + 1)):
+        cat.order_id = order_id
+
+    await Subcategory.bulk_update(subcategories, fields=["order_id"])
 
     return True

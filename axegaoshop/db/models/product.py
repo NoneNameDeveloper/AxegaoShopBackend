@@ -184,40 +184,65 @@ class ProductPhoto(Model):
         exclude = ("product",)
 
 
-async def change_product_order(product_1: int, product_2: int) -> bool:
-    """смена порядка в товарах"""
-    product1 = await Product.get_or_none(id=product_1)
-    product2 = await Product.get_or_none(id=product_2)
+async def change_product_order(ids: list[int]) -> bool:
+    """
+    смена порядка в товарах
 
-    if not product1 or not product2:
+    Алгоритм:
+        На вход принимается список ID товаров в измененном порядке,
+        затем по порядку этих ID изменяется поле order_id в бд
+
+    :param ids: список айдишников товаров из бд
+    :return: True - успех / False - ошибка
+
+    """
+    if not len(ids) == await Product.all().count():
         return False
 
-    product_1_order_id_temp: int = product1.order_id
+    products: list[Product] = []
 
-    product1.order_id = product2.order_id
-    product2.order_id = product_1_order_id_temp
+    # провера на существование категорий с таким ID
+    for id_ in ids:
+        product = await Product.get_or_none(id=id_)
+        if not product:
+            return False
 
-    await product1.save(repeat=True)
-    await product2.save(repeat=True)
+        products.append(product)
+
+    for product, order_id in zip(products, range(1, len(products) + 1)):
+        product.order_id = order_id
+
+    await Product.bulk_update(products, fields=["order_id"])
 
     return True
 
 
-async def change_parameter_order(parameter_1: int, parameter_2: int) -> bool:
-    """смена порядка в параметрах (версиях товара)"""
-    parameter1 = await Product.get_or_none(id=parameter_1)
-    parameter2 = await Product.get_or_none(id=parameter_2)
+async def change_parameter_order(ids: list[int]) -> bool:
+    """
+    смена порядка в параметрах
 
-    if not parameter2 or not parameter1:
-        return False
+    Алгоритм:
+        На вход принимается список ID параметров в измененном порядке,
+        затем по порядку этих ID изменяется поле order_id в бд
 
-    param_1_order_id_temp: int = parameter1.order_id
+    :param ids: список айдишников параметров из бд
+    :return: True - успех / False - ошибка
 
-    parameter1.order_id = parameter2.order_id
-    parameter2.order_id = param_1_order_id_temp
+    """
+    parameters: list[Parameter] = []
 
-    await parameter1.save(repeat=True)
-    await parameter2.save(repeat=True)
+    # провера на существование категорий с таким ID
+    for id_ in ids:
+        parameter = await Parameter.get_or_none(id=id_)
+        if not parameter:
+            return False
+
+        parameters.append(parameter)
+
+    for param, order_id in zip(parameters, range(1, len(parameters) + 1)):
+        param.order_id = order_id
+
+    await Parameter.bulk_update(parameters, fields=["order_id"])
 
     return True
 

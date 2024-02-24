@@ -226,7 +226,6 @@ async def create_product(
 
 @router.get(
     "/product/{id}",
-    dependencies=[Depends(JWTBearer())],
     response_model=ProductIn_Pydantic
 )
 async def get_product(id: int):
@@ -257,8 +256,8 @@ async def delete_product(id: int):
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     status_code=200
 )
-async def change_product_order_router(product_order: ProductOrderChange):
-    res = await change_product_order(product_order.product_1, product_order.product_2)
+async def change_product_order_router(product_ids: list[int]):
+    res = await change_product_order(product_ids)
 
     if not res:
         raise HTTPException(status_code=404, detail="NOT_FOUND")

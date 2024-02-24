@@ -37,32 +37,44 @@ class Category(Model):
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
-        if not kwargs.get("repeat"):
-            last_cat_id = (await Category.all().order_by("id"))
+        last_cat_id = (await Category.all().order_by("id"))
 
-            if not last_cat_id:
-                self.order_id = 1
-            else:
-                self.order_id = last_cat_id[-1].order_id + 1
+        if not last_cat_id:
+            self.order_id = 1
         else:
-            del kwargs['repeat']
+            self.order_id = last_cat_id[-1].order_id + 1
+
         await super().save(*args, **kwargs)
 
 
-async def change_category_order(category_1: int, category_2: int) -> bool:
-    """смена порядка в категориях"""
-    category1 = await Category.get_or_none(id=category_1)
-    category2 = await Category.get_or_none(id=category_2)
+async def change_category_order(ids: list[int]) -> bool:
+    """
+    смена порядка в категориях
 
-    if not category1 or not category2:
+    Алгоритм:
+        На вход принимается список ID категорий в измененном порядке,
+        затем по порядку этих ID изменяется поле order_id в бд
+
+    :param ids: список айдишников категорий из бд
+    :return: True - успеш / False - ошибка
+
+    """
+    if not len(ids) == await Category.all().count():
         return False
 
-    cat_1_order_id_temp: int = category1.order_id
+    categories: list[Category] = []
 
-    category1.order_id = category2.order_id
-    category2.order_id = cat_1_order_id_temp
+    # провера на существование категорий с таким ID
+    for id_ in ids:
+        cat = await Category.get_or_none(id=id_)
+        if not cat:
+            return False
 
-    await category1.save(repeat=True)
-    await category2.save(repeat=True)
+        categories.append(cat)
+
+    for cat, order_id in zip(categories, range(1, len(categories) + 1)):
+        cat.order_id = order_id
+
+    await Category.bulk_update(categories, fields=["order_id"])
 
     return True
