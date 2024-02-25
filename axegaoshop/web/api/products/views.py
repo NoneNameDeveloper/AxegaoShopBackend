@@ -3,12 +3,10 @@ import typing
 from fastapi import APIRouter, Depends, HTTPException
 from tortoise.functions import Avg, Coalesce
 
-from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order, \
-    get_items_data_for_product
+from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order
 from axegaoshop.db.models.subcategory import Subcategory
 
-from axegaoshop.web.api.products.schema import ProductCreate, ProductIn_Pydantic, ProductOrderChange, \
-    ProductDataIn_Pydantic, ProductUpdate
+from axegaoshop.web.api.products.schema import ProductCreate, ProductIn_Pydantic, ProductUpdate, ProductDataOut
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -69,14 +67,23 @@ async def get_products(
 @router.get(
     "/product/{id}/data",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=list[ProductDataIn_Pydantic]
+    response_model=list[ProductDataOut]
 )
 async def items_by_product_get(id: int):
     """получение данных по товарам (строк) для админки"""
     if not await Product.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
-    return await ProductDataIn_Pydantic.from_queryset(await get_items_data_for_product(id))
+    parameters = await ProductData.filter(parameter__product_id=id).distinct().values('parameter_id')
+    response_data = []
+    for parameter in parameters:
+        parameter_id = parameter["parameter_id"]
+        items = await ProductData.filter(parameter__product_id=id, parameter_id=parameter_id).values('value')
+        items_list = [item['value'] for item in items]
+        response_data.append(ProductDataOut(parameter_id=parameter_id, items=items_list))
+
+    return response_data
+
 
 
 @router.patch(

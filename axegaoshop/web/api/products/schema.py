@@ -94,14 +94,14 @@ class ProductUpdate(BaseModel):
     card_price: typing.Optional[float] = None
 
 
+class ProductDataOut(BaseModel):
+    parameter_id: int
+    items: list[str]
+
+
 ProductIn_Pydantic = pydantic_model_creator(
     Product,
     exclude=(
         "parameters.data.id", "parameters.cart_product",
         "cart_product", "product_photos.id"
     ))
-
-
-ProductDataIn_Pydantic = pydantic_model_creator(
-    ProductData
-)
