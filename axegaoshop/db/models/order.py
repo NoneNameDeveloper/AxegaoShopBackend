@@ -99,7 +99,7 @@ class Order(Model):
             'order_parameters__order__number',  # номер заказа
             'order_parameters__order__id',  # айди заказа
             'order_parameters__order__result_price',  # итоговая цена в заказе
-            'product__give_type'  # тип выдачи
+            'give_type'  # тип выдачи
         )
 
         items_dict = {}

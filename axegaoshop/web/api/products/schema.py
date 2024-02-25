@@ -21,7 +21,6 @@ class ProductCreate(BaseModel):
     description: str
     card_price: float
     subcategory_id: int
-    give_type: typing.Optional[str] = "string"
     parameters: list[ParameterCreate]
     options: typing.Optional[list[OptionCreate]] = None
     photos: typing.Optional[list[str]] = []

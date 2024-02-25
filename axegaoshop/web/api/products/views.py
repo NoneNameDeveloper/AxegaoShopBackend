@@ -180,7 +180,6 @@ async def create_product(
         card_price=product_data.card_price,
         card_has_sale=parameters_[0].has_sale,
         card_sale_price=parameters_[0].sale_price,
-        give_type=product_data.give_type,
         subcategory=subcategory
     )
 
@@ -191,6 +190,7 @@ async def create_product(
         description=p.description,
         price=p.price,
         has_sale=p.has_sale,
+        give_type=p.give_type,
         sale_price=p.sale_price,
         product=product
     ) for p in parameters_]

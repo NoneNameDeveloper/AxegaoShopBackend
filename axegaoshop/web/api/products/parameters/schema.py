@@ -14,6 +14,7 @@ class ParameterCreate(BaseModel):
     title: str
     description: typing.Optional[str] = None
     price: float
+    give_type: typing.Literal["hand", "file", "string"]
     has_sale: bool = False
     sale_price: float = 0.0
     data: typing.Optional[list[str]] = []
