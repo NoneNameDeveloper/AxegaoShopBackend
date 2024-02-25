@@ -21,9 +21,6 @@ class Product(Model):
 
     subcategory: fields.ForeignKeyRelation = fields.ForeignKeyField("axegaoshop.Subcategory",
                                                                     related_name="products")
-
-    give_type = fields.CharField(max_length=30, null=False, default="string")  # string/file/hand - тип выдачи товара
-
     order_id = fields.BigIntField(null=False)
 
     parameters: fields.ReverseRelation["Parameter"]
@@ -70,6 +67,8 @@ class Parameter(Model):
 
     has_sale = fields.BooleanField(default=False)
     sale_price = fields.DecimalField(max_digits=10, decimal_places=2)
+
+    give_type = fields.CharField(max_length=30, null=False, default="string")  # string/file/hand - тип выдачи товара
 
     product: fields.ForeignKeyRelation[Product] = fields.ForeignKeyField("axegaoshop.Product",
                                                                          related_name="parameters")
