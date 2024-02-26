@@ -44,15 +44,16 @@ async def get_products(
                            )
         if price_sort or rating_sort:
             sorted_products = (sorted_products
-                               .order_by("card_price" if price_sort else "-card_price")
-                               .annotate(
-                                    param_reviews_count=Coalesce(Avg(
-                                        'parameters__order_parameters__order__reviews__rate'),
-                                        0
-                                    )
-                                )
-                               .order_by("param_reviews_count" if rating_sort else "-param_reviews_count")
-                               )
+            .annotate(
+                param_reviews_count=Coalesce(Avg(
+                    'parameters__order_parameters__order__reviews__rate'),
+                    0
+                )
+            )
+            .order_by(
+                "param_reviews_count" if rating_sort else "-param_reviews_count",
+                "card_price" if price_sort else "-card_price"
+            ))
 
         sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
             sorted_products
@@ -83,7 +84,6 @@ async def items_by_product_get(id: int):
         response_data.append(ProductDataOut(parameter_id=parameter_id, items=items_list))
 
     return response_data
-
 
 
 @router.patch(
@@ -129,15 +129,16 @@ async def subcategory_products_get(
                        )
     if price_sort or rating_sort:
         sorted_products = (sorted_products
-                           .order_by("card_price" if price_sort else "-card_price")
-                           .annotate(
-                                param_reviews_count=Coalesce(Avg(
-                                    'parameters__order_parameters__order__reviews__rate'),
-                                    0
-                                )
+        .annotate(
+            param_reviews_count=Coalesce(Avg(
+                'parameters__order_parameters__order__reviews__rate'),
+                0
+            )
         )
-                           .order_by("param_reviews_count" if rating_sort else "-param_reviews_count")
-                           )
+        .order_by(
+            "param_reviews_count" if rating_sort else "-param_reviews_count",
+            "card_price" if price_sort else "-card_price"
+        ))
 
     sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
         sorted_products
