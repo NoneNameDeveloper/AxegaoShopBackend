@@ -121,12 +121,23 @@ async def items_by_product_get(id: int):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     parameters = await ProductData.filter(parameter__product_id=id).distinct().values('parameter_id')
+
+    # получаем все параметры с типом выдачи ручным для включения в ответ с пустым массивом
+    parameters_all = await Parameter.filter(product_id=id).all()
+    parameters_all_ids = [p.id for p in parameters_all]
+
     response_data = []
+
+    # заполняем массив ответа ручными параметрами (нет ProductData)
+    [response_data.append(ProductDataOut(parameter_id=p_id, items=[])) for p_id in parameters_all_ids]
+
     for parameter in parameters:
         parameter_id = parameter["parameter_id"]
         items = await ProductData.filter(parameter__product_id=id, parameter_id=parameter_id).values('value')
         items_list = [item['value'] for item in items]
         response_data.append(ProductDataOut(parameter_id=parameter_id, items=items_list))
+
+    [response_data.append(ProductDataOut(parameter_id=p_id, items=[])) for p_id in parameters_all_ids if p_id not in parameters]
 
     return response_data
 
@@ -230,7 +241,6 @@ async def create_product(
     )
 
     await product.save()
-
     parameters = [Parameter(
         title=p.title,
         description=p.description,
@@ -245,6 +255,7 @@ async def create_product(
         await param.save()
         for p in parameters_:
             for d in p.data:
+                print(p, d)
                 p_d = ProductData(
                     parameter=param,
                     value=d

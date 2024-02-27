@@ -13,7 +13,7 @@ from axegaoshop.db.models.product import Parameter
 class ParameterCreate(BaseModel):
     title: str
     description: typing.Optional[str] = None
-    price: str
+    price: float
     give_type: typing.Literal["hand", "file", "string"]
     has_sale: bool = False
     sale_price: str = "0.0"
@@ -26,6 +26,7 @@ class ParameterCreate(BaseModel):
                     "title": "Windows 11 Professional",
                     "price": 4500,
                     "has_sale": False,
+                    "give_type": "string",
                     "data": [
                         "FWBFIWEF-FWEF-W-EFWE-F-WE", "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
                     ]
