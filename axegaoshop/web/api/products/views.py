@@ -1,9 +1,11 @@
 import typing
 
 from fastapi import APIRouter, Depends, HTTPException
+from tortoise.expressions import Q, F
 from tortoise.functions import Avg, Coalesce
 
 from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order
+from axegaoshop.db.models.review import Review
 from axegaoshop.db.models.subcategory import Subcategory
 
 from axegaoshop.web.api.products.schema import ProductCreate, ProductIn_Pydantic, ProductUpdate, ProductDataOut
@@ -38,27 +40,70 @@ async def get_products(
     """
 
     if not query:
-        sorted_products = (Product.filter().all().prefetch_related()
+
+        sorted_products = (Product.filter().all()
+                           .prefetch_related()
                            .limit(limit)
                            .offset(offset)
                            )
+        if price_sort:
+            price_sort = "card_price"
+        elif price_sort == False:
+            price_sort = "-card_price"
+        elif price_sort is None:
+            price_sort = ""
+
+        if rating_sort:
+            rating_sort = "reviews_avg"
+        elif rating_sort == False:
+            rating_sort = "-reviews_avg"
+        elif rating_sort is None:
+            rating_sort = ""
+
+        sortings = [price_sort if price_sort else None, rating_sort if rating_sort else None]
+        sortings = list(filter(lambda x: x is not None, sortings))
+
         if price_sort or rating_sort:
+            # sorted_products = (sorted_products
+            # .annotate(
+            #     reviews_avg=Coalesce(Avg(
+            #         'parameters__order_parameters__order__reviews__rate',
+            #         _filter=(Q(Q(parameters__order_parameters__order__reviews__status="accepted") & Q(parameters__order_parameters__order__reviews__product_id=F("products.id"))))),
+            #         0,
+            #     )
+            # )
+            # .order_by(
+            #     *sortings
+            # ))
             sorted_products = (sorted_products
             .annotate(
-                param_reviews_count=Coalesce(Avg(
-                    'parameters__order_parameters__order__reviews__rate'),
-                    0
+                reviews_avg=Coalesce(Avg(
+                    'parameters__order_parameters__order__reviews__rate',
+                    _filter=(Q(Q(parameters__order_parameters__order__reviews__status="accepted")))),
+                    0,
                 )
             )
             .order_by(
-                "param_reviews_count" if rating_sort else "-param_reviews_count",
-                "card_price" if price_sort else "-card_price"
+                *sortings
             ))
 
         sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
             sorted_products
 
-        return await ProductIn_Pydantic.from_queryset(sorted_products)
+        rev = await Review.filter(status="accepted").values_list("product_id", flat=True)
+
+        result_ = []
+
+        for value in await sorted_products.all():
+            if value.id not in rev:
+                value.reviews_avg = 0
+                result_.append(value)
+            else:
+                result_.append(value)
+
+        result_ = sorted(result_, key=lambda x: x.reviews_avg)
+
+        return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
     else:
         return await ProductIn_Pydantic.from_queryset(Product.filter(title__istartswith=query).
                                                       limit(limit).
