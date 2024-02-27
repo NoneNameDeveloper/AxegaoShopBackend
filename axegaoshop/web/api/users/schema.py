@@ -72,7 +72,7 @@ UserForAdmin_Pydantic = pydantic_model_creator(User, exclude=("shop_cart", "orde
 UserCart_Pydantic = pydantic_model_creator(
     User,
     exclude=(
-        "shop_cart.id", "shop_cart.product.options", "shop_cart.product.category", "shop_cart.product.id",
+        "shop_cart.id", "shop_cart.product.options", "shop_cart.product.category",
         "shop_cart.product.parameters", "shop_cart.parameter.data", "shop_cart.parameter.id"
         "shop_cart.product.category_id", "shop_cart.product.product_photos.id",
         "shop_cart.parameter.product", "shop_cart.reviews", "orders", "replenishes"
