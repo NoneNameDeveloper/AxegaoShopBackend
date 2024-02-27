@@ -13,10 +13,10 @@ from axegaoshop.db.models.product import Parameter
 class ParameterCreate(BaseModel):
     title: str
     description: typing.Optional[str] = None
-    price: float
+    price: str
     give_type: typing.Literal["hand", "file", "string"]
     has_sale: bool = False
-    sale_price: float = 0.0
+    sale_price: str = "0.0"
     data: typing.Optional[list[str]] = []
 
     model_config = {

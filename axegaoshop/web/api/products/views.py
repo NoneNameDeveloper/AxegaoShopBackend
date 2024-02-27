@@ -237,7 +237,7 @@ async def create_product(
         price=p.price,
         has_sale=p.has_sale,
         give_type=p.give_type,
-        sale_price=p.sale_price,
+        sale_price=float(p.sale_price),
         product=product
     ) for p in parameters_]
 
