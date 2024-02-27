@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from tortoise.functions import Count
 
 from axegaoshop.db.models.category import Category
 from axegaoshop.db.models.subcategory import Subcategory, change_subcategory_order
@@ -37,9 +38,16 @@ async def subcategory_create(subcategory: SubcategoryCreate):
     "/subcategories",
     response_model=list[SubcategoryIn_Pydantic],
 )
-async def subcategories_get():
-    return await SubcategoryIn_Pydantic.from_queryset(Subcategory.all())
-
+async def subcategories_get(empty_filter: bool = True):
+    """empty filter - если True, возвращает толкьо подкатегории, в которых есть товары
+    False - возвращает все подкатегории"""
+    if empty_filter:
+        return await SubcategoryIn_Pydantic.from_queryset(Subcategory
+                                                          .annotate(product_count=Count("products"))
+                                                          .filter(product_count__not=0).all()
+                                                          )
+    else:
+        return await SubcategoryIn_Pydantic.from_queryset(Subcategory.all())
 
 @router.get(
     "/subcategory/{id}",
