@@ -179,7 +179,7 @@ async def subcategory_products_get(
     if not await Subcategory.get_or_none(id=subcategory_id):
         raise HTTPException(status_code=404, detail="SUBCATEGORY_NOT_FOUND")
 
-    sorted_products = (Product.filter(subcategory_id=id).all()
+    sorted_products = (Product.filter(subcategory_id=subcategory_id).all()
                        .prefetch_related()
                        .limit(limit)
                        .offset(offset)
