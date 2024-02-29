@@ -140,7 +140,7 @@ async def check_order(
     if order.status == "finished" or order.status == "canceled":
         raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
 
-    has_payment = True # await ozone_bank.has_payment(order.result_price, order.created_datetime)
+    has_payment = await ozone_bank.has_payment(order.result_price, order.created_datetime)
     if has_payment:
         items = await order.get_items()
 
