@@ -33,8 +33,9 @@ class Order(Model):
     email = fields.TextField(null=False)  # почта, указанная при заполнении заявки на заказ
 
     payment_type = fields.CharField(max_length=100, null=False)  # выбранный способ оплаты  ("sbp", "site_balance")
-
-    reviews: fields.ForeignKeyNullableRelation  # отзывы по этому заказу (может и не быть, может быть максимум столько, сколько в заказе товаров)
+    # отзывы по этому заказу (может и не быть, может быть максимум
+    # столько, сколько в заказе товаров)
+    reviews: fields.ForeignKeyNullableRelation
     order_parameters: fields.ReverseRelation["OrderParameters"]  # параметры заказа
     payment: fields.OneToOneRelation
 
