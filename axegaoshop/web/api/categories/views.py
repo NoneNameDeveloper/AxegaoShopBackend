@@ -1,12 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+from tortoise.functions import Count
 
 from axegaoshop.db.models.category import Category, change_category_order
 
-from axegaoshop.web.api.categories.schema import CategoryIn_Pydantic, CategoryCreate, CategoryOrderChange, CategoryUpdate
+from axegaoshop.web.api.categories.schema import CategoryIn_Pydantic, CategoryCreate, CategoryOrderChange, \
+    CategoryUpdate
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
-
 
 router = APIRouter()
 
@@ -30,8 +31,16 @@ async def category_create(category: CategoryCreate):
     "/categories",
     response_model=list[CategoryIn_Pydantic]
 )
-async def category_get():
-    return await CategoryIn_Pydantic.from_queryset(Category.all())
+async def category_get(empty_filter: bool = True):
+    """empty filter - если True, возвращает только категории, в которых есть подкатегории
+    False - возвращает все категории"""
+    if empty_filter:
+        return await CategoryIn_Pydantic.from_queryset(CategoryIn_Pydantic
+                                                       .annotate(subcategories_count=Count("subcategories"))
+                                                       .filter(subcategories_count__not=0).all()
+                                                       )
+    else:
+        return await CategoryIn_Pydantic.from_queryset(Category.all())
 
 
 @router.patch(
