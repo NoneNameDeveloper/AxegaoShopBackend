@@ -1,7 +1,7 @@
 import typing
 
 from fastapi import APIRouter, Depends, HTTPException
-from tortoise.expressions import Q, F
+from tortoise.expressions import Q
 from tortoise.functions import Avg, Coalesce
 
 from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order
