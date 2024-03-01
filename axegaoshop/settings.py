@@ -24,7 +24,7 @@ class PaymentType(enum.StrEnum):
 
 
 # разрешенные типы данных для загрузки в /api/upload
-ALLOWED_UPLOAD_TYPES = ['image/jpeg', 'image/png', 'text/plain']
+ALLOWED_UPLOAD_TYPES = ['image/jpeg', 'image/png', 'text/plain', 'image/svg+xml']
 
 
 class ProductExt:
