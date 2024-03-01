@@ -144,7 +144,7 @@ async def update_product(id: int, data: ProductUpdate):
     if not await Product.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
-    await Product.update_from_dict(**data.model_dump(exclude_unset=True))
+    await Product.filter(id=id).update(**data.model_dump(exclude_unset=True))
 
     return await ProductIn_Pydantic.from_queryset_single(Product.filter(id=id).first())
 
