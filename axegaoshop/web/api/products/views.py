@@ -263,7 +263,7 @@ async def create_product(
 
     subcategory = await Subcategory.filter(id=product_data.subcategory_id).first()
     if not subcategory:
-        raise HTTPException(status_code=404, detail="CATEGORY_NOT_FOUND")
+        raise HTTPException(status_code=404, detail="SUBCATEGORY_NOT_FOUND")
 
     product = Product(
         title=product_data.title,
@@ -285,16 +285,19 @@ async def create_product(
         product=product
     ) for p in parameters_]
 
+    param_cache = []
+
     for param in parameters:
         await param.save()
-        for p in parameters_:
-            for d in p.data:
-                print(p, d)
-                p_d = ProductData(
-                    parameter=param,
-                    value=d
-                )
-                await p_d.save()
+        param_cache.append(param)
+
+    for param_idx, p in enumerate(parameters_, start=0):
+        for d in p.data:
+            p_d = ProductData(
+                parameter=param_cache[param_idx],
+                value=d
+            )
+            await p_d.save()
 
     if options_:
         options = [Option(
