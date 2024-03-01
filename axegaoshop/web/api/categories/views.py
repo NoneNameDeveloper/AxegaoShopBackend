@@ -35,7 +35,7 @@ async def category_get(empty_filter: bool = True):
     """empty filter - если True, возвращает только категории, в которых есть подкатегории
     False - возвращает все категории"""
     if empty_filter:
-        return await CategoryIn_Pydantic.from_queryset(CategoryIn_Pydantic
+        return await CategoryIn_Pydantic.from_queryset(Category
                                                        .annotate(subcategories_count=Count("subcategories"))
                                                        .filter(subcategories_count__not=0).all()
                                                        )
