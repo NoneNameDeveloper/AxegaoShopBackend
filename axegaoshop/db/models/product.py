@@ -31,7 +31,7 @@ class Product(Model):
     def sale_percent(self) -> int:
         """процент скидки (высчитывается автоматом в пидантик модель)"""
 
-        return int((self.card_sale_price * 100) / self.card_price)
+        return 100 - int((self.card_sale_price * 100) / self.card_price)
 
     class PydanticMeta:
         exclude = ("subcategory", "shop_cart", "created_datetime", "reviews")
