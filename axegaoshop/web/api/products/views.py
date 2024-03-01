@@ -101,7 +101,8 @@ async def get_products(
             else:
                 result_.append(value)
 
-        result_ = sorted(result_, key=lambda x: x.reviews_avg)
+        if hasattr(result_[0], "reviews_avg"):
+            result_ = sorted(result_, key=lambda x: x.reviews_avg)
 
         return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
     else:
@@ -120,24 +121,15 @@ async def items_by_product_get(id: int):
     if not await Product.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
-    parameters = await ProductData.filter(parameter__product_id=id).distinct().values('parameter_id')
-
-    # получаем все параметры с типом выдачи ручным для включения в ответ с пустым массивом
-    parameters_all = await Parameter.filter(product_id=id).all()
-    parameters_all_ids = [p.id for p in parameters_all]
+    parameters_all = Parameter.filter(product_id=id)
 
     response_data = []
 
-    # заполняем массив ответа ручными параметрами (нет ProductData)
-    [response_data.append(ProductDataOut(parameter_id=p_id, items=[])) for p_id in parameters_all_ids]
-
-    for parameter in parameters:
-        parameter_id = parameter["parameter_id"]
-        items = await ProductData.filter(parameter__product_id=id, parameter_id=parameter_id).values('value')
+    for parameter in await parameters_all.all():
+        parameter_id = parameter.id
+        items = await ProductData.filter(parameter_id=parameter_id, parameter__give_type__not="hand").values('value')
         items_list = [item['value'] for item in items]
         response_data.append(ProductDataOut(parameter_id=parameter_id, items=items_list))
-
-    [response_data.append(ProductDataOut(parameter_id=p_id, items=[])) for p_id in parameters_all_ids if p_id not in parameters]
 
     return response_data
 
