@@ -101,7 +101,7 @@ async def get_products(
             else:
                 result_.append(value)
 
-        if hasattr(result_[0], "reviews_avg"):
+        if len(result_) > 0 and hasattr(result_[0], "reviews_avg"):
             result_ = sorted(result_, key=lambda x: x.reviews_avg)
 
         return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
