@@ -17,21 +17,5 @@ class OptionCreate(BaseModel):
     value: str
     is_pk: typing.Optional[bool] = False
 
-    model_config = {
-        "json_schema_extra": {
-            "examples": [
-                {
-                    "title": "Тип поставки",
-                    "value": "Ключ"
-                },
-                {
-                    "title": "Код",
-                    "value": "100",
-                    "is_pk": True
-                }
-            ]
-        }
-    }
-
 
 OptionIn_Pydantic = pydantic_model_creator(Option, exclude=("product", ))

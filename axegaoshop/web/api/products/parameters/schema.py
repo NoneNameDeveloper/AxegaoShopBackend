@@ -25,6 +25,7 @@ class ParameterCreate(BaseModel):
                 {
                     "title": "Windows 11 Professional",
                     "price": 4500,
+                    "descripition": "Описание параметра",
                     "has_sale": False,
                     "give_type": "string",
                     "data": [
