@@ -270,7 +270,7 @@ async def create_product(
         description=product_data.description,
         card_price=product_data.card_price,
         card_has_sale=parameters_[0].has_sale,
-        card_sale_price=parameters_[0].sale_price,
+        card_sale_price=float(parameters_[0].sale_price),
         subcategory=subcategory
     )
 
