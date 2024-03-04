@@ -44,11 +44,15 @@ async def create_product_photo(id: int, photo: PhotoCreate):
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     response_model=PhotoIn_Pydantic
 )
-async def update_product_photo(id: int, parameter: PhotoUpdate):
+async def update_product_photo(id: int, photo: PhotoUpdate):
+    """передавать айди фотографии"""
     if not await ProductPhoto.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
-    await ProductPhoto.filter(id=id).update(**parameter.model_dump(exclude_unset=True))
+    if photo.main:
+        await ProductPhoto.filter(main=True).update(main=False)
+
+    await ProductPhoto.filter(id=id).update(**photo.model_dump(exclude_unset=True))
 
     return await ProductPhoto.filter(id=id).first()
 
