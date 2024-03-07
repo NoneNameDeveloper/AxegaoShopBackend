@@ -19,11 +19,15 @@ class ShopCart(Model):
     )
     quantity = fields.IntField(default=1)
 
+    created_at = fields.DatetimeField(auto_now_add=True)
+
     class Meta:
         table = "shop_cart"
+        ordering = ["created_at"]
 
     class PydanticMeta:
         exclude = ("user", "user_id")
+
 
 
 async def add_to_cart(user_id: int, product_id: int, parameter_id: int, quantity: int) -> ShopCart:

@@ -19,6 +19,12 @@ class ParameterCreate(BaseModel):
     sale_price: str = "0.0"
     data: typing.Optional[list[str]] = []
 
+    @model_validator(mode="after")
+    def validate_param_create(self) -> "ParameterCreate":
+        if self.sale_price == "":
+            self.sale_price = "0.0"
+        return self
+
     model_config = {
         "json_schema_extra": {
             "examples": [

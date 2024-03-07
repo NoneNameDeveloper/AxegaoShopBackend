@@ -25,7 +25,7 @@ class PhotoCreate(BaseModel):
 
 class PhotoUpdate(BaseModel):
     photo: str
-    main: typing.Optional[bool] = False
+    main: typing.Optional[bool] = None
 
 
 PhotoIn_Pydantic = pydantic_model_creator(ProductPhoto, exclude=("product", ))
