@@ -72,11 +72,17 @@ class Parameter(Model):
 
     product: fields.ForeignKeyRelation[Product] = fields.ForeignKeyField("axegaoshop.Product",
                                                                          related_name="parameters")
+
     order_id = fields.IntField(null=False)
 
     shop_cart: fields.ReverseRelation
     data: fields.ReverseRelation["ProductData"]
     order_parameters: fields.ReverseRelation
+
+    def sale_percent(self) -> int | None:
+        """процент скидки (высчитывается автоматом в пидантик модель)"""
+
+        return 100 - int((self.sale_price * 100) / self.price) if self.has_sale else None
 
     class Meta:
         table = "parameters"
@@ -84,6 +90,7 @@ class Parameter(Model):
 
     class PydanticMeta:
         exclude = ["shop_cart", "product", "data", "order_parameters", "reviews"]
+        computed = ("sale_percent", )
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
