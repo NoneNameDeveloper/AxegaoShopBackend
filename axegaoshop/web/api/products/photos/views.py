@@ -30,7 +30,7 @@ async def create_product_photo(id: int, photo: PhotoCreate):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     photo_ = ProductPhoto(
-        photo=photo.title,
+        photo=photo.photo,
         product_id=id
     )
 
