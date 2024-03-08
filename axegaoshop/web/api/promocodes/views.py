@@ -52,7 +52,7 @@ async def update_promocode(id: int, promocode: UpdatePromocode):
 
     await Promocode.filter(id=id).update(**promocode.model_dump(exclude_unset=True))
 
-    return await PromocodeIn_Pydantic.from_queryset(Promocode.filter(id=id).first())
+    return await PromocodeIn_Pydantic.from_queryset_single(Promocode.filter(id=id).first())
 
 
 @router.delete(
