@@ -1,4 +1,5 @@
 from tortoise.exceptions import NoValuesFetched
+from tortoise.expressions import F
 from tortoise.fields import ReverseRelation
 from tortoise.models import Model
 from tortoise import fields
@@ -24,8 +25,8 @@ class Promocode(Model):
 
     async def use(self):
         """используем промокод"""
-        self.activations_count -= 1
-        await self.save()
+        self.activations_count = F("activations_count") - 1
+        await self.save(update_fields=['activations_count'])
 
     async def active(self):
         """проверка на активность промокода"""
