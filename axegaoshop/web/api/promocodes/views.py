@@ -84,4 +84,6 @@ async def apply_promocode(name: str):
 
     await promocode.use()
 
+    await promocode.refresh_from_db()
+
     return await PromocodeIn_Pydantic.from_tortoise_orm(promocode)
