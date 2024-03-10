@@ -32,7 +32,7 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
     if order_.promocode:
         promocode = await Promocode.get_or_none(name=order_.promocode)
 
-        if not promocode or not promocode.active():
+        if not promocode or not await promocode.active():
             raise HTTPException(status_code=404, detail="INVALID_PROMOCODE")
 
     if order_.straight:
