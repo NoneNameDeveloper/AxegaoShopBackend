@@ -41,7 +41,7 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
             raise HTTPException(status_code=404, detail="PARAMETER_NOT_FOUND")
 
     order = Order(
-        promocode=order_.promocode,
+        promocode=promocode,
         user_id=user.id,
         straight=order_.straight,
         payment_type=order_.payment_type,
