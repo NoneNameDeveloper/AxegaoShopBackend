@@ -1,7 +1,8 @@
 from fastapi.routing import APIRouter
 
 from axegaoshop.web.api import orders, partners, products, promocodes, \
-    shop_carts, subcategories, uploads, users, categories, healthcheck, reviews
+    shop_carts, subcategories, uploads, users, categories, healthcheck, reviews, \
+    tickets
 
 from axegaoshop.web.api.products import options, photos, parameters
 
@@ -40,3 +41,5 @@ api_router.include_router(router=ozone_bank.router, prefix="", tags=["SBP Ozone 
 api_router.include_router(router=healthcheck.router, prefix="", tags=["Healthcheck"])
 
 api_router.include_router(router=telegram.router, prefix="", tags=["Telegram Notifications"])
+
+api_router.include_router(router=tickets.router, prefix="", tags=["Tickets"])

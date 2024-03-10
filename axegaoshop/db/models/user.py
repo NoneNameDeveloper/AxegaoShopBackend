@@ -28,12 +28,13 @@ class User(Model):
     reviews: fields.ReverseRelation
     orders: fields.ReverseRelation
     shop_cart: fields.ForeignKeyRelation
+    tickets: fields.ReverseRelation
 
     class Meta:
         table = "users"
 
     class PydanticMeta:
-        exclude = ("password", "reviews")
+        exclude = ("password", "reviews", "tickets")
 
     def __str__(self):
         return self.username

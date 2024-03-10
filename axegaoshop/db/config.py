@@ -18,7 +18,8 @@ MODELS_MODULES: List[str] = [
     f"{MODELS_MODULES_PREFIX}.payment_settings",
     f"{MODELS_MODULES_PREFIX}.password_reset",
     f"{MODELS_MODULES_PREFIX}.replenish",
-    f"{MODELS_MODULES_PREFIX}.telegram_settings"
+    f"{MODELS_MODULES_PREFIX}.telegram_settings",
+    f"{MODELS_MODULES_PREFIX}.ticket",
 ]
 
 TORTOISE_CONFIG = {
