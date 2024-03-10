@@ -29,6 +29,7 @@ router = APIRouter()
     response_model=typing.Union[OrderIn_Pydantic, OrderFinishOut]
 )
 async def create_order(order_: OrderCreate, user: User = Depends(get_current_user)):
+    promocode = None
     if order_.promocode:
         promocode = await Promocode.get_or_none(name=order_.promocode)
 
@@ -100,7 +101,8 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
 
     # очищение корзины пользователя после покупки
     if not order_.straight:
-        await user.clear_shop_cart()
+        # await user.clear_shop_cart()
+        ...
 
     return await OrderIn_Pydantic.from_tortoise_orm(order)
 
