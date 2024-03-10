@@ -25,7 +25,8 @@ class Promocode(Model):
 
     async def use(self):
         """используем промокод"""
-        await Promocode.filter(id=1).update(activations_count=F('activations_count') - 1)
+        if not self.activations_count == -1:
+            await Promocode.filter(id=self.id).update(activations_count=F('activations_count') - 1)
 
     async def active(self):
         """проверка на активность промокода"""
