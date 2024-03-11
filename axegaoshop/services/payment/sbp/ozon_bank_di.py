@@ -7,9 +7,9 @@ async def get_ozone_bank() -> OzoneBank | None:
     data = await get_ozone_bank_data()
 
     if not data:
-        yield None
+        return None
 
-    yield await OzoneBank(
+    return await OzoneBank(
         pin_code=data.pin_code,
         secure_refresh_token=data.token
     ).prepare()
