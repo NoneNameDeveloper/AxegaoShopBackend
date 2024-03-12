@@ -29,7 +29,6 @@ class ShopCart(Model):
         exclude = ("user", "user_id")
 
 
-
 async def add_to_cart(user_id: int, product_id: int, parameter_id: int, quantity: int) -> ShopCart:
     user = await User.filter(id=user_id).first().prefetch_related("shop_cart")
     product = await Product.filter(id=product_id).first()

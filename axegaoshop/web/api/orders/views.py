@@ -108,6 +108,19 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
 
 
 @router.get(
+    "/order/{id}/status",
+    dependencies=[Depends(JWTBearer())],
+    status_code=200
+)
+async def get_order_status(id: int, user: User = Depends(get_current_user)):
+    # получение заказа по айди и принадлежности к ПОЛЬЗОВАТЕЛЮ
+    order = Order.filter(user_id=user.id, id=id, status=OrderStatus.WAIT_FOR_PAYMENT)
+
+    if not await order.exists():
+        raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
+
+
+@router.get(
     "/order/{id}/check",
     dependencies=[Depends(JWTBearer())],
     response_model=OrderFinishOut,
@@ -148,6 +161,9 @@ async def check_order(
 
         await order.finish()
         await order.save()
+
+        # очищение корзины
+        await ShopCart.filter(user=user).delete()
 
         res_data = OrderFinishOut.model_validate(items)
 

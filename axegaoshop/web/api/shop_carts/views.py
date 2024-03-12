@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
 
+from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.product import Product
 from axegaoshop.db.models.shop_cart import add_to_cart
 from axegaoshop.db.models.user import User
@@ -29,6 +30,11 @@ async def add_or_create_cart(data: ProductToCart, user: User = Depends(get_curre
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     await add_to_cart(user.id, data.product_id, data.parameter_id, data.count)
+
+    order = await Order.get_or_none(user=user, status="waiting_payment")
+    # отменяем заказ, если есть активный
+    if order:
+        await order.cancel()
 
     return await UserCart_Pydantic.from_queryset_single(User.filter(id=user.id).first())
 

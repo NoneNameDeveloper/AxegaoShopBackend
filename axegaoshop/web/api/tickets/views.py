@@ -1,7 +1,10 @@
+import typing
+
 from fastapi import APIRouter, Depends, HTTPException
 from tortoise.expressions import Q
 
-from axegaoshop.db.models.ticket import Ticket, get_or_create_ticket, TicketMessage, TicketMessageAttachment
+from axegaoshop.db.models.ticket import Ticket, get_or_create_ticket, TicketMessage, TicketMessageAttachment, \
+    get_user_all_dialog
 from axegaoshop.db.models.user import User
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import get_current_user, current_user_is_admin
@@ -13,7 +16,7 @@ router = APIRouter()
 @router.post(
     path="/tickets/send",
     dependencies=[Depends(JWTBearer())],
-    response_model=TicketIn_Pydantic
+    response_model=TicketIn_Pydantic | list[TicketIn_Pydantic]
 )
 async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user: User = Depends(get_current_user)):
     """функционал:
@@ -30,7 +33,7 @@ async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user:
 
     ticket: Ticket = await get_or_create_ticket(user)
 
-    role: str = "user" if not user.is_admin else "admin"
+    role: typing.Literal["user", "admin"] = "user" if not user.is_admin else "admin"
 
     ticket_message = await TicketMessage.create(
         ticket=ticket,
@@ -42,7 +45,10 @@ async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user:
         [TicketMessageAttachment(file=f, ticket_message=ticket_message) for f in ticket_message_request.attachments]
     )
 
-    return await TicketIn_Pydantic.from_queryset_single(Ticket.filter(id=ticket.id).first())
+    if role == "admin":
+        return await TicketIn_Pydantic.from_queryset_single(Ticket.filter(id=ticket.id).first())
+    else:
+        return await TicketIn_Pydantic.from_queryset(Ticket.filter(user=user).all())
 
 
 @router.get(
@@ -57,6 +63,16 @@ async def get_ticket_by_id(id: int):
         raise HTTPException(status_code=404, detail="TICKET_NOT_FOUND")
 
     return await TicketIn_Pydantic.from_tortoise_orm(ticket)
+
+
+@router.get(
+    path="/tickets",
+    dependencies=[Depends(JWTBearer())],
+    response_model=list[TicketIn_Pydantic]
+)
+async def get_tickets_all(user: User = Depends(get_current_user)):
+    """получение всех сообщения из всех тикетов для пользователя"""
+    return await TicketIn_Pydantic.from_queryset(Ticket.filter(user=user).all())
 
 
 @router.get(

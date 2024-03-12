@@ -31,7 +31,7 @@ class Ticket(Model):
 
     class Meta:
         table = "tickets"
-        ordering = ["-created_at"]
+        ordering = ["created_at"]
 
     class PydanticMeta:
         computed = ("last_message", )
@@ -45,6 +45,7 @@ class Ticket(Model):
         self.status = "closed"
         self.closed_at = datetime.now()
         await self.save()
+
 
 class TicketMessage(Model):
     """таблица с диалогами и сообщениями админа/юзера"""
@@ -62,6 +63,7 @@ class TicketMessage(Model):
 
     class Meta:
         table = "ticket_messages"
+        ordering = ["created_at"]
 
 
 class TicketMessageAttachment(Model):
@@ -79,3 +81,21 @@ class TicketMessageAttachment(Model):
 async def get_or_create_ticket(user: User) -> Ticket:
     """получение текущего тикета или создание нового у пользователя"""
     return (await Ticket.get_or_create(user=user, status="opened"))[0]
+
+
+async def get_user_all_dialog(user: User) -> list[dict]:
+    """получение всех сообщений из тикетов пользователя"""
+    data = []
+    all_messages = await TicketMessage.filter(ticket__user=user).all()
+
+    for message in all_messages:
+        data.append({
+            "role": message.role,
+            "message": message.text,
+            "created_at": message.created_at,
+            "attachments": await message.attachments.all().values_list("file", flat=True)
+        })
+
+    return data
+
+
