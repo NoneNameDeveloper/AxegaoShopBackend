@@ -20,3 +20,10 @@ class PaymentSettingsIn(BaseModel):
     class Config:
         from_attributes = True
 
+
+class PaymentSettingsUser(BaseModel):
+    phone: str
+    fio: str
+
+    class Config:
+        from_attributes = True
