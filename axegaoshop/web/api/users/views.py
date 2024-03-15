@@ -161,7 +161,7 @@ async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
     dependencies=[Depends(JWTBearer())],
     response_model=list[UserReplenish_Pydantic]
 )
-async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
+async def get_user_replenishes(user: Annotated[User, Depends(get_current_user)]):
     """получение истории пополнений пользователя (текущего)"""
     if user.is_anonymous:
         raise HTTPException(status_code=404, detail="AUTHORIZE_REQUIRED")
