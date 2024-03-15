@@ -28,10 +28,15 @@ async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user:
 
         И админ и пользователь стучатся в одно место, сообщения в зависимости от роли распределяются.
     """
-    if not user.email:
+    if not user.is_admin and not user.email:
         raise HTTPException(status_code=401, detail="EMAIL_REQUIRED")
 
-    ticket: Ticket = await get_or_create_ticket(user)
+    if not ticket_message_request.id:
+        ticket: Ticket = await get_or_create_ticket(user)
+    else:
+        ticket: Ticket = await Ticket.get_or_none(id=ticket_message_request.id)
+        if not ticket or ticket.status == "closed":
+            raise HTTPException(status_code=404, detail="TICKET_NOT_FOUND")
 
     role: typing.Literal["user", "admin"] = "user" if not user.is_admin else "admin"
 

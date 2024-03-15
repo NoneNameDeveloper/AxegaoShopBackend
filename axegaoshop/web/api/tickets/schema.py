@@ -1,3 +1,5 @@
+import typing
+
 from pydantic import BaseModel
 from tortoise.contrib.pydantic import pydantic_model_creator
 
@@ -5,6 +7,7 @@ from axegaoshop.db.models.ticket import Ticket, TicketMessage, TicketMessageAtta
 
 
 class TicketMessageSend(BaseModel):
+    id: typing.Optional[int] = None
     text: str
     attachments: list[str] = []
 
