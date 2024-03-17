@@ -42,6 +42,8 @@ class UserReplenishOut(BaseModel):
 
 
 class UserUpdateAdmin(UserUpdate):
+    username: typing.Optional[str] = None
+    photo: typing.Optional[str] = None
     password: typing.Optional[str] = None
     is_admin: typing.Optional[bool] = None
 
