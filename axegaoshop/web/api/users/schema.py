@@ -41,11 +41,12 @@ class UserReplenishOut(BaseModel):
     created_datetime: datetime
 
 
-class UserUpdateAdmin(UserUpdate):
+class UserUpdateAdmin(BaseModel):
     username: typing.Optional[str] = None
     photo: typing.Optional[str] = None
     password: typing.Optional[str] = None
     is_admin: typing.Optional[bool] = None
+    balance: typing.Optional[float] = None
 
 
 class UserOutput(BaseModel):
