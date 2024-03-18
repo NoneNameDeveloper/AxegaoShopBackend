@@ -68,7 +68,7 @@ class UserProductsComment(BaseModel):
     order_id: int  # айди заказа
 
 
-UserIn_Pydantic = pydantic_model_creator(User, exclude=("is_admin", "replenishes", "shop_cart.id", "shop_cart.items.id", "shop_cart.cart_product"))
+UserIn_Pydantic = pydantic_model_creator(User, exclude=("replenishes", "shop_cart.id", "shop_cart.items.id", "shop_cart.cart_product"))
 
 UserForAdmin_Pydantic = pydantic_model_creator(User, exclude=("shop_cart", "orders", "reviews", "replenishes"))
 
