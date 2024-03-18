@@ -216,7 +216,7 @@ async def delete_user(id: int):
 @router.patch(
     "/user/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=UserOutput
+    response_model=UserIn_Pydantic
 )
 async def update_user_by_id(id: int, user: UserUpdateAdmin):
 
