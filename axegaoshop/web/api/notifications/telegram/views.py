@@ -70,6 +70,10 @@ async def create_or_update_telegram_settings(data: TelegramSettingUpdate):
     else:
         await TelegramSetting.filter(id=telegram_settings.id).update(token=data.token)
 
+    for r in recievers:
+        if r not in data.telegram_ids:
+            await TelegramReciever.filter(telegram_id=r).delete()
+    
     # создание получателей
     [await TelegramReciever.create(telegram_id=id_) for id_ in data.telegram_ids if id_ not in recievers]
 
