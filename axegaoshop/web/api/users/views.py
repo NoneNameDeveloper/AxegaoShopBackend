@@ -162,6 +162,28 @@ async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
 
 
 @router.get(
+    "/user/orders/{order_id}",
+    dependencies=[Depends(JWTBearer())],
+    # response_model=list[OrderIn_Pydantic]
+)
+async def get_user_order_by_id(order_id: int, user: Annotated[User, Depends(get_current_user)]):
+    """получение инфы по заказу пользователя (текущего)"""
+    if user.is_anonymous:
+        raise HTTPException(status_code=404, detail="AUTHORIZE_REQUIRED")
+
+    res_: list[dict] = []
+    for order in (await Order.filter(user=user, status="finished").all()):
+        print(order)
+        res_.append(await order.get_items(finished=True))
+
+    for r in res_:
+        if r['id'] == order_id:
+            return r
+
+    return None
+
+
+@router.get(
     "/user/replenishes",
     dependencies=[Depends(JWTBearer())],
     response_model=list[UserReplenish_Pydantic]
