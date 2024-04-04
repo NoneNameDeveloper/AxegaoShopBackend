@@ -19,13 +19,13 @@ router = APIRouter()
     path="/cart/add",
     dependencies=[Depends(JWTBearer())],
     response_model=UserCart_Pydantic,
-    description="""
-Работа с корзиной пользователя
-1. В count указывать **полное** количество товара (не инкремент/декремент).
-2. При передаче count=0 происходит **удаление товара** из корзины.
-"""
 )
 async def add_or_create_cart(data: ProductToCart, user: User = Depends(get_current_user)):
+    """
+    Работа с корзиной пользователя
+    1. В count указывать **полное** количество товара (не инкремент/декремент).
+    2. При передаче count=0 происходит **удаление товара** из корзины.
+    """
     if not await Product.get_or_none(id=data.product_id, parameters__id=data.parameter_id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
