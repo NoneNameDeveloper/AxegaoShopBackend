@@ -1,4 +1,5 @@
 import typing
+from datetime import datetime
 
 from pydantic import BaseModel, field_validator, model_validator, Field
 from tortoise.contrib.pydantic import pydantic_model_creator
@@ -77,6 +78,16 @@ class OrderFinishOut(BaseModel):
     number: str
     total_price: float
     order_data: list[OrderDataOut]
+
+
+class OrderDataHistory(BaseModel):
+    number: str
+    order_id: int
+    date: datetime
+    email: str
+    product: str
+    give_type: str
+    count: int
 
 
 OrderIn_Pydantic = pydantic_model_creator(Order, exclude=("user", ))
