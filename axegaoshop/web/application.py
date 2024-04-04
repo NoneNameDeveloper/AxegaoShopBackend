@@ -47,9 +47,7 @@ def get_app() -> FastAPI:
         docs_url="/api/docs",
         redoc_url="/api/redoc",
         openapi_url="/api/openapi.json",
-        default_response_class=UJSONResponse,
-        description="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleH"
-                    "AiOjE3MTEyMDgxMDMsInN1YiI6IjUifQ.QdERrV2ukjIbtd8bewyqNMuv_GFJgrYWZxD5coNJmFI"
+        default_response_class=UJSONResponse
     )
 
     app.add_middleware(
