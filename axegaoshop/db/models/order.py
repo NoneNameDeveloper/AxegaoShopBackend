@@ -1,4 +1,3 @@
-import asyncio
 from decimal import Decimal
 from typing import Any
 
@@ -92,7 +91,7 @@ class Order(Model):
 
         return order_products
 
-    async def  get_items(self) -> dict:
+    async def get_items(self, finished: bool = False) -> dict:
         """получение товаров из заказа"""
         # получение всей инфы на итоговую страницу, кроме самих товаров
         order_data = await Parameter.filter(order_parameters__order=self).values_list(
@@ -104,14 +103,25 @@ class Order(Model):
             'order_parameters__order__result_price',  # итоговая цена в заказе
             'give_type'  # тип выдачи
         )
-
         items_dict = {}
 
         for data in order_data:
-            items_dict[data[0]] = await get_items_data_for_order(data[1], data[2])
+            items_dict[data[0]] = await get_items_data_for_order(data[1], data[2], await Order.get(id=data[4]))
 
-        if any([od[6] == "hand" for od in order_data]) or any([not i for i in items_dict.values()]):
-            o_d = []
+        if not finished:
+            if any([od[6] == "hand" for od in order_data]) or any([not i for i in items_dict.values()]):
+                o_d = []
+            else:
+                o_d = [
+                    {
+                        "id": res_data[1],
+                        "title": res_data[0],
+                        "count": res_data[2],
+                        "give_type": res_data[6],
+                        "items": [item.value for item in items_dict[res_data[0]]]
+
+                    } for res_data in order_data
+                ]
         else:
             o_d = [
                 {

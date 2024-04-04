@@ -125,6 +125,8 @@ class ProductData(Model):
 
     is_active = fields.BooleanField(default=True, null=False)
 
+    order: fields.ForeignKeyNullableRelation = fields.ForeignKeyField("axegaoshop.Order", related_name="data", null=True)
+
     class PydanticMeta:
         exclude = ("parameer", "is_active")
 
@@ -253,20 +255,27 @@ async def change_parameter_order(ids: list[int]) -> bool:
     return True
 
 
-async def get_items_data_for_order(parameter_id: int, count: int) -> list[ProductData]:
+async def get_items_data_for_order(parameter_id: int, count: int, order) -> list[ProductData]:
     """получение данных по товару из заказа и удаление этих ключей из базы данных (архивирование)"""
-    items = await ProductData.filter(parameter__id=parameter_id, is_active=True).limit(count)
 
-    # если количество товаров в базе меньше, чем запросил пользователь
-    # ничего не возвращаем, кидаем на ручную оплату
-    if len(items) < count:
-        return []
+    # завершаем заказ
+    if not order.status == "finished":
+        items = await ProductData.filter(parameter__id=parameter_id, is_active=True).limit(count)
 
-    # деактивация товаров
-    for item in items:
-        await item.update_from_dict({"is_active": False}).save()
+        # если количество товаров в базе меньше, чем запросил пользователь
+        # ничего не возвращаем, кидаем на ручную оплату
+        if len(items) < count:
+            return []
 
-    return items
+        # деактивация товаров
+        for item in items:
+            await item.update_from_dict({"is_active": False, "order_id": order.id}).save()
+
+        return items
+    # берем из истории (уже купленные ключи)
+    else:
+        items = await ProductData.filter(order_id=order.id, parameter__id=parameter_id, is_active=False).all()
+        return items
 
 
 async def get_items_data_for_product(product_id: int) -> QuerySet[ProductData]:
