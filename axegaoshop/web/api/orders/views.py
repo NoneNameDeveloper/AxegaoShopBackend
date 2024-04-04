@@ -15,10 +15,11 @@ from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
 from axegaoshop.settings import PaymentType
 
-from axegaoshop.web.api.orders.schema import OrderCreate, OrderIn_Pydantic, OrderStatus, OrderStatusOut, OrderFinishOut
+from axegaoshop.web.api.orders.schema import OrderCreate, OrderIn_Pydantic, OrderStatus, OrderStatusOut, OrderFinishOut, \
+    OrderDataHistory
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import get_current_user
+from axegaoshop.services.security.users import get_current_user, current_user_is_admin
 
 router = APIRouter()
 
@@ -101,8 +102,7 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
 
     # очищение корзины пользователя после покупки
     if not order_.straight:
-        # await user.clear_shop_cart()
-        ...
+        await user.clear_shop_cart()
 
     return await OrderIn_Pydantic.from_tortoise_orm(order)
 
@@ -137,7 +137,7 @@ async def check_order(
 
     при успешной оплате возвращаются данные по товарам из заказа
 
-    ОБРАТИТЬ ВНИМАНИЕ НА ['order_data']['items']. Если там пустой массив - обрабатывать как тип выдачи 'hand'.
+    ОБРАТИТЬ ВНИМАНИЕ НА ['order_data']. Если там пустой массив - обрабатывать как тип выдачи 'hand'.
     """
     # проверка озон банка :TODO: проверка отвала озона
     if not ozone_bank:
@@ -206,3 +206,31 @@ async def cancel_order(id: int):
 
     await order.update_from_dict({"status": "canceled"})
     await order.save()
+
+
+@router.get(
+    "/orders",
+    # dependencies=[Depends(JWTBearer), Depends(current_user_is_admin)],
+    status_code=200,
+    response_model=list[OrderDataHistory]
+)
+async def get_orders_history():
+    """получение истории заказов в админку (без пагинации, просто все сразу)"""
+    orders = await Order.all().prefetch_related('order_parameters', 'user')
+    order_history = []
+    for order in orders:
+        order_data = [{
+            'number': order.number,
+            'order_id': order.id,
+            'date': order.created_datetime,
+            'email': order.email,
+            'product': param.parameter.title,
+            'give_type': order.give_type,
+            'count': param.count
+        } for param in (await order.order_parameters.all().prefetch_related('parameter'))]
+
+        if order_data:
+            for o in order_data:
+                order_history.append(o)
+
+    return order_history
