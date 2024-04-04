@@ -25,6 +25,8 @@ class Order(Model):
 
     result_price = fields.DecimalField(max_digits=10, decimal_places=2, null=True)
 
+    give_type = fields.CharField(max_length=100, null=False, default="string")  # тип выдачи заказа
+
     created_datetime = fields.DatetimeField(auto_now_add=True)
 
     status = fields.CharField(max_length=100,
@@ -90,7 +92,7 @@ class Order(Model):
 
         return order_products
 
-    async def get_items(self) -> dict:
+    async def  get_items(self) -> dict:
         """получение товаров из заказа"""
         # получение всей инфы на итоговую страницу, кроме самих товаров
         order_data = await Parameter.filter(order_parameters__order=self).values_list(
@@ -105,23 +107,28 @@ class Order(Model):
 
         items_dict = {}
 
-        [items_dict.setdefault(
-            data[0], await get_items_data_for_order(data[1], data[2])) for data in order_data]
+        for data in order_data:
+            items_dict[data[0]] = await get_items_data_for_order(data[1], data[2])
+
+        if any([od[6] == "hand" for od in order_data]) or any([not i for i in items_dict.values()]):
+            o_d = []
+        else:
+            o_d = [
+                {
+                    "id": res_data[1],
+                    "title": res_data[0],
+                    "count": res_data[2],
+                    "give_type": res_data[6],
+                    "items": [item.value for item in items_dict[res_data[0]]]
+
+                } for res_data in order_data
+            ]
 
         result_dict = {
             "id": order_data[0][4],
             "number": order_data[0][3],
             "total_price": order_data[0][5],
-            "order_data": [
-                {
-                    "id": res_data[1],
-                    "title": res_data[0],
-                    "count": res_data[2],
-                    "give_type": order_data[0][6],
-                    "items": [item.value for item in items_dict[res_data[0]]]
-
-                } for res_data in order_data
-            ]
+            "order_data": o_d,
         }
 
         return result_dict
