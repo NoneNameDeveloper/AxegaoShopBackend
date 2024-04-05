@@ -52,7 +52,7 @@ async def update_product_photo(id: int, photo: PhotoUpdate):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     if photo.main:
-        await ProductPhoto.filter(Q(Q(main=True) & Q(product_id=photo_db.product))).update(main=False)
+        await ProductPhoto.filter(Q(Q(main=True) & Q(product_id=photo_db.product_id))).update(main=False)
 
     await ProductPhoto.filter(id=id).update(**photo.model_dump(exclude_unset=True))
 
