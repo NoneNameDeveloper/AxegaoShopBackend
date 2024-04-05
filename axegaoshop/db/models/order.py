@@ -103,6 +103,9 @@ class Order(Model):
             'order_parameters__order__result_price',  # итоговая цена в заказе
             'give_type'  # тип выдачи
         )
+        if not order_data:
+            return {}
+
         items_dict = {}
 
         for data in order_data:
@@ -133,7 +136,7 @@ class Order(Model):
 
                 } for res_data in order_data
             ]
-
+        
         result_dict = {
             "id": order_data[0][4],
             "number": order_data[0][3],

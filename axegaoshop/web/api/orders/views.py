@@ -88,7 +88,6 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
     if order_.payment_type == PaymentType.SITE_BALANCE:
         if user.balance >= int(order.result_price):
             items = await order.get_items()
-
             await order.finish()
             await order.save()
 
@@ -159,7 +158,6 @@ async def check_order(
     if order.status == "finished":
         res_: list[dict] = []
         for order in (await Order.filter(user=user, status="finished").all()):
-            print(order)
             res_.append(await order.get_items(finished=True))
 
         for r in res_:
