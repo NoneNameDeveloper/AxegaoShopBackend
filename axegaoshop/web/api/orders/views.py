@@ -1,7 +1,8 @@
 import asyncio
 import typing
-from datetime import datetime
+from datetime import datetime, tzinfo
 
+import pytz
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import UJSONResponse
 
@@ -94,7 +95,6 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
             # очищение корзины пользователя после покупки
             if not order_.straight:
                 await user.clear_shop_cart()
-
             # снятие баланса пользователя
             await user.add_balance(-int(order.result_price))
 
@@ -188,7 +188,8 @@ async def check_order(
             await asyncio.create_task(telegram_service.notify("sell", items))
 
         return res_data
-    return UJSONResponse(status_code=200, content={"status": "waiting", "remaining_time": (datetime.now()-order.created_datetime).second})
+
+    return UJSONResponse(status_code=200, content={"status": "waiting", "remaining_time": (datetime.now(tz=pytz.UTC)-order.created_datetime).total_seconds()})
 
 
 @router.post(
