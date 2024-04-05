@@ -124,6 +124,21 @@ async def close_ticket_by_id(id: int):
 
 
 @router.post(
+    path="/ticket/{id}/delete",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    status_code=200
+)
+async def delete_ticket_by_id(id: int):
+    """удаление тикета из админки"""
+    ticket = await Ticket.get_or_none(Q(id=id), Q(Q(status="opened") | Q(status="closed")))
+
+    if not ticket:
+        raise HTTPException(status_code=404, detail="TICKET_NOT_FOUND")
+
+    await ticket.delete()
+
+
+@router.post(
     path="/tickets/close",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     status_code=201
