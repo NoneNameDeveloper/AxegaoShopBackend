@@ -91,6 +91,10 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
             await order.finish()
             await order.save()
 
+            # очищение корзины пользователя после покупки
+            if not order_.straight:
+                await user.clear_shop_cart()
+
             # снятие баланса пользователя
             await user.add_balance(-int(order.result_price))
 
