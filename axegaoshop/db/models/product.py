@@ -306,7 +306,7 @@ async def update_parameter_data(parameter_id: int, data: list[str]):
             pass
 
     # удаление оставшихся строк
-    await ProductData.filter(value__in=items_values).delete()
+    await ProductData.filter(value__in=items_values, parameter_id=parameter_id).delete()
 
     # создание новых строк
     await ProductData.bulk_create(
