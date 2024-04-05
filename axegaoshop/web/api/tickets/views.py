@@ -3,8 +3,7 @@ import typing
 from fastapi import APIRouter, Depends, HTTPException
 from tortoise.expressions import Q
 
-from axegaoshop.db.models.ticket import Ticket, get_or_create_ticket, TicketMessage, TicketMessageAttachment, \
-    get_user_all_dialog
+from axegaoshop.db.models.ticket import Ticket, get_or_create_ticket, TicketMessage, TicketMessageAttachment
 from axegaoshop.db.models.user import User
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import get_current_user, current_user_is_admin
