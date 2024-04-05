@@ -1,5 +1,6 @@
 import asyncio
 import typing
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import UJSONResponse
@@ -144,7 +145,7 @@ async def check_order(
         raise HTTPException(status_code=500, detail="Server error")
 
     # получение заказа по айди и принадлежности к ПОЛЬЗОВАТЕЛЮ
-    order = Order.filter(user_id=user.id, id=id, status=OrderStatus.WAIT_FOR_PAYMENT)
+    order = Order.filter(user_id=user.id, id=id, status__in=[OrderStatus.WAIT_FOR_PAYMENT, OrderStatus.FINISHED])
 
     if not await order.exists():
         raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
@@ -152,8 +153,20 @@ async def check_order(
     order = await order.get()
 
     # проверка на то что заказ НЕ завершен / отменен
-    if order.status == "finished" or order.status == "canceled":
-        raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
+    if order.status == "canceled":
+        raise HTTPException(status_code=404, detail="ORDER_CANCELED")
+
+    if order.status == "finished":
+        res_: list[dict] = []
+        for order in (await Order.filter(user=user, status="finished").all()):
+            print(order)
+            res_.append(await order.get_items(finished=True))
+
+        for r in res_:
+            if r['id'] == id:
+                return r
+
+        return None
 
     has_payment = await ozone_bank.has_payment(order.result_price, order.created_datetime)
     if has_payment:
@@ -173,7 +186,7 @@ async def check_order(
             await asyncio.create_task(telegram_service.notify("sell", items))
 
         return res_data
-    return UJSONResponse(status_code=200, content={"status": "waiting"})
+    return UJSONResponse(status_code=200, content={"status": "waiting", "remaining_time": (datetime.now()-order.created_datetime).second})
 
 
 @router.post(
