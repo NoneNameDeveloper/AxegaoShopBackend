@@ -46,11 +46,12 @@ async def create_product_photo(id: int, photo: PhotoCreate):
 )
 async def update_product_photo(id: int, photo: PhotoUpdate):
     """передавать айди фотографии"""
-    if not await ProductPhoto.get_or_none(id=id):
+    photo_db = await ProductPhoto.get_or_none(id=id)
+    if not photo_db:
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     if photo.main:
-        await ProductPhoto.filter(main=True).update(main=False)
+        await ProductPhoto.filter(main=True, product_id=photo_db.product).update(main=False)
 
     await ProductPhoto.filter(id=id).update(**photo.model_dump(exclude_unset=True))
 
