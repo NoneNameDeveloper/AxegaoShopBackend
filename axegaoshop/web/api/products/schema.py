@@ -91,6 +91,7 @@ class ProductUpdate(BaseModel):
     title: typing.Optional[str] = None
     description: typing.Optional[str] = None
     card_price: typing.Optional[float] = None
+    subcategory_id: typing.Optional[int] = None
 
 
 class ProductDataOut(BaseModel):
