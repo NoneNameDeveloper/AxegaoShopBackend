@@ -189,7 +189,7 @@ async def check_order(
 
         return res_data
 
-    return UJSONResponse(status_code=200, content={"status": "waiting", "remaining_time": (datetime.now(tz=pytz.UTC)-order.created_datetime).total_seconds()})
+    return UJSONResponse(status_code=200, content={"status": "waiting", "remaining_time": 600-((datetime.now(tz=pytz.UTC)-order.created_datetime).total_seconds())})
 
 
 @router.post(
