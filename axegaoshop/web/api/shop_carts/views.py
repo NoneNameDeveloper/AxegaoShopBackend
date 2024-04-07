@@ -31,10 +31,9 @@ async def add_or_create_cart(data: ProductToCart, user: User = Depends(get_curre
 
     await add_to_cart(user.id, data.product_id, data.parameter_id, data.count)
 
-    order = await Order.get_or_none(user=user, status="waiting_payment")
-    # отменяем заказ, если есть активный
-    if order:
-        await order.cancel()
+    # orders = await Order.filter(user=user, status="waiting_payment").all()
+    # # отменяем заказ, если есть активный
+    # [await order.cancel() for order in orders]
 
     return await UserCart_Pydantic.from_queryset_single(User.filter(id=user.id).first())
 
