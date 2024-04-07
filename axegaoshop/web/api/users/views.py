@@ -1,6 +1,8 @@
 import typing
+from datetime import datetime
 from typing import Annotated
 
+import pytz
 from fastapi.security import OAuth2PasswordBearer
 from fastapi import APIRouter, HTTPException, Depends, Request
 
@@ -173,7 +175,6 @@ async def get_user_order_by_id(order_id: int, user: Annotated[User, Depends(get_
 
     res_: list[dict] = []
     for order in (await Order.filter(user=user, status="finished").all()):
-        print(order)
         res_.append(await order.get_items(finished=True))
 
     for r in res_:
@@ -341,8 +342,10 @@ async def replenish_balance_check(
         result_price=replenish.result_price,
         payment_type=replenish.payment_type,
         status=replenish.status,
-        created_datetime=replenish.created_datetime
+        created_datetime=replenish.created_datetime,
+        remaining_time=(600-((datetime.now(tz=pytz.UTC)-replenish.created_datetime).total_seconds()))
     )
+
 
 @router.post(
     "/user/password/drop",
