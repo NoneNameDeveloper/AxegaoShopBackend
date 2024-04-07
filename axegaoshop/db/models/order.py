@@ -1,3 +1,7 @@
+import datetime
+import os
+import zipfile
+from datetime import time
 from decimal import Decimal
 from typing import Any
 
@@ -144,6 +148,26 @@ class Order(Model):
             "order_data": o_d,
         }
 
+        add_archive: bool = True
+        for od in o_d:
+            if not od['items'] or any(i['give_type'] != 'file' for i in o_d):
+                add_archive = False
+
+        if add_archive:
+            zip_filename: str = str(order_data[0][4]) + ".zip"
+
+            base_path = 'axegaoshop/data/storage/uploads'
+            zip_filepath = os.path.join(base_path, zip_filename)
+
+            # Создаем архив
+            with zipfile.ZipFile(zip_filepath, 'w') as zipf:
+                # Добавляем каждый файл в архив
+                for filename in [i for od_ in o_d for i in od_['items']]:
+                    file_path = os.path.join(base_path, filename)
+                    if os.path.exists(file_path):
+                        zipf.write(file_path, os.path.basename(file_path))
+
+            result_dict['uri'] = zip_filename
         return result_dict
 
     async def finish(self):

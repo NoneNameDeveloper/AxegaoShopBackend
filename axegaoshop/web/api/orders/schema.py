@@ -78,6 +78,7 @@ class OrderFinishOut(BaseModel):
     number: str
     total_price: float
     order_data: list[OrderDataOut]
+    uri: typing.Optional[str]
 
 
 class OrderDataHistory(BaseModel):
