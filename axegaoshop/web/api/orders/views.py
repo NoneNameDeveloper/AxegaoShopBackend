@@ -167,8 +167,11 @@ async def check_order(
             res_.append(await order.get_items(finished=True))
 
         for r in res_:
-            if r['id'] == id:
-                return r
+            try:
+                if r['id'] == id:
+                    return r
+            except:
+                pass
 
         return None
 
