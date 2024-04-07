@@ -51,6 +51,8 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         payment_type=order_.payment_type,
         email=order_.email
     )
+    # отмена всех остальных заказов юзера
+    [await _order.cancel() for _order in await Order.filter(user_id=user.id, status="waiting_payment").all()]
 
     # если заказ напрямую - один параметр в заказе
     if order_.straight:
