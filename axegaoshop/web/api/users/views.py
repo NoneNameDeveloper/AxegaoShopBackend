@@ -160,7 +160,9 @@ async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
         res_.append(await order.get_items(finished=True))
 
     for idx, o in enumerate(res_):
+        print(o)
         if not o or o == {}:
+            print("n")
             res_.pop(idx)
 
     return res_
