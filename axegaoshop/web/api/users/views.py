@@ -157,8 +157,11 @@ async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
 
     res_: list[dict] = []
     for order in (await Order.filter(user=user, status="finished").all()):
-        print(order)
         res_.append(await order.get_items(finished=True))
+
+    for idx, o in enumerate(res_):
+        if not o:
+            res_.pop(idx)
 
     return res_
 

@@ -168,6 +168,9 @@ class Order(Model):
                         zipf.write(file_path, os.path.basename(file_path))
 
             result_dict['uri'] = zip_filename
+        else:
+            result_dict['uri'] = None
+
         return result_dict
 
     async def finish(self):
