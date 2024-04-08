@@ -48,6 +48,7 @@ class ParameterUpdate(BaseModel):
     price: float
     has_sale: bool = False
     sale_price: float = 0.0
+    give_type: str = None
 
 
 class ParameterOrderChange(BaseModel):
