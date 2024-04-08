@@ -148,18 +148,14 @@ async def get_current_user_(user: Annotated[User, Depends(get_current_user)]):
 @router.get(
     "/user/orders",
     dependencies=[Depends(JWTBearer())],
-    # response_model=list[OrderIn_Pydantic]
+    response_model=list[OrderIn_Pydantic]
 )
 async def get_user_orders(user: Annotated[User, Depends(get_current_user)]):
     """получение истории заказов пользователя (текущего)"""
     if user.is_anonymous:
         raise HTTPException(status_code=404, detail="AUTHORIZE_REQUIRED")
 
-    res_: list[dict] = []
-    for order in (await Order.filter(user=user, status="finished").all()):
-        res_.append(await order.get_items(finished=True))
-
-    return [r for r in res_ if r]
+    return await OrderIn_Pydantic.from_queryset(Order.filter(user_id=user.id, status="finished").all())
 
 
 @router.get(
