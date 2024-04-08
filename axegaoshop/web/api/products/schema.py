@@ -3,11 +3,10 @@ import typing
 from pydantic import BaseModel
 from tortoise.contrib.pydantic import pydantic_model_creator
 
-from axegaoshop.db.models.product import Product, ProductData
+from axegaoshop.db.models.product import Product
 
 from axegaoshop.web.api.products.options.schema import OptionCreate
 from axegaoshop.web.api.products.parameters.schema import ParameterCreate
-from axegaoshop.web.api.products.photos.schema import PhotoCreate
 
 
 class ProductSorting(BaseModel):

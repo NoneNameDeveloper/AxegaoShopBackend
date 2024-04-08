@@ -127,7 +127,7 @@ async def items_by_product_get(id: int):
 
     for parameter in await parameters_all.all():
         parameter_id = parameter.id
-        items = await ProductData.filter(parameter_id=parameter_id, parameter__give_type__not="hand").values('value')
+        items = await ProductData.filter(parameter_id=parameter_id, parameter__give_type__not="hand", is_active=True).values('value')
         items_list = [item['value'] for item in items]
         response_data.append(ProductDataOut(parameter_id=parameter_id, items=items_list))
 
