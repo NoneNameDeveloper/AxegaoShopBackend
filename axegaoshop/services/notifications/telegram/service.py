@@ -38,7 +38,7 @@ class TelegramService:
                         chat_id=reciever,
                         text=SELL_NOTIFY_TEMPLATE.format(
                             BUYER=data['buyer'],
-                            TOTAL_PRICE=data['total_price'],
+                            TOTAL_PRICE=data['result_price'],
                             NUMBER=data['number'],
                             APPENDIX="------------\n".join([
                                 NOTIFY_APPENDIX_TEMPLATE.format(

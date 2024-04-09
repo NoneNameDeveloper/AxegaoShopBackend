@@ -144,7 +144,7 @@ class Order(Model):
         result_dict = {
             "id": order_data[0][4],
             "number": order_data[0][3],
-            "total_price": order_data[0][5],
+            "result_price": order_data[0][5],
             "order_data": o_d,
         }
 

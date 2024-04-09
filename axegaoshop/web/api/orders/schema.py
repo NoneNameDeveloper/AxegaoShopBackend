@@ -76,7 +76,7 @@ class OrderDataOut(BaseModel):
 class OrderFinishOut(BaseModel):
     id: int
     number: str
-    total_price: float
+    result_price: float
     order_data: list[OrderDataOut]
     uri: typing.Optional[str]
 
