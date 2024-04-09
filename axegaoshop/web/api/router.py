@@ -4,7 +4,7 @@ from axegaoshop.web.api import orders, partners, products, promocodes, \
     shop_carts, subcategories, uploads, users, categories, healthcheck, reviews, \
     tickets
 
-from axegaoshop.web.api.products import options, photos, parameters
+from axegaoshop.web.api.products import options, photos, parameters, request
 
 from axegaoshop.web.api.notifications import telegram
 
@@ -43,3 +43,5 @@ api_router.include_router(router=healthcheck.router, prefix="", tags=["Healthche
 api_router.include_router(router=telegram.router, prefix="", tags=["Telegram Notifications"])
 
 api_router.include_router(router=tickets.router, prefix="", tags=["Tickets"])
+
+api_router.include_router(router=request.router, prefix="", tags=["Request Product"])
