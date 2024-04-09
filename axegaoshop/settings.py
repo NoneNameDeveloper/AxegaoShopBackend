@@ -71,6 +71,11 @@ class Settings(BaseSettings):
 
     redis_amounts_key: str = "payment:amounts"
 
+    mail_host: str = "mail.vulpine.email"
+    mail_port: int = 465
+    mail_user: str = "loftsoft@vulpine.email"
+    mail_password: str = "#,31,ellEYm"
+
     # конфигурация Sentry SDK
     sentry_dsn: Optional[str] = None
     sentry_sample_rate: float = 1.0
