@@ -41,7 +41,7 @@ class Message(BaseModel):
 @router.post(
     "/user/register",
     status_code=201,
-    response_model=UserOutput,
+    # response_model=UserOutput,
     responses={
         400: {
             "model": Message, "description": "User with such login already exists."
@@ -74,7 +74,18 @@ async def register_user(user: UserCreate, user_check: Annotated[User | None, Dep
             is_anonymous=True
         )
         await new_user.save()
-        return new_user
+
+        access = create_access_token(new_user.id)
+        refresh = create_refresh_token(new_user.id)
+
+        token_db = Token(
+            access_token=access,
+            refresh_token=refresh,
+            user_id=new_user.id
+        )
+        await token_db.save()
+
+        return token_db
 
     encrypted_password = get_hashed_password(user.password)
 
