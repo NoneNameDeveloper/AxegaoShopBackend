@@ -1,6 +1,6 @@
 import asyncio
 import typing
-from datetime import datetime, tzinfo
+from datetime import datetime
 
 import pytz
 from fastapi import APIRouter, Depends, HTTPException
@@ -11,17 +11,18 @@ from axegaoshop.db.models.product import Parameter
 from axegaoshop.db.models.promocode import Promocode
 from axegaoshop.db.models.shop_cart import ShopCart
 from axegaoshop.db.models.user import User
+from axegaoshop.services.notifications.mailing.mailing import Mailer
 from axegaoshop.services.notifications.telegram import TelegramService
 from axegaoshop.services.notifications.telegram.telegram_di import get_telegram_data
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
 from axegaoshop.settings import PaymentType
 
-from axegaoshop.web.api.orders.schema import OrderCreate, OrderIn_Pydantic, OrderStatus, OrderStatusOut, OrderFinishOut, \
+from axegaoshop.web.api.orders.schema import OrderCreate, OrderIn_Pydantic, OrderStatus, OrderFinishOut, \
     OrderDataHistory
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import get_current_user, current_user_is_admin
+from axegaoshop.services.security.users import get_current_user
 
 router = APIRouter()
 
@@ -191,6 +192,39 @@ async def check_order(
             # добавление для уведы почты пользователя в словарь
             items['buyer'] = user.email
             await asyncio.create_task(telegram_service.notify("sell", items))
+
+        # сборка данных для писма и отправка по указанной В ЗАКАЗЕ почте
+        mailer = Mailer(recipient=order.email)
+        mail_parameters_data: list[dict] = []
+        mail_total_count: int = 0
+        mail_total_sum = res_data.result_price
+        for od in res_data.order_data:
+            # значит ручной тип выдачи
+            if items.get("give_type"):
+                mail_parameters_data.append(
+                    {
+                        "title": od.title,
+                        "count": od.count,
+                        "photo": "http://fileshare.su:8000/api/uploads/" + od.photo
+                    }
+                )
+            else:
+                for key_ in od['items']:
+                    mail_parameters_data.append(
+                        {
+                            "title": od['title'],
+                            "key": key_,
+                            "photo": "http://fileshare.su:8000/api/uploads/" + od.photo
+                        }
+                    )
+            mail_total_count += od.count
+
+        await asyncio.create_task(mailer.send_shipping(
+            parameters=mail_parameters_data,
+            total_sum=mail_total_sum,
+            total_count=mail_total_count,
+            hand=items.get("give_type"),
+        ))
 
         return res_data
 
