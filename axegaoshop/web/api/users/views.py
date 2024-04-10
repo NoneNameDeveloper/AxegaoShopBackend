@@ -56,12 +56,13 @@ async def register_user(user: UserCreate, user_check: Annotated[User | None, Dep
             status_code=401, detail="LOGIN_EXISTS"
         )
 
-    email_exists: bool = await User.filter(email=user.email).exists()
+    if user.email:
+        email_exists: bool = await User.filter(email=user.email).exists()
 
-    if email_exists:
-        raise HTTPException(
-            status_code=401, detail="EMAIL_EXISTS"
-        )
+        if email_exists:
+            raise HTTPException(
+                status_code=401, detail="EMAIL_EXISTS"
+            )
 
     if not user.password and user_exists:
         await User.filter(id=user_check.id).update(**user.model_dump(exclude_unset=True), is_anonymous=False)
