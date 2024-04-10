@@ -40,8 +40,11 @@ class Settings(BaseSettings):
     """
 
     # конфигурация uvicorn
+    scheme: str = "http"
     host: str = "127.0.0.1"
     port: int = 8000
+
+    front_hostname: str = "http://fileshare.su:3000"
 
     # количество воркеров uvicorn
     workers_count: int = 1
@@ -89,6 +92,15 @@ class Settings(BaseSettings):
     jwt_refresh_secret_key: str = "jwt_refresh_key"
 
     @property
+    def base_hostname(self) -> URL:
+        """создание хостнейма на сайт"""
+        return URL.build(
+            scheme=self.scheme,
+            host=self.host,
+            port=self.port
+        )
+
+    @property
     def db_url(self) -> URL:
         """
         Создание ссылки для подключения к базе данных
@@ -118,3 +130,5 @@ class Settings(BaseSettings):
 
 settings = Settings()
 settings.__call__()
+print(settings.base_hostname)
+print(settings.front_hostname)
