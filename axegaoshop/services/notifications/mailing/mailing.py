@@ -11,7 +11,7 @@ class MessageTypes:
     RESET_PASSWORD = "reset.html"
     SHIPPING = "shipping.html"
     PURCHASE = "purchase.html"
-    TICKET_MESSAGE = "message.html"
+    TICKET_MESSAGE = "message.htofml"
 
 
 class Mailer:

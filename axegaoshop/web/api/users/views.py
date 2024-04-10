@@ -61,7 +61,7 @@ async def register_user(user: UserCreate, user_check: Annotated[User | None, Dep
         )
 
     if user.email:
-        email_exists: bool = await User.filter(email=user.email).exists()
+        email_exists: bool = await User.filter(email__iexact=user.email).exists()
 
         if email_exists:
             raise HTTPException(
@@ -97,7 +97,7 @@ async def register_user(user: UserCreate, user_check: Annotated[User | None, Dep
     new_user = User(
         username=user.username,
         password=encrypted_password,
-        email=user.email
+        email=user.email.lower()
     )
     new_user.photo = create_user_photo(user.username)
     await new_user.save()
@@ -110,7 +110,7 @@ async def login_user(request: TokenRequest):
     """
     для получения access token для анонима (неавторизованного человека) передать username без пароля
     """
-    user = await User.filter(email=request.email).get_or_none()
+    user = await User.filter(email__iexact=request.email.lower()).get_or_none()
 
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
