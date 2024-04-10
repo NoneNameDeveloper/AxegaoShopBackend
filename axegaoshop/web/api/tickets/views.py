@@ -1,3 +1,4 @@
+import asyncio
 import typing
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -5,6 +6,7 @@ from tortoise.expressions import Q
 
 from axegaoshop.db.models.ticket import Ticket, get_or_create_ticket, TicketMessage, TicketMessageAttachment
 from axegaoshop.db.models.user import User
+from axegaoshop.services.notifications.mailing.mailing import Mailer
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import get_current_user, current_user_is_admin
 from axegaoshop.web.api.tickets.schema import TicketIn_Pydantic, TicketMessageSend
@@ -44,6 +46,14 @@ async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user:
         role=role,
         text=ticket_message_request.text
     )
+
+    # отправка текста тикета человеку на почту
+    if not role == "admin":
+        mailer = Mailer(recipient=(await ticket.user.get()).email)
+
+        await asyncio.create_task(mailer.send_ticket_message(
+            content=ticket_message_request.text
+        ))
 
     await TicketMessageAttachment.bulk_create(
         [TicketMessageAttachment(file=f, ticket_message=ticket_message) for f in ticket_message_request.attachments]
