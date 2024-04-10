@@ -54,15 +54,12 @@ class OrderStatusOut(BaseModel):
     status: str
 
 
-# class OrderDataItemsOut(BaseModel):
-#     key: str
-
-
 class OrderDataOut(BaseModel):
     id: int = Field(description="Айди параметра (версии товара)")
     title: str
     count: int
     give_type: typing.Literal["string", "hand", "file"]
+    photo: str
     items: list[str]
 
     @model_validator(mode="after")
