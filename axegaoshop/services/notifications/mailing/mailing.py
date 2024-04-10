@@ -15,7 +15,7 @@ class MessageTypes:
 class Mailer:
     """модуль для работы с почтовыми сообщениями"""
     def __init__(self, recipient: str):
-        self.mailer_ = aioyagmail.SMTP(
+        self.mailer_ = aioyagmail.AIOSMTP(
             user=settings.mail_user,
             password=settings.mail_password,
             host=settings.mail_host,
