@@ -1,5 +1,7 @@
 import typing
 
+from transliterate import translit
+
 from fastapi import APIRouter, Depends, HTTPException
 from tortoise.expressions import Q
 from tortoise.functions import Avg, Coalesce
@@ -14,6 +16,12 @@ from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
 
 router = APIRouter()
+
+
+def transliterate_query(query: str) -> str:
+    query = query.lower()
+    return translit(query, "ru", reversed=True) if query != "виндовс" else (translit(query, "ru", reversed=True).
+                                                                            replace("v", "w"))
 
 
 @router.get(
@@ -106,7 +114,7 @@ async def get_products(
 
         return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
     else:
-        return await ProductIn_Pydantic.from_queryset(Product.filter(title__istartswith=query).
+        return await ProductIn_Pydantic.from_queryset(Product.filter(Q(title__istartswith=query) | Q(title_istartswith=transliterate_query(query))).
                                                       limit(limit).
                                                       offset(offset))
 

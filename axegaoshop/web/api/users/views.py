@@ -110,7 +110,7 @@ async def login_user(request: TokenRequest):
     """
     для получения access token для анонима (неавторизованного человека) передать username без пароля
     """
-    user = await User.filter(email__iexact=request.email.lower()).get_or_none()
+    user = await User.filter(email__iexact=request.email).get_or_none()
 
     if not user:
         raise HTTPException(status_code=401, detail="User not found")
