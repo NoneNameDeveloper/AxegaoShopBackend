@@ -1,3 +1,5 @@
+from concurrent.futures import ThreadPoolExecutor
+
 import aioyagmail
 import yagmail
 
@@ -15,7 +17,7 @@ class MessageTypes:
 class Mailer:
     """модуль для работы с почтовыми сообщениями"""
     def __init__(self, recipient: str):
-        self.mailer_kwargs = aioyagmail.AIOSMTP(
+        self.mailer_ = yagmail.SMTP(
             user=settings.mail_user,
             password=settings.mail_password,
             host=settings.mail_host,
@@ -29,17 +31,11 @@ class Mailer:
             reset_url: str
     ):
         """письмо на сброс пароля"""
-        async with aioyagmail.AIOSMTP(
-            user=settings.mail_user,
-            password=settings.mail_password,
-            host=settings.mail_host,
-            port=settings.mail_port,
-        ) as m:
-            await m.send(
-                self.recipient,
-                subject="LoftSoft Сброс Пароля",
-                contents=render_template(MessageTypes.RESET_PASSWORD, reset_url=reset_url),
-            )
+        self.mailer_.send(
+            self.recipient,
+            subject="LoftSoft Сброс Пароля",
+            contents=render_template(MessageTypes.RESET_PASSWORD, reset_url=reset_url),
+        )
 
     async def send_shipping(
             self,
@@ -49,59 +45,42 @@ class Mailer:
             hand: bool = True
     ):
         """письмо на покупку товара"""
-
+        print(parameters)
+        print(total_count, total_sum)
         for p in parameters:
             p['photo'] = "http://fileshare.su:8000/api/uploads/L3ZKA1tU667CvcJn.png"
         if not hand:
-            async with aioyagmail.AIOSMTP(
-            user=settings.mail_user,
-            password=settings.mail_password,
-            host=settings.mail_host,
-            port=settings.mail_port,
-        ) as m:
-                await m.send(
-                    self.recipient,
-                    subject="LoftSoft Покупка Товара",
-                    contents=render_template(
-                        MessageTypes.PURCHASE,
-                        parameters=parameters,
-                        total_sum=total_sum,
-                        total_count=total_count
-                    ),
-                )
-        else:
-            async with aioyagmail.AIOSMTP(
-            user=settings.mail_user,
-            password=settings.mail_password,
-            host=settings.mail_host,
-            port=settings.mail_port,
-        ) as m:
-                await m.send(
-                    self.recipient,
-                    subject="LoftSoft Покупка Товара",
-                    contents=render_template(
-                        MessageTypes.SHIPPING,
-                        parameters=parameters,
-                        total_sum=total_sum,
-                        total_count=total_count
-                    ),
-                )
-
-    async def send_ticket_message(self, content: str):
-        async with aioyagmail.AIOSMTP(
-            user=settings.mail_user,
-            password=settings.mail_password,
-            host=settings.mail_host,
-            port=settings.mail_port,
-        ) as m:
-            await m.send(
+            self.mailer_.send(
                 self.recipient,
-                subject="LoftSoft Сообщение от Поддержки",
+                subject="LoftSoft Покупка Товара",
                 contents=render_template(
-                    MessageTypes.TICKET_MESSAGE,
-                    content=content
+                    MessageTypes.PURCHASE,
+                    parameters=parameters,
+                    total_sum=total_sum,
+                    total_count=total_count
                 ),
             )
+        else:
+            self.mailer_.send(
+                self.recipient,
+                subject="LoftSoft Покупка Товара",
+                contents=render_template(
+                    MessageTypes.SHIPPING,
+                    parameters=parameters,
+                    total_sum=total_sum,
+                    total_count=total_count
+                ),
+            )
+
+    async def send_ticket_message(self, content: str):
+        self.mailer_.send(
+            self.recipient,
+            subject="LoftSoft Сообщение от Поддержки",
+            contents=render_template(
+                MessageTypes.TICKET_MESSAGE,
+                content=content
+            ),
+        )
 #
 # m = Mailer(recipient="homycoder@gmail.com")
 #

@@ -1,9 +1,12 @@
 import enum
 import os.path
+from concurrent.futures import ThreadPoolExecutor
 from typing import Optional
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from yarl import URL
+
+executor = ThreadPoolExecutor(max_workers=6)
 
 
 class LogLevel(enum.StrEnum):
