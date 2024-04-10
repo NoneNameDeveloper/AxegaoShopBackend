@@ -20,7 +20,7 @@ router = APIRouter()
 
 def transliterate_query(query: str) -> str:
     query = query.lower()
-    return translit(query, "ru", reversed=True) if query != "виндовс" else (translit(query, "ru", reversed=True).
+    return translit(query, "ru", reversed=True) if "вин" not in query else (translit(query, "ru", reversed=True).
                                                                             replace("v", "w"))
 
 
@@ -114,7 +114,9 @@ async def get_products(
 
         return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
     else:
-        return await ProductIn_Pydantic.from_queryset(Product.filter(Q(title__istartswith=query) | Q(title__istartswith=transliterate_query(query))).
+        trans_query: str = transliterate_query(query)
+        print(trans_query)
+        return await ProductIn_Pydantic.from_queryset(Product.filter(Q(title__istartswith=query) | Q(title__istartswith=trans_query)).
                                                       limit(limit).
                                                       offset(offset))
 
