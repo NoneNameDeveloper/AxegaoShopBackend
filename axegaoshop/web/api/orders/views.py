@@ -219,7 +219,7 @@ async def check_order(
                     )
             mail_total_count += od.count
 
-        await asyncio.create_task(mailer.send_shipping(
+        asyncio.create_task(mailer.send_shipping(
             parameters=mail_parameters_data,
             total_sum=mail_total_sum,
             total_count=mail_total_count,

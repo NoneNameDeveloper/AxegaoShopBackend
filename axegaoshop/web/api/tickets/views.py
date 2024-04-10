@@ -51,7 +51,7 @@ async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user:
     if role == "admin":
         mailer = Mailer(recipient=(await ticket.user.get()).email)
 
-        await asyncio.create_task(mailer.send_ticket_message(
+        asyncio.create_task(mailer.send_ticket_message(
             content=ticket_message_request.text
         ))
 

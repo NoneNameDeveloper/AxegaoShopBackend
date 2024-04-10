@@ -15,7 +15,7 @@ class MessageTypes:
 class Mailer:
     """модуль для работы с почтовыми сообщениями"""
     def __init__(self, recipient: str):
-        self.mailer_ = yagmail.SMTP(
+        self.mailer_ = aioyagmail.SMTP(
             user=settings.mail_user,
             password=settings.mail_password,
             host=settings.mail_host,
@@ -29,11 +29,12 @@ class Mailer:
             reset_url: str
     ):
         """письмо на сброс пароля"""
-        self.mailer_.send(
-            self.recipient,
-            subject="LoftSoft Сброс Пароля",
-            contents=render_template(MessageTypes.RESET_PASSWORD, reset_url=reset_url),
-        )
+        async with self.mailer_ as m:
+            await m.send(
+                self.recipient,
+                subject="LoftSoft Сброс Пароля",
+                contents=render_template(MessageTypes.RESET_PASSWORD, reset_url=reset_url),
+            )
 
     async def send_shipping(
             self,
@@ -43,42 +44,44 @@ class Mailer:
             hand: bool = True
     ):
         """письмо на покупку товара"""
-        print(parameters)
-        print(total_count, total_sum)
+
         for p in parameters:
             p['photo'] = "http://fileshare.su:8000/api/uploads/L3ZKA1tU667CvcJn.png"
         if not hand:
-            self.mailer_.send(
-                self.recipient,
-                subject="LoftSoft Покупка Товара",
-                contents=render_template(
-                    MessageTypes.PURCHASE,
-                    parameters=parameters,
-                    total_sum=total_sum,
-                    total_count=total_count
-                ),
-            )
+            async with self.mailer_ as m:
+                await m.send(
+                    self.recipient,
+                    subject="LoftSoft Покупка Товара",
+                    contents=render_template(
+                        MessageTypes.PURCHASE,
+                        parameters=parameters,
+                        total_sum=total_sum,
+                        total_count=total_count
+                    ),
+                )
         else:
-            self.mailer_.send(
-                self.recipient,
-                subject="LoftSoft Покупка Товара",
-                contents=render_template(
-                    MessageTypes.SHIPPING,
-                    parameters=parameters,
-                    total_sum=total_sum,
-                    total_count=total_count
-                ),
-            )
+            async with self.mailer_ as m:
+                await m.send(
+                    self.recipient,
+                    subject="LoftSoft Покупка Товара",
+                    contents=render_template(
+                        MessageTypes.SHIPPING,
+                        parameters=parameters,
+                        total_sum=total_sum,
+                        total_count=total_count
+                    ),
+                )
 
     async def send_ticket_message(self, content: str):
-        self.mailer_.send(
-            self.recipient,
-            subject="LoftSoft Сообщение от Поддержки",
-            contents=render_template(
-                MessageTypes.TICKET_MESSAGE,
-                content=content
-            ),
-        )
+        async with self.mailer_ as m:
+            await m.send(
+                self.recipient,
+                subject="LoftSoft Сообщение от Поддержки",
+                contents=render_template(
+                    MessageTypes.TICKET_MESSAGE,
+                    content=content
+                ),
+            )
 #
 # m = Mailer(recipient="homycoder@gmail.com")
 #

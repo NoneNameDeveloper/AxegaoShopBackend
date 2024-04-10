@@ -383,7 +383,7 @@ async def drop_password(request: Request, user_drop_password: UserDropPassword):
 
     mailer = Mailer(recipient=user.email)
 
-    await asyncio.create_task(mailer.send_reset(
+    asyncio.create_task(mailer.send_reset(
         reset_url=password_drop_link
     ))
 
