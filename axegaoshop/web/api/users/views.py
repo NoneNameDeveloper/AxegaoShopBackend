@@ -1,3 +1,4 @@
+import asyncio
 import typing
 from datetime import datetime
 from typing import Annotated
@@ -7,14 +8,17 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi import APIRouter, HTTPException, Depends, Request
 
 from pydantic import BaseModel
+from starlette.responses import RedirectResponse
 
 from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.password_reset import PasswordReset
 from axegaoshop.db.models.replenish import Replenish
 from axegaoshop.db.models.token import Token
 from axegaoshop.db.models.user import User
+from axegaoshop.services.notifications.mailing.mailing import Mailer
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
+from axegaoshop.settings import settings
 from axegaoshop.web.api.orders.schema import OrderIn_Pydantic
 
 from axegaoshop.web.api.tokens.schema import TokenCreated, TokenRequest
@@ -356,7 +360,8 @@ async def replenish_balance_check(
 
 @router.post(
     "/user/password/drop",
-    status_code=200
+    status_code=200,
+
 )
 async def drop_password(request: Request, user_drop_password: UserDropPassword):
     """:TODO: send email with generated link & :TODO: base url change logic!!!"""
@@ -374,12 +379,13 @@ async def drop_password(request: Request, user_drop_password: UserDropPassword):
         password_reset.id
     )
 
-    password_drop_link: str = (request.base_url.scheme +
-                               "://" +
-                               request.base_url.hostname +
-                               password_drop_path)
+    password_drop_link: str = settings.base_hostname + password_drop_path
 
-    return password_drop_link
+    mailer = Mailer(recipient=user.email)
+
+    await asyncio.create_task(mailer.send_reset(
+        reset_url=password_drop_link
+    ))
 
 
 @router.get(
@@ -406,3 +412,5 @@ async def reset_password_from_email(
     # деактивация ссылки
     password_reset.is_active = False
     await password_reset.save()
+
+    return RedirectResponse(settings.front_hostname + "/auth")
