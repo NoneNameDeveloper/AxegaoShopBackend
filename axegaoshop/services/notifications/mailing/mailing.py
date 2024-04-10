@@ -26,7 +26,7 @@ class Mailer:
         # получатель письма
         self.recipient = recipient
 
-    async def send_reset(
+    def send_reset(
             self,
             reset_url: str
     ):
@@ -37,7 +37,7 @@ class Mailer:
             contents=render_template(MessageTypes.RESET_PASSWORD, reset_url=reset_url),
         )
 
-    async def send_shipping(
+    def send_shipping(
             self,
             parameters: list[dict],
             total_sum: float,
@@ -72,7 +72,7 @@ class Mailer:
                 ),
             )
 
-    async def send_ticket_message(self, content: str):
+    def send_ticket_message(self, content: str):
         self.mailer_.send(
             self.recipient,
             subject="LoftSoft Сообщение от Поддержки",
