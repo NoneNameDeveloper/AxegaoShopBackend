@@ -379,7 +379,7 @@ async def drop_password(request: Request, user_drop_password: UserDropPassword):
         password_reset.id
     )
 
-    password_drop_link: str = settings.base_hostname + password_drop_path
+    password_drop_link: str = str(settings.base_hostname) + password_drop_path
 
     mailer = Mailer(recipient=user.email)
 
