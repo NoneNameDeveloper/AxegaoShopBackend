@@ -15,12 +15,12 @@ class MessageTypes:
 class Mailer:
     """модуль для работы с почтовыми сообщениями"""
     def __init__(self, recipient: str):
-        self.mailer_kwargs = {
-            "user": settings.mail_user,
-            "password": settings.mail_password,
-            "host":settings.mail_host,
-            "port": settings.mail_port,
-        }
+        self.mailer_kwargs = aioyagmail.AIOSMTP(
+            user=settings.mail_user,
+            password=settings.mail_password,
+            host=settings.mail_host,
+            port=settings.mail_port,
+        )
         # получатель письма
         self.recipient = recipient
 
@@ -29,7 +29,12 @@ class Mailer:
             reset_url: str
     ):
         """письмо на сброс пароля"""
-        async with aioyagmail.AIOSMTP(**self.mailer_kwargs) as m:
+        async with aioyagmail.AIOSMTP(
+            user=settings.mail_user,
+            password=settings.mail_password,
+            host=settings.mail_host,
+            port=settings.mail_port,
+        ) as m:
             await m.send(
                 self.recipient,
                 subject="LoftSoft Сброс Пароля",
@@ -48,7 +53,12 @@ class Mailer:
         for p in parameters:
             p['photo'] = "http://fileshare.su:8000/api/uploads/L3ZKA1tU667CvcJn.png"
         if not hand:
-            async with aioyagmail.AIOSMTP(**self.mailer_kwargs) as m:
+            async with aioyagmail.AIOSMTP(
+            user=settings.mail_user,
+            password=settings.mail_password,
+            host=settings.mail_host,
+            port=settings.mail_port,
+        ) as m:
                 await m.send(
                     self.recipient,
                     subject="LoftSoft Покупка Товара",
@@ -60,7 +70,12 @@ class Mailer:
                     ),
                 )
         else:
-            async with aioyagmail.AIOSMTP(**self.mailer_kwargs) as m:
+            async with aioyagmail.AIOSMTP(
+            user=settings.mail_user,
+            password=settings.mail_password,
+            host=settings.mail_host,
+            port=settings.mail_port,
+        ) as m:
                 await m.send(
                     self.recipient,
                     subject="LoftSoft Покупка Товара",
@@ -73,7 +88,12 @@ class Mailer:
                 )
 
     async def send_ticket_message(self, content: str):
-        async with aioyagmail.AIOSMTP(**self.mailer_kwargs) as m:
+        async with aioyagmail.AIOSMTP(
+            user=settings.mail_user,
+            password=settings.mail_password,
+            host=settings.mail_host,
+            port=settings.mail_port,
+        ) as m:
             await m.send(
                 self.recipient,
                 subject="LoftSoft Сообщение от Поддержки",
