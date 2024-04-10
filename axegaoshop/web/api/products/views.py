@@ -114,7 +114,7 @@ async def get_products(
 
         return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
     else:
-        return await ProductIn_Pydantic.from_queryset(Product.filter(Q(title__istartswith=query) | Q(title_istartswith=transliterate_query(query))).
+        return await ProductIn_Pydantic.from_queryset(Product.filter(Q(title__istartswith=query) | Q(title__istartswith=transliterate_query(query))).
                                                       limit(limit).
                                                       offset(offset))
 
