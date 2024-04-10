@@ -18,7 +18,7 @@ from axegaoshop.db.models.user import User
 from axegaoshop.services.notifications.mailing.mailing import Mailer
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
-from axegaoshop.settings import settings
+from axegaoshop.settings import settings, executor
 from axegaoshop.web.api.orders.schema import OrderIn_Pydantic
 
 from axegaoshop.web.api.tokens.schema import TokenCreated, TokenRequest
@@ -383,7 +383,7 @@ async def drop_password(request: Request, user_drop_password: UserDropPassword):
 
     mailer = Mailer(recipient=user.email)
 
-    asyncio.create_task(mailer.send_reset(
+    executor.submit(mailer.send_reset(
         reset_url=password_drop_link
     ))
 

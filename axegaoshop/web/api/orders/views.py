@@ -16,7 +16,7 @@ from axegaoshop.services.notifications.telegram import TelegramService
 from axegaoshop.services.notifications.telegram.telegram_di import get_telegram_data
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
-from axegaoshop.settings import PaymentType
+from axegaoshop.settings import PaymentType, executor
 
 from axegaoshop.web.api.orders.schema import OrderCreate, OrderIn_Pydantic, OrderStatus, OrderFinishOut, \
     OrderDataHistory
@@ -219,7 +219,7 @@ async def check_order(
                     )
             mail_total_count += od.count
 
-        asyncio.create_task(mailer.send_shipping(
+        executor.submit(mailer.send_shipping(
             parameters=mail_parameters_data,
             total_sum=mail_total_sum,
             total_count=mail_total_count,
