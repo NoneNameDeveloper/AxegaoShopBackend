@@ -25,3 +25,4 @@ requests~=2.31.0
 pytest~=7.4.4
 httpx~=0.26.0
 APScheduler~=3.10.4
+aiogram~=3.4.1
