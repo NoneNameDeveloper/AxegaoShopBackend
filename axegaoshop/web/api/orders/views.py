@@ -209,10 +209,10 @@ async def check_order(
                     }
                 )
             else:
-                for key_ in od['items']:
+                for key_ in od.items:
                     mail_parameters_data.append(
                         {
-                            "title": od['title'],
+                            "title": od.title,
                             "key": key_,
                             "photo": "http://fileshare.su:8000/api/uploads/" + od.photo
                         }
