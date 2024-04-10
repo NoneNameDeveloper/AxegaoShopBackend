@@ -1,7 +1,6 @@
-import datetime
 import os
 import zipfile
-from datetime import time
+from collections import defaultdict
 from decimal import Decimal
 from typing import Any
 
@@ -105,8 +104,20 @@ class Order(Model):
             'order_parameters__order__number',  # номер заказа
             'order_parameters__order__id',  # айди заказа
             'order_parameters__order__result_price',  # итоговая цена в заказе
-            'give_type'  # тип выдачи
+            'give_type',  # тип выдачи
+            'product__product_photos__photo',
         )
+
+        # Создаем словарь для группировки значений по уникальному ключу
+        grouped_data = defaultdict(list)
+        for item in order_data:
+            key = item[0:7]  # Используем первые 7 элементов в качестве ключа
+            grouped_data[key].append(item[-1])  # Добавляем последний элемент в список значений
+
+        # Преобразуем словарь обратно в список кортежей
+        order_data = [(key + (values,)) for key, values in grouped_data.items()]
+
+        print(order_data)
         if not order_data:
             return {}
 
@@ -115,9 +126,22 @@ class Order(Model):
         for data in order_data:
             items_dict[data[0]] = await get_items_data_for_order(data[1], data[2], await Order.get(id=data[4]))
 
+        give_type = None
+
         if not finished:
             if any([od[6] == "hand" for od in order_data]) or any([not i for i in items_dict.values()]):
-                o_d = []
+                give_type: str = "hand"
+                o_d = [
+                    {
+                        "id": res_data[1],
+                        "title": res_data[0],
+                        "count": res_data[2],
+                        "give_type": res_data[6],
+                        "photo": res_data[7][0],
+                        "items": []
+
+                    } for res_data in order_data
+                ]
             else:
                 o_d = [
                     {
@@ -125,6 +149,7 @@ class Order(Model):
                         "title": res_data[0],
                         "count": res_data[2],
                         "give_type": res_data[6],
+                        "photo": res_data[7][0],
                         "items": [item.value for item in items_dict[res_data[0]]]
 
                     } for res_data in order_data
@@ -136,6 +161,7 @@ class Order(Model):
                     "title": res_data[0],
                     "count": res_data[2],
                     "give_type": res_data[6],
+                    "photo": res_data[7][0],
                     "items": [item.value for item in items_dict[res_data[0]]]
 
                 } for res_data in order_data
@@ -147,6 +173,8 @@ class Order(Model):
             "result_price": order_data[0][5],
             "order_data": o_d,
         }
+        if give_type:
+            result_dict['give_type'] = "hand"
 
         add_archive: bool = True
         for od in o_d:
