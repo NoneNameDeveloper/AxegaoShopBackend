@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from tortoise.expressions import Q
 from tortoise.models import Model
 from tortoise import fields
 
@@ -57,17 +58,12 @@ class User(Model):
     async def get_available_products_to_comment(self):
         """получение товаров (завершенные заказы), по которым не было оставлено комментариев"""
 
-        # Get the product IDs for which the user has not written a review yet
-        reviewed_products = await Review.filter(user=self).values_list('product_id', 'order_id')
+        reviewed_products = await Review.filter(Q(user=self) & ~Q(status="declined")).values_list('product_id', 'order_id')
 
-        # Get the product IDs and order IDs from the user's orders
         order_products = await OrderParameters.filter(order__user=self, order__status="finished").values_list('parameter__product__id', 'parameter__product__title', 'order_id')
 
-        # Find the products that are in the user's orders but have not been reviewed
-        # Use a set to keep track of unique combinations of product_id and order_id
         unique_combinations = set()
 
-        # Find the products that are in the user's orders but have not been reviewed
         available_products = [
             [product_id, title, order_id]
             for product_id, title, order_id in order_products
