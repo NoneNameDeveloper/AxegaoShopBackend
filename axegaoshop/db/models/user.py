@@ -33,6 +33,7 @@ class User(Model):
 
     class Meta:
         table = "users"
+        ordering = ["-reg_datetime"]
 
     class PydanticMeta:
         exclude = ("password", "reviews", "tickets")
