@@ -29,8 +29,9 @@ jobs:
 
       - name: Load Docker image on remote server
         run: |
+          apt install sshpass
           echo ${{ secrets.SSH_PRIVATE_KEY }} > key.pub
-          ssh -o StrictHostKeyChecking=no -p key.pub ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }} << ENDSSH
+          sshpass -p${{ secrets.SSH_PASSWORD }} ssh -o StrictHostKeyChecking=no ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }} << ENDSSH
           docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop_test.tar
           ENDSSH
 
