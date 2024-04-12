@@ -53,4 +53,4 @@ jobs:
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          script: docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml up -d
+          script: docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml up -d --build
