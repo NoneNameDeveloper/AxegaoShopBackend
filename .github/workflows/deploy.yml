@@ -27,14 +27,14 @@ jobs:
           source: axegaoshop_test.tar
           target: ${{ secrets.REMOTE_SERVER_PATH }}
 
-      - name: executing remote ssh commands using password
+      - name: Creating docker image
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_SERVER_ADDRESS }}
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop_test.tar
+          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop_test.tar && rm axegaoshop_test.tar
 
       - name: Transfer Docker image to remote server
         uses: appleboy/scp-action@v0.1.7
@@ -46,11 +46,20 @@ jobs:
           source: docker-compose.yml
           target: ${{ secrets.REMOTE_SERVER_PATH }}
 
-      - name: executing remote ssh commands using password
+      - name: Starting containers
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.REMOTE_SERVER_ADDRESS }}
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          script: docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml up -d --build
+          script: docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml up -d
+
+      - name: Starting migrations
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.REMOTE_SERVER_ADDRESS }}
+          username: ${{ secrets.REMOTE_SERVER_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml exec aerich migrate && docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml exec aerich migrate
