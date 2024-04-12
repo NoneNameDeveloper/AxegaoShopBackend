@@ -42,6 +42,12 @@ class Settings(BaseSettings):
     Изменяются и задаются в .env
     """
 
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="AXEGAOSHOP_",
+        env_file_encoding="utf-8",
+    )
+
     # конфигурация uvicorn
     scheme: str = "http"
     host: str = "fileshare.su"
@@ -125,14 +131,6 @@ class Settings(BaseSettings):
         os.makedirs(self.storage_folder, exist_ok=True)
         os.makedirs(self.storage_folder_images, exist_ok=True)
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_prefix="AXEGAOSHOP_",
-        env_file_encoding="utf-8",
-    )
-
 
 settings = Settings()
 settings.__call__()
-print(settings.base_hostname)
-print(settings.front_hostname)
