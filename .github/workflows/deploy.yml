@@ -16,12 +16,13 @@ jobs:
         run: | 
           docker save -o axegaoshop_test.tar axegaoshop_test:latest
           chmod 664 axegaoshop_test.tar
+
       - name: Transfer Docker image to remote server
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.REMOTE_SERVER_ADDRESS }}
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT }}
           source: axegaoshop_test.tar
           target: ${{ secrets.REMOTE_SERVER_PATH }}
