@@ -9,6 +9,7 @@ from axegaoshop.settings import settings
 @dataclass
 class MessageTypes:
     """типы почтовых сообщений"""
+
     RESET_PASSWORD = "reset.html"
     SHIPPING = "shipping.html"
     PURCHASE = "purchase.html"
@@ -17,6 +18,7 @@ class MessageTypes:
 
 class Mailer:
     """модуль для работы с почтовыми сообщениями"""
+
     def __init__(self, recipient: str):
         self.mailer_ = yagmail.SMTP(
             user=settings.mail_user,

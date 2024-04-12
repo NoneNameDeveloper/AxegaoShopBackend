@@ -7,6 +7,7 @@ from axegaoshop.services.security.tools import decode_jwt
 
 class JWTBearer(HTTPBearer):
     """модуль для работы с JWT авторизией"""
+
     def __init__(self, auto_error: bool = True):
         super(JWTBearer, self).__init__(auto_error=auto_error)
 

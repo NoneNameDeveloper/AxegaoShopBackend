@@ -11,6 +11,7 @@ OZONE_BASE_URL = "https://finance.ozon.ru"
 @dataclass
 class OzoneMethods:
     """методы API озона, которые используем"""
+
     AUTH_LOGIN: str = "/api/v2/auth_login"
     CLIENT_OPERATIONS: str = "/api/v2/clientOperations"
 
@@ -18,12 +19,14 @@ class OzoneMethods:
 @dataclass
 class EffectTypes:
     """тип платежей в истории (поступление, отправка)"""
+
     INPUT: str = "EFFECT_CREDIT"
     OUTPUT: str = "EFFECT_DEBIT"
 
 
 class PaymentModel(BaseModel):
     """модель возвращаемого ответа от сервера Ozone Bank"""
+
     id: str
     operation_id: str = Field(str, alias="operationId")
     sender: str = Field(str, alias="purpose")  # отправитель
@@ -41,9 +44,10 @@ class PaymentModel(BaseModel):
 class OzoneBank:
     """класс для работы с приватным API Ozone Bank-а
 
-     - проверка платежей
-     - идентификация платежа по копейкам
+    - проверка платежей
+    - идентификация платежа по копейкам
     """
+
     def __init__(self, pin_code: str, secure_refresh_token: str):
         self.pin_code: str = pin_code
         self.secure_refresh_token: str = secure_refresh_token
