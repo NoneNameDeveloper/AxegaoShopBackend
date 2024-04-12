@@ -23,7 +23,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           source: axegaoshop_test.tar
-          target: your_server_target_folder_path
+          target: ${{ secrets.REMOTE_SERVER_PATH }}
 
       - name: Load Docker image on remote server
         run: |
