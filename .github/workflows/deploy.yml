@@ -17,10 +17,10 @@ jobs:
 
       - name: Transfer Docker image to remote server
         run: |
-          mkdir -p ~/.ssh
+          sudo mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          scp -o StrictHostKeyChecking=no axegaoshop_test.tar ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
+          sudo chmod 600 ~/.ssh/id_rsa
+          sudo scp -o StrictHostKeyChecking=no axegaoshop_test.tar ${{ secrets.REMOTE_SERVER_USERNAME }}@${{ secrets.REMOTE_SERVER_ADDRESS }}:${{ secrets.REMOTE_SERVER_PATH }}
 
       - name: Load Docker image on remote server
         run: |
