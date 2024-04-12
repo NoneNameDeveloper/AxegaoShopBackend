@@ -1,6 +1,6 @@
 name: 'Deploying'
 on:
-  push:
+  [push, pull_request]:
     branches: [master]
     paths:
       - '*'
