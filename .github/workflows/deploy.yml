@@ -1,9 +1,5 @@
 name: 'Deploying'
-on:
-  push:
-    branches: [master]
-    paths:
-      - '*'
+on: [push, pull_request]
 
 jobs:
   deploy:
