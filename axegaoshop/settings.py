@@ -22,16 +22,18 @@ class LogLevel(enum.StrEnum):
 
 class PaymentType(enum.StrEnum):
     """доступные типы оплаты"""
+
     SBP: str = "sbp"
     SITE_BALANCE: str = "site_balance"
 
 
 # разрешенные типы данных для загрузки в /api/upload
-ALLOWED_UPLOAD_TYPES = ['image/jpeg', 'image/png', 'text/plain', 'image/svg+xml']
+ALLOWED_UPLOAD_TYPES = ["image/jpeg", "image/png", "text/plain", "image/svg+xml"]
 
 
 class ProductExt:
     """типы расширений для файлов-товаров для проверки при выдаче"""
+
     TXT = ".txt"
 
 
@@ -103,11 +105,7 @@ class Settings(BaseSettings):
     @property
     def base_hostname(self) -> URL:
         """создание хостнейма на сайт"""
-        return URL.build(
-            scheme=self.scheme,
-            host=self.host,
-            port=self.port
-        )
+        return URL.build(scheme=self.scheme, host=self.host, port=self.port)
 
     @property
     def db_url(self) -> URL:

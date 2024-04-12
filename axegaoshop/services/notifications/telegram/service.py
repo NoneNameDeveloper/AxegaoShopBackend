@@ -11,6 +11,7 @@ from axegaoshop.services.notifications.telegram.templates import (
 
 class TelegramService:
     """класс для работы с телеграммом и отправки уведомлений"""
+
     def __init__(self, token: str, recievers: list[int]):
         self.bot_token = token
         self.bot: Bot = self.connect_bot()
