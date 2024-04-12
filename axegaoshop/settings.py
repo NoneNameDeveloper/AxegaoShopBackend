@@ -125,7 +125,7 @@ class Settings(BaseSettings):
             path=f"/{self.db_base}",
         )
 
-    def __call__(self):
+    def __call__(self) -> None:
         """создание папок для хранилища"""
         os.makedirs(self.storage_folder, exist_ok=True)
         os.makedirs(self.storage_folder_images, exist_ok=True)
