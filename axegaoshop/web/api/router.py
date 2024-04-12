@@ -1,8 +1,19 @@
 from fastapi.routing import APIRouter
 
-from axegaoshop.web.api import orders, partners, products, promocodes, \
-    shop_carts, subcategories, uploads, users, categories, healthcheck, reviews, \
-    tickets
+from axegaoshop.web.api import (
+    orders,
+    partners,
+    products,
+    promocodes,
+    shop_carts,
+    subcategories,
+    uploads,
+    users,
+    categories,
+    healthcheck,
+    reviews,
+    tickets,
+)
 
 from axegaoshop.web.api.products import options, photos, parameters, request
 
@@ -22,7 +33,9 @@ api_router.include_router(router=products.router, prefix="", tags=["Products"])
 
 api_router.include_router(router=options.router, prefix="", tags=["Product options"])
 api_router.include_router(router=photos.router, prefix="", tags=["Product photos"])
-api_router.include_router(router=parameters.router, prefix="", tags=["Product parameters"])
+api_router.include_router(
+    router=parameters.router, prefix="", tags=["Product parameters"]
+)
 
 api_router.include_router(router=orders.router, prefix="", tags=["Orders"])
 
@@ -36,11 +49,15 @@ api_router.include_router(router=uploads.router, prefix="", tags=["Uploads"])
 
 api_router.include_router(router=reviews.router, prefix="", tags=["Reviews"])
 
-api_router.include_router(router=ozone_bank.router, prefix="", tags=["SBP Ozone Bank Settings"])
+api_router.include_router(
+    router=ozone_bank.router, prefix="", tags=["SBP Ozone Bank Settings"]
+)
 
 api_router.include_router(router=healthcheck.router, prefix="", tags=["Healthcheck"])
 
-api_router.include_router(router=telegram.router, prefix="", tags=["Telegram Notifications"])
+api_router.include_router(
+    router=telegram.router, prefix="", tags=["Telegram Notifications"]
+)
 
 api_router.include_router(router=tickets.router, prefix="", tags=["Tickets"])
 

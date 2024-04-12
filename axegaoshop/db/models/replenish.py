@@ -7,18 +7,26 @@ from axegaoshop.services.utils import generate_unique_sum_postfix, random_upper_
 
 class Replenish(Model):
     """таблица с пополнениями баланса"""
+
     id = fields.IntField(pk=True)
 
     user = fields.ForeignKeyField("axegaoshop.User", related_name="replenishes")
 
-    number = fields.CharField(max_length=50, unique=True, default=random_upper_string)  # номер платежа
+    number = fields.CharField(
+        max_length=50, unique=True, default=random_upper_string
+    )  # номер платежа
 
-    result_price = fields.DecimalField(max_digits=10, decimal_places=2, null=True)  # окончательная цена с копейками
+    result_price = fields.DecimalField(
+        max_digits=10, decimal_places=2, null=True
+    )  # окончательная цена с копейками
 
-    payment_type = fields.CharField(max_length=100, null=False)  # выбранный способ оплаты  ("sbp")
+    payment_type = fields.CharField(
+        max_length=100, null=False
+    )  # выбранный способ оплаты  ("sbp")
 
-    status = fields.CharField(max_length=100,
-                              default="waiting_payment")  # статус пополнения (waiting_payment, canceled, finished)
+    status = fields.CharField(
+        max_length=100, default="waiting_payment"
+    )  # статус пополнения (waiting_payment, canceled, finished)
 
     created_datetime = fields.DatetimeField(auto_now_add=True)  # дата создания платежа
     payed_datetime = fields.DatetimeField(auto_now=True)  # дата подтверждения оплаты
@@ -44,6 +52,6 @@ class Replenish(Model):
 
     async def finish(self):
         """завершить заявку"""
-        self.status = 'finished'
+        self.status = "finished"
         await rem_amount(float(self.result_price))
         await self.save()

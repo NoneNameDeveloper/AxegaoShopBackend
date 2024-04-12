@@ -14,7 +14,7 @@ router = APIRouter()
 @router.post(
     "/partners",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=201
+    status_code=201,
 )
 async def create_partner(partner: CreatePartner):
     await Partner.create(**partner.model_dump())
@@ -23,7 +23,7 @@ async def create_partner(partner: CreatePartner):
 @router.delete(
     "/partner/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def delete_partner(id: int):
     partner = await Partner.get_or_none(id=id)
@@ -34,10 +34,6 @@ async def delete_partner(id: int):
     await partner.delete()
 
 
-@router.get(
-    "/partners",
-    response_model=list[PartnerIn_Pydantic],
-    status_code=200
-)
+@router.get("/partners", response_model=list[PartnerIn_Pydantic], status_code=200)
 async def get_partners():
     return await PartnerIn_Pydantic.from_queryset(Partner.all())

@@ -1,7 +1,17 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-from axegaoshop.db.models.product import Product, Parameter, change_parameter_order, update_parameter_data
-from axegaoshop.web.api.products.parameters.schema import ParameterIn_Pydantic, ParameterCreate, ParameterUpdate, ParameterOrderChange
+from axegaoshop.db.models.product import (
+    Product,
+    Parameter,
+    change_parameter_order,
+    update_parameter_data,
+)
+from axegaoshop.web.api.products.parameters.schema import (
+    ParameterIn_Pydantic,
+    ParameterCreate,
+    ParameterUpdate,
+    ParameterOrderChange,
+)
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -9,10 +19,7 @@ from axegaoshop.services.security.users import current_user_is_admin
 router = APIRouter()
 
 
-@router.get(
-    path="/product/{id}/parameters",
-    response_model=list[ParameterIn_Pydantic]
-)
+@router.get(path="/product/{id}/parameters", response_model=list[ParameterIn_Pydantic])
 async def get_product_parameters(id: int):
     if not await Product.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
@@ -23,7 +30,7 @@ async def get_product_parameters(id: int):
 @router.post(
     path="/product/{id}/parameters",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=ParameterIn_Pydantic
+    response_model=ParameterIn_Pydantic,
 )
 async def create_product_parameter(id: int, parameter: ParameterCreate):
     if not await Product.get_or_none(id=id):
@@ -36,7 +43,7 @@ async def create_product_parameter(id: int, parameter: ParameterCreate):
         give_type=parameter.give_type,
         has_sale=parameter.has_sale,
         sale_price=parameter.sale_price,
-        product_id=id
+        product_id=id,
     )
 
     await parameter_.save()
@@ -47,7 +54,7 @@ async def create_product_parameter(id: int, parameter: ParameterCreate):
 @router.patch(
     path="/parameter/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=ParameterIn_Pydantic
+    response_model=ParameterIn_Pydantic,
 )
 async def update_product_parameter(id: int, parameter: ParameterUpdate):
     if not await Parameter.get_or_none(id=id):
@@ -61,7 +68,7 @@ async def update_product_parameter(id: int, parameter: ParameterUpdate):
 @router.patch(
     path="/parameter/{id}/data",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def update_product_parameter_data(id: int, data: list[str]):
     """обновление строк параметра товара"""
@@ -74,7 +81,7 @@ async def update_product_parameter_data(id: int, data: list[str]):
 @router.delete(
     path="/parameter/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def delete_product_parameter(id: int):
     if not await Parameter.get_or_none(id=id):
@@ -86,7 +93,7 @@ async def delete_product_parameter(id: int):
 @router.post(
     "/parameter/order",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def change_product_order_router(parameter_ids: list[int]):
     res = await change_parameter_order(parameter_ids)

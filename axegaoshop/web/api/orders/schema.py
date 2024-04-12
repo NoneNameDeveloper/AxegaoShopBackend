@@ -10,9 +10,9 @@ from axegaoshop.settings import settings
 
 
 class OrderStatus:
-    WAIT_FOR_PAYMENT = 'waiting_payment'
-    CANCELED = 'canceled'
-    FINISHED = 'finished'
+    WAIT_FOR_PAYMENT = "waiting_payment"
+    CANCELED = "canceled"
+    FINISHED = "finished"
 
 
 class OrderCreate(BaseModel):
@@ -45,7 +45,9 @@ class OrderCreate(BaseModel):
 
         if not self.straight:
             if self.parameter_id or self.count:
-                raise ValueError("parameter_id or count shouldn't be used in non-straight payment!")
+                raise ValueError(
+                    "parameter_id or count shouldn't be used in non-straight payment!"
+                )
 
         return self
 
@@ -63,7 +65,7 @@ class OrderDataOut(BaseModel):
     items: list[str]
 
     @model_validator(mode="after")
-    def set_give_type(self) -> 'OrderDataOut':
+    def set_give_type(self) -> "OrderDataOut":
         """если нет товаров - выдача руками"""
         if not self.items:
             self.give_type = "hand"
@@ -88,4 +90,4 @@ class OrderDataHistory(BaseModel):
     count: int
 
 
-OrderIn_Pydantic = pydantic_model_creator(Order, exclude=("user", ))
+OrderIn_Pydantic = pydantic_model_creator(Order, exclude=("user",))

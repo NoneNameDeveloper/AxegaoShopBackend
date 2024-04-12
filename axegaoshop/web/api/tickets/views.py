@@ -4,7 +4,12 @@ import typing
 from fastapi import APIRouter, Depends, HTTPException
 from tortoise.expressions import Q
 
-from axegaoshop.db.models.ticket import Ticket, get_or_create_ticket, TicketMessage, TicketMessageAttachment
+from axegaoshop.db.models.ticket import (
+    Ticket,
+    get_or_create_ticket,
+    TicketMessage,
+    TicketMessageAttachment,
+)
 from axegaoshop.db.models.user import User
 from axegaoshop.services.notifications.mailing.mailing import Mailer
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
@@ -18,17 +23,19 @@ router = APIRouter()
 @router.post(
     path="/tickets/send",
     dependencies=[Depends(JWTBearer())],
-    response_model=TicketIn_Pydantic | list[TicketIn_Pydantic]
+    response_model=TicketIn_Pydantic | list[TicketIn_Pydantic],
 )
-async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user: User = Depends(get_current_user)):
+async def send_or_create_ticket(
+    ticket_message_request: TicketMessageSend, user: User = Depends(get_current_user)
+):
     """функционал:
 
-        Человек пишет сообщение, отправляет, если есть открытый тикет от этого человека - сообщение просто
-        попадает в этот тикет. Если открытого тикета нет - создается новый.
+    Человек пишет сообщение, отправляет, если есть открытый тикет от этого человека - сообщение просто
+    попадает в этот тикет. Если открытого тикета нет - создается новый.
 
-        У админа соответственно эти тикеты отображаются.
+    У админа соответственно эти тикеты отображаются.
 
-        И админ и пользователь стучатся в одно место, сообщения в зависимости от роли распределяются.
+    И админ и пользователь стучатся в одно место, сообщения в зависимости от роли распределяются.
     """
     if not user.is_admin and not user.email:
         raise HTTPException(status_code=401, detail="EMAIL_REQUIRED")
@@ -43,25 +50,26 @@ async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user:
     role: typing.Literal["user", "admin"] = "user" if not user.is_admin else "admin"
 
     ticket_message = await TicketMessage.create(
-        ticket=ticket,
-        role=role,
-        text=ticket_message_request.text
+        ticket=ticket, role=role, text=ticket_message_request.text
     )
 
     # отправка текста тикета человеку на почту
     if role == "admin":
         mailer = Mailer(recipient=(await ticket.user.get()).email)
 
-        executor.submit(mailer.send_ticket_message(
-            content=ticket_message_request.text
-        ))
+        executor.submit(mailer.send_ticket_message(content=ticket_message_request.text))
 
     await TicketMessageAttachment.bulk_create(
-        [TicketMessageAttachment(file=f, ticket_message=ticket_message) for f in ticket_message_request.attachments]
+        [
+            TicketMessageAttachment(file=f, ticket_message=ticket_message)
+            for f in ticket_message_request.attachments
+        ]
     )
 
     if role == "admin":
-        return await TicketIn_Pydantic.from_queryset_single(Ticket.filter(id=ticket.id).first())
+        return await TicketIn_Pydantic.from_queryset_single(
+            Ticket.filter(id=ticket.id).first()
+        )
     else:
         return await TicketIn_Pydantic.from_queryset(Ticket.filter(user=user).all())
 
@@ -69,7 +77,7 @@ async def send_or_create_ticket(ticket_message_request: TicketMessageSend, user:
 @router.get(
     path="/ticket/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=TicketIn_Pydantic
+    response_model=TicketIn_Pydantic,
 )
 async def get_ticket_by_id(id: int):
     ticket = await Ticket.get_or_none(id=id)
@@ -83,7 +91,7 @@ async def get_ticket_by_id(id: int):
 @router.get(
     path="/tickets",
     dependencies=[Depends(JWTBearer())],
-    response_model=list[TicketIn_Pydantic]
+    response_model=list[TicketIn_Pydantic],
 )
 async def get_tickets_all(user: User = Depends(get_current_user)):
     """получение всех сообщения из всех тикетов для пользователя"""
@@ -93,31 +101,27 @@ async def get_tickets_all(user: User = Depends(get_current_user)):
 @router.get(
     path="/tickets/opened",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=list[TicketIn_Pydantic]
+    response_model=list[TicketIn_Pydantic],
 )
 async def get_opened_tickets():
     """получение открытых тикетов (админка)"""
-    return await TicketIn_Pydantic.from_queryset(
-        Ticket.filter(status="opened").all()
-    )
+    return await TicketIn_Pydantic.from_queryset(Ticket.filter(status="opened").all())
 
 
 @router.get(
     path="/tickets/closed",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=list[TicketIn_Pydantic]
+    response_model=list[TicketIn_Pydantic],
 )
 async def get_closed_tickets():
     """получение закрытых тикетов (история) (админка)"""
-    return await TicketIn_Pydantic.from_queryset(
-        Ticket.filter(status="closed").all()
-    )
+    return await TicketIn_Pydantic.from_queryset(Ticket.filter(status="closed").all())
 
 
 @router.post(
     path="/ticket/{id}/close",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=TicketIn_Pydantic
+    response_model=TicketIn_Pydantic,
 )
 async def close_ticket_by_id(id: int):
     """закрытие тикета из админки"""
@@ -136,11 +140,13 @@ async def close_ticket_by_id(id: int):
 @router.post(
     path="/ticket/{id}/delete",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def delete_ticket_by_id(id: int):
     """удаление тикета из админки"""
-    ticket = await Ticket.get_or_none(Q(id=id), Q(Q(status="opened") | Q(status="closed")))
+    ticket = await Ticket.get_or_none(
+        Q(id=id), Q(Q(status="opened") | Q(status="closed"))
+    )
 
     if not ticket:
         raise HTTPException(status_code=404, detail="TICKET_NOT_FOUND")
@@ -151,7 +157,7 @@ async def delete_ticket_by_id(id: int):
 @router.post(
     path="/tickets/close",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=201
+    status_code=201,
 )
 async def close_all_tickets():
     """закрытие всех тикетов из админки"""

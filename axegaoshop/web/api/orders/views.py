@@ -18,8 +18,13 @@ from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
 from axegaoshop.settings import PaymentType, executor
 
-from axegaoshop.web.api.orders.schema import OrderCreate, OrderIn_Pydantic, OrderStatus, OrderFinishOut, \
-    OrderDataHistory
+from axegaoshop.web.api.orders.schema import (
+    OrderCreate,
+    OrderIn_Pydantic,
+    OrderStatus,
+    OrderFinishOut,
+    OrderDataHistory,
+)
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import get_current_user
@@ -30,7 +35,7 @@ router = APIRouter()
 @router.post(
     "/order/",
     dependencies=[Depends(JWTBearer())],
-    response_model=typing.Union[OrderIn_Pydantic, OrderFinishOut]
+    response_model=typing.Union[OrderIn_Pydantic, OrderFinishOut],
 )
 async def create_order(order_: OrderCreate, user: User = Depends(get_current_user)):
     promocode = None
@@ -50,18 +55,21 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
         user_id=user.id,
         straight=order_.straight,
         payment_type=order_.payment_type,
-        email=order_.email
+        email=order_.email,
     )
     # отмена всех остальных заказов юзера
-    [await _order.cancel() for _order in await Order.filter(user_id=user.id, status="waiting_payment").all()]
+    [
+        await _order.cancel()
+        for _order in await Order.filter(
+            user_id=user.id, status="waiting_payment"
+        ).all()
+    ]
 
     # если заказ напрямую - один параметр в заказе
     if order_.straight:
         await order.save()
         order_params = OrderParameters(
-            order_id=order.id,
-            parameter_id=order_.parameter_id,
-            count=order_.count
+            order_id=order.id, parameter_id=order_.parameter_id, count=order_.count
         )
         await order_params.save()
 
@@ -77,9 +85,7 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
 
         for item in user_cart:
             order_param = OrderParameters(
-                parameter_id=item.parameter_id,
-                order_id=order.id,
-                count=item.quantity
+                parameter_id=item.parameter_id, order_id=order.id, count=item.quantity
             )
             await order_param.save()
 
@@ -107,18 +113,10 @@ async def create_order(order_: OrderCreate, user: User = Depends(get_current_use
             await order.cancel()
             return UJSONResponse(content="NOT_ENOUGH_BALANCE", status_code=200)
 
-    # очищение корзины пользователя после покупки
-    if not order_.straight:
-        await user.clear_shop_cart()
-
     return await OrderIn_Pydantic.from_tortoise_orm(order)
 
 
-@router.get(
-    "/order/{id}/status",
-    dependencies=[Depends(JWTBearer())],
-    status_code=200
-)
+@router.get("/order/{id}/status", dependencies=[Depends(JWTBearer())], status_code=200)
 async def get_order_status(id: int, user: User = Depends(get_current_user)):
     # получение заказа по айди и принадлежности к ПОЛЬЗОВАТЕЛЮ
     order = Order.filter(user_id=user.id, id=id, status=OrderStatus.WAIT_FOR_PAYMENT)
@@ -131,13 +129,13 @@ async def get_order_status(id: int, user: User = Depends(get_current_user)):
     "/order/{id}/check",
     dependencies=[Depends(JWTBearer())],
     response_model=OrderFinishOut,
-    status_code=200
+    status_code=200,
 )
 async def check_order(
-        id: int,
-        user: User = Depends(get_current_user),
-        ozone_bank: OzoneBank = Depends(get_ozone_bank),
-        telegram_service: TelegramService = Depends(get_telegram_data)
+    id: int,
+    user: User = Depends(get_current_user),
+    ozone_bank: OzoneBank = Depends(get_ozone_bank),
+    telegram_service: TelegramService = Depends(get_telegram_data),
 ):
     """
     срабатывает при нажатии кнопки "Проверить" на странице оплаты
@@ -146,12 +144,16 @@ async def check_order(
 
     ОБРАТИТЬ ВНИМАНИЕ НА ['order_data']. Если там пустой массив - обрабатывать как тип выдачи 'hand'.
     """
-    # проверка озон банка :TODO: проверка отвала озона
+    # проверка озон банка
     if not ozone_bank:
         raise HTTPException(status_code=500, detail="Server error")
 
     # получение заказа по айди и принадлежности к ПОЛЬЗОВАТЕЛЮ
-    order = Order.filter(user_id=user.id, id=id, status__in=[OrderStatus.WAIT_FOR_PAYMENT, OrderStatus.FINISHED])
+    order = Order.filter(
+        user_id=user.id,
+        id=id,
+        status__in=[OrderStatus.WAIT_FOR_PAYMENT, OrderStatus.FINISHED],
+    )
 
     if not await order.exists():
         raise HTTPException(status_code=404, detail="ORDER_NOT_FOUND")
@@ -164,19 +166,21 @@ async def check_order(
 
     if order.status == "finished":
         res_: list[dict] = []
-        for order in (await Order.filter(user=user, status="finished").all()):
+        for order in await Order.filter(user=user, status="finished").all():
             res_.append(await order.get_items(finished=True))
 
         for r in res_:
             try:
-                if r['id'] == id:
+                if r["id"] == id:
                     return r
             except:
                 pass
 
         return None
 
-    has_payment = await ozone_bank.has_payment(order.result_price, order.created_datetime)
+    has_payment = await ozone_bank.has_payment(
+        order.result_price, order.created_datetime
+    )
     if has_payment:
         items = await order.get_items()
 
@@ -190,7 +194,7 @@ async def check_order(
 
         if telegram_service:
             # добавление для уведы почты пользователя в словарь
-            items['buyer'] = user.email
+            items["buyer"] = user.email
             await asyncio.create_task(telegram_service.notify("sell", items))
 
         # сборка данных для писма и отправка по указанной В ЗАКАЗЕ почте
@@ -205,7 +209,7 @@ async def check_order(
                     {
                         "title": od.title,
                         "count": od.count,
-                        "photo": "http://fileshare.su:8000/api/uploads/" + od.photo
+                        "photo": "http://fileshare.su:8000/api/uploads/" + od.photo,
                     }
                 )
             else:
@@ -214,28 +218,37 @@ async def check_order(
                         {
                             "title": od.title,
                             "key": key_,
-                            "photo": "http://fileshare.su:8000/api/uploads/" + od.photo
+                            "photo": "http://fileshare.su:8000/api/uploads/" + od.photo,
                         }
                     )
             mail_total_count += od.count
 
-        executor.submit(mailer.send_shipping(
-            parameters=mail_parameters_data,
-            total_sum=mail_total_sum,
-            total_count=mail_total_count,
-            hand=items.get("give_type"),
-        ))
+        executor.submit(
+            mailer.send_shipping(
+                parameters=mail_parameters_data,
+                total_sum=mail_total_sum,
+                total_count=mail_total_count,
+                hand=items.get("give_type"),
+            )
+        )
 
         return res_data
 
-    return UJSONResponse(status_code=200, content={"status": "waiting", "remaining_time": 600-((datetime.now(tz=pytz.UTC)-order.created_datetime).total_seconds())})
+    return UJSONResponse(
+        status_code=200,
+        content={
+            "status": "waiting",
+            "remaining_time": 600
+            - ((datetime.now(tz=pytz.UTC) - order.created_datetime).total_seconds()),
+        },
+    )
 
 
 @router.post(
     "/order/{id}/approve",
     dependencies=[Depends(JWTBearer())],
     summary="ВЫРЕЗАТЬ НА ПРОДЕ",
-    status_code=200
+    status_code=200,
 )
 async def approve_order_temp(id: int):
     order = await Order.get_or_none(id=id)
@@ -247,11 +260,7 @@ async def approve_order_temp(id: int):
     await order.save()
 
 
-@router.post(
-    "/order/{id}/cancel",
-    dependencies=[Depends(JWTBearer())],
-    status_code=200
-)
+@router.post("/order/{id}/cancel", dependencies=[Depends(JWTBearer())], status_code=200)
 async def cancel_order(id: int):
     """применяется для отмены заказа по истечении срока"""
     order = await Order.get_or_none(id=id)
@@ -267,22 +276,27 @@ async def cancel_order(id: int):
     "/orders",
     # dependencies=[Depends(JWTBearer), Depends(current_user_is_admin)],
     status_code=200,
-    response_model=list[OrderDataHistory]
+    response_model=list[OrderDataHistory],
 )
 async def get_orders_history():
     """получение истории заказов в админку (без пагинации, просто все сразу)"""
-    orders = await Order.all().prefetch_related('order_parameters', 'user')
+    orders = await Order.all().prefetch_related("order_parameters", "user")
     order_history = []
     for order in orders:
-        order_data = [{
-            'number': order.number,
-            'order_id': order.id,
-            'date': order.created_datetime,
-            'email': order.email,
-            'product': param.parameter.title,
-            'give_type': order.give_type,
-            'count': param.count
-        } for param in (await order.order_parameters.all().prefetch_related('parameter'))]
+        order_data = [
+            {
+                "number": order.number,
+                "order_id": order.id,
+                "date": order.created_datetime,
+                "email": order.email,
+                "product": param.parameter.title,
+                "give_type": order.give_type,
+                "count": param.count,
+            }
+            for param in (
+                await order.order_parameters.all().prefetch_related("parameter")
+            )
+        ]
 
         if order_data:
             for o in order_data:

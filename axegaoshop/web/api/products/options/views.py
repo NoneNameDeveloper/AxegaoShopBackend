@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, Depends
 
 from axegaoshop.db.models.product import Product, Option
 
-from axegaoshop.web.api.products.options.schema import OptionIn_Pydantic, OptionCreate, OptionUpdate
+from axegaoshop.web.api.products.options.schema import (
+    OptionIn_Pydantic,
+    OptionCreate,
+    OptionUpdate,
+)
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -10,10 +14,7 @@ from axegaoshop.services.security.users import current_user_is_admin
 router = APIRouter()
 
 
-@router.get(
-    path="/product/{id}/options",
-    response_model=list[OptionIn_Pydantic]
-)
+@router.get(path="/product/{id}/options", response_model=list[OptionIn_Pydantic])
 async def get_product_options(id: int):
     if not await Product.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
@@ -24,15 +25,12 @@ async def get_product_options(id: int):
 @router.post(
     path="/product/{id}/options",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=OptionIn_Pydantic
+    response_model=OptionIn_Pydantic,
 )
 async def create_product_option(id: int, option: OptionCreate):
 
     option = Option(
-        title=option.title,
-        value=option.value,
-        is_pk=option.is_pk,
-        product_id=id
+        title=option.title, value=option.value, is_pk=option.is_pk, product_id=id
     )
 
     if not await option.is_available():
@@ -46,17 +44,13 @@ async def create_product_option(id: int, option: OptionCreate):
 @router.patch(
     path="/option/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=OptionIn_Pydantic
+    response_model=OptionIn_Pydantic,
 )
 async def update_product_option(id: int, option: OptionUpdate):
     if not await Option.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
-    option_ = Option(
-        title=option.title,
-        value=option.value,
-        is_pk=option.is_pk
-    )
+    option_ = Option(title=option.title, value=option.value, is_pk=option.is_pk)
     if option.is_pk:
         if not await option_.is_available():
             raise HTTPException(status_code=400, detail="NOT_AVAILABLE")
@@ -69,7 +63,7 @@ async def update_product_option(id: int, option: OptionUpdate):
 @router.delete(
     path="/option/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def delete_product_option(id: int):
     if not await Option.get_or_none(id=id):

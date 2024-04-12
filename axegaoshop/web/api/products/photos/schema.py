@@ -17,7 +17,7 @@ class PhotoCreate(BaseModel):
                 },
                 {
                     "photo": "qlmzvywrge.jpg",
-                }
+                },
             ]
         }
     }
@@ -28,4 +28,4 @@ class PhotoUpdate(BaseModel):
     main: typing.Optional[bool] = None
 
 
-PhotoIn_Pydantic = pydantic_model_creator(ProductPhoto, exclude=("product", ))
+PhotoIn_Pydantic = pydantic_model_creator(ProductPhoto, exclude=("product",))

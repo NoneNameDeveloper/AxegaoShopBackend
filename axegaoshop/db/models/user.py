@@ -44,7 +44,9 @@ class User(Model):
     async def save(self, *args, **kwargs):
         """генерация и добавление аватарки к пользователю (символьная)"""
         if not self.photo:
-            self.photo = create_user_photo(self.username)  # передаем login в create_user_photo
+            self.photo = create_user_photo(
+                self.username
+            )  # передаем login в create_user_photo
         await super().save(*args, **kwargs)
 
     async def add_balance(self, amount: float):
@@ -59,16 +61,22 @@ class User(Model):
     async def get_available_products_to_comment(self):
         """получение товаров (завершенные заказы), по которым не было оставлено комментариев"""
 
-        reviewed_products = await Review.filter(Q(user=self) & ~Q(status="declined")).values_list('product_id', 'order_id')
+        reviewed_products = await Review.filter(
+            Q(user=self) & ~Q(status="declined")
+        ).values_list("product_id", "order_id")
 
-        order_products = await OrderParameters.filter(order__user=self, order__status="finished").values_list('parameter__product__id', 'parameter__product__title', 'order_id')
+        order_products = await OrderParameters.filter(
+            order__user=self, order__status="finished"
+        ).values_list("parameter__product__id", "parameter__product__title", "order_id")
 
         unique_combinations = set()
 
         available_products = [
             [product_id, title, order_id]
             for product_id, title, order_id in order_products
-            if (product_id, order_id) not in reviewed_products and (product_id, order_id) not in unique_combinations and not unique_combinations.add((product_id, order_id))
+            if (product_id, order_id) not in reviewed_products
+            and (product_id, order_id) not in unique_combinations
+            and not unique_combinations.add((product_id, order_id))
         ]
 
         return available_products

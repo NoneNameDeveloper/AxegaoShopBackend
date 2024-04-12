@@ -29,8 +29,7 @@ TORTOISE_CONFIG = {
     "apps": {
         "axegaoshop": {
             "models": MODELS_MODULES + ["aerich.models"],
-            "default_connection": "default"
+            "default_connection": "default",
         },
-
-    }
+    },
 }

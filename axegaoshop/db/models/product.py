@@ -8,6 +8,7 @@ from tortoise.queryset import QuerySet
 
 class Product(Model):
     """таблица с товарами (винда 11, винда 10...)"""
+
     id = fields.IntField(pk=True)
 
     created_datetime = fields.DatetimeField(default=datetime.now)
@@ -15,12 +16,17 @@ class Product(Model):
     title = fields.CharField(max_length=500, null=False)
     description = fields.TextField()
 
-    card_price = fields.DecimalField(max_digits=10, decimal_places=2)  # цена на карточке из первой версии товара
+    card_price = fields.DecimalField(
+        max_digits=10, decimal_places=2
+    )  # цена на карточке из первой версии товара
     card_has_sale = fields.BooleanField(default=False)  # скидка из первой версии товара
-    card_sale_price = fields.DecimalField(max_digits=10, decimal_places=2)  # скидка из первой версии товара
+    card_sale_price = fields.DecimalField(
+        max_digits=10, decimal_places=2
+    )  # скидка из первой версии товара
 
-    subcategory: fields.ForeignKeyRelation = fields.ForeignKeyField("axegaoshop.Subcategory",
-                                                                    related_name="products")
+    subcategory: fields.ForeignKeyRelation = fields.ForeignKeyField(
+        "axegaoshop.Subcategory", related_name="products"
+    )
     order_id = fields.BigIntField(null=False)
 
     parameters: fields.ReverseRelation["Parameter"]
@@ -35,7 +41,9 @@ class Product(Model):
 
     class PydanticMeta:
         exclude = ("subcategory", "shop_cart", "created_datetime", "reviews")
-        computed = ["sale_percent", ]
+        computed = [
+            "sale_percent",
+        ]
 
     class Meta:
         table = "products"
@@ -45,19 +53,22 @@ class Product(Model):
         """сохраняем и назначаем order_id"""
 
         if not kwargs.get("repeat"):
-            last_product_id = (await Product.filter(subcategory_id=self.subcategory_id).order_by("id"))
+            last_product_id = await Product.filter(
+                subcategory_id=self.subcategory_id
+            ).order_by("id")
 
             if not last_product_id:
                 self.order_id = 1
             else:
                 self.order_id = last_product_id[-1].order_id + 1
         else:
-            del kwargs['repeat']
+            del kwargs["repeat"]
         await super().save(*args, **kwargs)
 
 
 class Parameter(Model):
     """таблица с параметрами - версиями товара (винда домашняя, винда профессиональная...)"""
+
     id = fields.IntField(pk=True)
 
     title = fields.TextField(null=False)
@@ -68,10 +79,13 @@ class Parameter(Model):
     has_sale = fields.BooleanField(default=False)
     sale_price = fields.DecimalField(max_digits=10, decimal_places=2)
 
-    give_type = fields.CharField(max_length=30, null=False, default="string")  # string/file/hand - тип выдачи товара
+    give_type = fields.CharField(
+        max_length=30, null=False, default="string"
+    )  # string/file/hand - тип выдачи товара
 
-    product: fields.ForeignKeyRelation[Product] = fields.ForeignKeyField("axegaoshop.Product",
-                                                                         related_name="parameters")
+    product: fields.ForeignKeyRelation[Product] = fields.ForeignKeyField(
+        "axegaoshop.Product", related_name="parameters"
+    )
 
     order_id = fields.IntField(null=False)
 
@@ -82,7 +96,9 @@ class Parameter(Model):
     def sale_percent(self) -> int | None:
         """процент скидки (высчитывается автоматом в пидантик модель)"""
 
-        return 100 - int((self.sale_price * 100) / self.price) if self.has_sale else None
+        return (
+            100 - int((self.sale_price * 100) / self.price) if self.has_sale else None
+        )
 
     class Meta:
         table = "parameters"
@@ -90,19 +106,21 @@ class Parameter(Model):
 
     class PydanticMeta:
         exclude = ["shop_cart", "product", "data", "order_parameters", "reviews"]
-        computed = ("sale_percent", )
+        computed = ("sale_percent",)
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
         if not kwargs.get("repeat"):
-            last_param_id = (await Parameter.filter(product_id=self.product_id).order_by("id"))
+            last_param_id = await Parameter.filter(product_id=self.product_id).order_by(
+                "id"
+            )
 
             if not last_param_id:
                 self.order_id = 1
             else:
                 self.order_id = last_param_id[-1].order_id + 1
         else:
-            del kwargs['repeat']
+            del kwargs["repeat"]
         await super().save(*args, **kwargs)
 
     async def get_price(self):
@@ -115,6 +133,7 @@ class Parameter(Model):
 
 class ProductData(Model):
     """таблица с самими товарами (ключами..)"""
+
     id = fields.IntField(pk=True)
 
     parameter: fields.ForeignKeyRelation["Parameter"] = fields.ForeignKeyField(
@@ -125,7 +144,9 @@ class ProductData(Model):
 
     is_active = fields.BooleanField(default=True, null=False)
 
-    order: fields.ForeignKeyNullableRelation = fields.ForeignKeyField("axegaoshop.Order", related_name="data", null=True)
+    order: fields.ForeignKeyNullableRelation = fields.ForeignKeyField(
+        "axegaoshop.Order", related_name="data", null=True
+    )
 
     class PydanticMeta:
         exclude = ("parameer", "is_active")
@@ -136,6 +157,7 @@ class ProductData(Model):
 
 class Option(Model):
     """таблица с характеристиками (код, метод установки...)"""
+
     id = fields.IntField(pk=True)
 
     title = fields.TextField(null=False)
@@ -144,7 +166,9 @@ class Option(Model):
 
     is_pk = fields.BooleanField(default=False)
 
-    product: fields.ForeignKeyRelation[Product] = fields.ForeignKeyField("axegaoshop.Product", related_name="options")
+    product: fields.ForeignKeyRelation[Product] = fields.ForeignKeyField(
+        "axegaoshop.Product", related_name="options"
+    )
 
     class Meta:
         table = "options"
@@ -173,6 +197,7 @@ class Option(Model):
 
 class ProductPhoto(Model):
     """фотографии к товарам"""
+
     id = fields.IntField(pk=True)
 
     photo = fields.CharField(max_length=200)
@@ -180,8 +205,7 @@ class ProductPhoto(Model):
     main = fields.BooleanField(default=False)
 
     product: fields.ForeignKeyRelation[Product] = fields.ForeignKeyField(
-        "axegaoshop.Product",
-        related_name="product_photos"
+        "axegaoshop.Product", related_name="product_photos"
     )
 
     class Meta:
@@ -255,12 +279,16 @@ async def change_parameter_order(ids: list[int]) -> bool:
     return True
 
 
-async def get_items_data_for_order(parameter_id: int, count: int, order) -> list[ProductData]:
+async def get_items_data_for_order(
+    parameter_id: int, count: int, order
+) -> list[ProductData]:
     """получение данных по товару из заказа и удаление этих ключей из базы данных (архивирование)"""
 
     # завершаем заказ
     if not order.status == "finished":
-        items = await ProductData.filter(parameter__id=parameter_id, is_active=True).limit(count)
+        items = await ProductData.filter(
+            parameter__id=parameter_id, is_active=True
+        ).limit(count)
 
         # если количество товаров в базе меньше, чем запросил пользователь
         # ничего не возвращаем, кидаем на ручную оплату
@@ -269,12 +297,16 @@ async def get_items_data_for_order(parameter_id: int, count: int, order) -> list
 
         # деактивация товаров
         for item in items:
-            await item.update_from_dict({"is_active": False, "order_id": order.id}).save()
+            await item.update_from_dict(
+                {"is_active": False, "order_id": order.id}
+            ).save()
 
         return items
     # берем из истории (уже купленные ключи)
     else:
-        items = await ProductData.filter(order_id=order.id, parameter__id=parameter_id, is_active=False).all()
+        items = await ProductData.filter(
+            order_id=order.id, parameter__id=parameter_id, is_active=False
+        ).all()
         return items
 
 
@@ -288,7 +320,12 @@ async def get_items_data_for_product(product_id: int) -> QuerySet[ProductData]:
 async def update_parameter_data(parameter_id: int, data: list[str]):
     """обновление строк по товару (сверка и удаление старых, добавление новых)"""
     # модельки строк
-    items = [u for u in await ProductData.filter(parameter__id=parameter_id, is_active=True).all()]
+    items = [
+        u
+        for u in await ProductData.filter(
+            parameter__id=parameter_id, is_active=True
+        ).all()
+    ]
     # данные строк
     items_values = [v.value for v in items]
 
@@ -310,11 +347,5 @@ async def update_parameter_data(parameter_id: int, data: list[str]):
 
     # создание новых строк
     await ProductData.bulk_create(
-        [
-            ProductData(
-                parameter_id=parameter_id,
-                value=v
-            ) for v in new_
-        ]
+        [ProductData(parameter_id=parameter_id, value=v) for v in new_]
     )
-

@@ -50,10 +50,10 @@ class Settings(BaseSettings):
 
     # конфигурация uvicorn
     scheme: str = "http"
-    host: str = "fileshare.su"
+    host: str = "127.0.0.1"
     port: int = 8000
 
-    front_hostname: str = ""
+    front_hostname: str = "http://fileshare.su:3000"
 
     # количество воркеров uvicorn
     workers_count: int = 1
@@ -103,12 +103,11 @@ class Settings(BaseSettings):
     @property
     def base_hostname(self) -> URL:
         """создание хостнейма на сайт"""
-        return "http://fileshare.su:8000"
-	#return URL.build(
-        #    scheme=self.scheme,
-        #    host=self.host,
-        #    port=self.port
-        #)
+        return URL.build(
+            scheme=self.scheme,
+            host=self.host,
+            port=self.port
+        )
 
     @property
     def db_url(self) -> URL:

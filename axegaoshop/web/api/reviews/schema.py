@@ -10,6 +10,7 @@ from axegaoshop.db.models.review import Review
 
 class ReviewCreate(BaseModel):
     """тело отзыва"""
+
     rate: int  # кол-во звезд в отзыве
     text: str  # текст отзыва
     images: typing.Optional[list[str]] = None
@@ -19,6 +20,7 @@ class ReviewCreate(BaseModel):
 
 class ReviewOutput(BaseModel):
     """отзыв на страницы пользователям"""
+
     id: int
     rate: int
     text: str
@@ -34,8 +36,13 @@ class ReviewOutput(BaseModel):
 
 class ReviewUpdate(BaseModel):
     """обновление отзыва (пока только текст)"""
+
     text: str
 
 
-ReviewIn_Pydantic = pydantic_model_creator(Review, exclude=("user", "straight", "result_price", "status", "order", "product"))
-ReviewInAdmin_Pydantic = pydantic_model_creator(Review, exclude=("order", "user.orders", "user.shop_cart", "order", "product"))
+ReviewIn_Pydantic = pydantic_model_creator(
+    Review, exclude=("user", "straight", "result_price", "status", "order", "product")
+)
+ReviewInAdmin_Pydantic = pydantic_model_creator(
+    Review, exclude=("order", "user.orders", "user.shop_cart", "order", "product")
+)

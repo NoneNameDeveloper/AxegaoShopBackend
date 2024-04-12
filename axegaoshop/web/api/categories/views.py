@@ -3,8 +3,12 @@ from tortoise.functions import Count
 
 from axegaoshop.db.models.category import Category, change_category_order
 
-from axegaoshop.web.api.categories.schema import CategoryIn_Pydantic, CategoryCreate, CategoryOrderChange, \
-    CategoryUpdate
+from axegaoshop.web.api.categories.schema import (
+    CategoryIn_Pydantic,
+    CategoryCreate,
+    CategoryOrderChange,
+    CategoryUpdate,
+)
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -15,30 +19,27 @@ router = APIRouter()
 @router.post(
     "/categories",
     response_model=CategoryIn_Pydantic,
-    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)]
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
 )
 async def category_create(category: CategoryCreate):
-    cat = Category(
-        title=category.title,
-        photo=category.photo
-    )
+    cat = Category(title=category.title, photo=category.photo)
     await cat.save()
 
-    return await CategoryIn_Pydantic.from_queryset_single(Category.filter(id=cat.id).first())
+    return await CategoryIn_Pydantic.from_queryset_single(
+        Category.filter(id=cat.id).first()
+    )
 
 
-@router.get(
-    "/categories",
-    response_model=list[CategoryIn_Pydantic]
-)
+@router.get("/categories", response_model=list[CategoryIn_Pydantic])
 async def category_get(empty_filter: bool = True):
     """empty filter - если True, возвращает только категории, в которых есть подкатегории
     False - возвращает все категории"""
     if empty_filter:
-        return await CategoryIn_Pydantic.from_queryset(Category
-                                                       .annotate(subcategories_count=Count("subcategories"))
-                                                       .filter(subcategories_count__not=0).all()
-                                                       )
+        return await CategoryIn_Pydantic.from_queryset(
+            Category.annotate(subcategories_count=Count("subcategories"))
+            .filter(subcategories_count__not=0)
+            .all()
+        )
     else:
         return await CategoryIn_Pydantic.from_queryset(Category.all())
 
@@ -46,7 +47,7 @@ async def category_get(empty_filter: bool = True):
 @router.patch(
     "/category/{id}",
     response_model=CategoryIn_Pydantic,
-    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)]
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
 )
 async def category_update(id: int, category_: CategoryUpdate):
     cat = await Category.get_or_none(id=id)
@@ -56,13 +57,15 @@ async def category_update(id: int, category_: CategoryUpdate):
 
     await Category.filter(id=id).update(**category_.model_dump(exclude_unset=True))
 
-    return await CategoryIn_Pydantic.from_queryset_single(Category.filter(id=id).first())
+    return await CategoryIn_Pydantic.from_queryset_single(
+        Category.filter(id=id).first()
+    )
 
 
 @router.delete(
     "/category/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def category_delete(id: int):
     cat = await Category.get_or_none(id=id)
@@ -77,7 +80,7 @@ async def category_delete(id: int):
     "/category/order",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
     status_code=200,
-    response_model=list[CategoryIn_Pydantic]
+    response_model=list[CategoryIn_Pydantic],
 )
 async def change_category_order_router(category_ids: list[int]):
     res = await change_category_order(category_ids)

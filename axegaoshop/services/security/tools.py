@@ -1,8 +1,8 @@
 import time
+from typing import Union, Any
+from datetime import datetime, timedelta
 
 from passlib.context import CryptContext
-from datetime import datetime, timedelta
-from typing import Union, Any
 from jose import jwt
 
 from axegaoshop.settings import settings
@@ -26,13 +26,17 @@ def verify_password(password: str, hashed_pass: str) -> bool:
     return password_context.verify(password, hashed_pass)
 
 
-def create_access_token(subject: Union[str, Any], expires_delta: int | None = None) -> str:
+def create_access_token(
+    subject: Union[str, Any], expires_delta: int | None = None
+) -> str:
     """создание JWT токена"""
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
 
     else:
-        expires_delta = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.utcnow() + timedelta(
+            minutes=ACCESS_TOKEN_EXPIRE_MINUTES
+        )
 
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, settings.jwt_secret_key, ALGORITHM)
@@ -45,7 +49,9 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) ->
     if expires_delta is not None:
         expires_delta = datetime.utcnow() + expires_delta
     else:
-        expires_delta = datetime.utcnow() + timedelta(minutes=REFRESH_TOKEN_EXPIRE_MINUTES)
+        expires_delta = datetime.utcnow() + timedelta(
+            minutes=REFRESH_TOKEN_EXPIRE_MINUTES
+        )
 
     to_encode = {"exp": expires_delta, "sub": str(subject)}
     encoded_jwt = jwt.encode(to_encode, settings.jwt_refresh_secret_key, ALGORITHM)
@@ -55,7 +61,9 @@ def create_refresh_token(subject: Union[str, Any], expires_delta: int = None) ->
 def decode_jwt(token: str) -> dict:
     """получение данных из jwn токена"""
     try:
-        decoded_token: dict = jwt.decode(token, settings.jwt_secret_key, algorithms=[ALGORITHM])
+        decoded_token: dict = jwt.decode(
+            token, settings.jwt_secret_key, algorithms=[ALGORITHM]
+        )
 
         return decoded_token if decoded_token["exp"] >= time.time() else None
     except:
@@ -65,4 +73,3 @@ def decode_jwt(token: str) -> dict:
 def generate_password_drop_link(uid: str):
     """генерация ссылки для сброса пароля, которая передается в письме на почту"""
     return f"/api/user/password/reset/{uid}"
-

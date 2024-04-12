@@ -27,11 +27,13 @@ async def handle_upload(file: UploadFile) -> str:
     content: bytes = await file.read()
 
     if file.content_type not in ALLOWED_UPLOAD_TYPES:
-        raise HTTPException(status_code=406, detail="Only .jpeg or .png or .txt or .svd files allowed")
+        raise HTTPException(
+            status_code=406, detail="Only .jpeg or .png or .txt or .svd files allowed"
+        )
 
     file_name = random_string(16) + ext
 
-    async with aiofiles.open(os.path.join(img_dir, file_name), mode='wb') as f:
+    async with aiofiles.open(os.path.join(img_dir, file_name), mode="wb") as f:
         await f.write(content)
 
     return file_name

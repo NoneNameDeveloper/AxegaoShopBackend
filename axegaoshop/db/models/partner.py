@@ -5,6 +5,7 @@ from tortoise import fields
 class Partner(Model):
     """таблица с партнерами (фоторгафии полноразмерные, сжимаются для
     админки на фронте)"""
+
     id = fields.IntField(pk=True)
 
     created_datetime = fields.DatetimeField(auto_now_add=True)
@@ -15,4 +16,4 @@ class Partner(Model):
         table = "partners"
 
     class PydanticMeta:
-        exclude = ("created_datetime", )
+        exclude = ("created_datetime",)

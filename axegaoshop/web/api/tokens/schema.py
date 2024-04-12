@@ -13,5 +13,6 @@ class TokenCreated(BaseModel):
 
 class TokenRequest(BaseModel):
     """request to token in /user/login"""
+
     email: str
     password: typing.Optional[str] = None

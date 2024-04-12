@@ -2,7 +2,11 @@ from fastapi import APIRouter, HTTPException, Depends
 from tortoise.expressions import Q
 
 from axegaoshop.db.models.product import ProductPhoto, Product
-from axegaoshop.web.api.products.photos.schema import PhotoIn_Pydantic, PhotoCreate, PhotoUpdate
+from axegaoshop.web.api.products.photos.schema import (
+    PhotoIn_Pydantic,
+    PhotoCreate,
+    PhotoUpdate,
+)
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -10,10 +14,7 @@ from axegaoshop.services.security.users import current_user_is_admin
 router = APIRouter()
 
 
-@router.get(
-    path="/product/{id}/photos",
-    response_model=list[PhotoIn_Pydantic]
-)
+@router.get(path="/product/{id}/photos", response_model=list[PhotoIn_Pydantic])
 async def get_product_photo(id: int):
     if not await Product.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
@@ -24,16 +25,13 @@ async def get_product_photo(id: int):
 @router.post(
     path="/product/{id}/photos",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=PhotoIn_Pydantic
+    response_model=PhotoIn_Pydantic,
 )
 async def create_product_photo(id: int, photo: PhotoCreate):
     if not await Product.get_or_none(id=id):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
-    photo_ = ProductPhoto(
-        photo=photo.photo,
-        product_id=id
-    )
+    photo_ = ProductPhoto(photo=photo.photo, product_id=id)
 
     await photo_.save()
 
@@ -43,7 +41,7 @@ async def create_product_photo(id: int, photo: PhotoCreate):
 @router.patch(
     path="/photo/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=PhotoIn_Pydantic
+    response_model=PhotoIn_Pydantic,
 )
 async def update_product_photo(id: int, photo: PhotoUpdate):
     """передавать айди фотографии"""
@@ -52,7 +50,9 @@ async def update_product_photo(id: int, photo: PhotoUpdate):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     if photo.main:
-        await ProductPhoto.filter(Q(Q(main=True) & Q(product_id=photo_db.product_id))).update(main=False)
+        await ProductPhoto.filter(
+            Q(Q(main=True) & Q(product_id=photo_db.product_id))
+        ).update(main=False)
 
     await ProductPhoto.filter(id=id).update(**photo.model_dump(exclude_unset=True))
 
@@ -62,7 +62,7 @@ async def update_product_photo(id: int, photo: PhotoUpdate):
 @router.delete(
     path="/photo/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def delete_product_photo(id: int):
     if not await ProductPhoto.get_or_none(id=id):

@@ -4,6 +4,7 @@ from tortoise import fields
 
 class PaymentSettingsOzone(Model):
     """таблица с данными о платежке Sbp OzoneBank"""
+
     id = fields.IntField(pk=True)
 
     name = fields.TextField(null=True)  # название настройки (акка)
@@ -30,5 +31,3 @@ async def get_ozone_bank_data() -> PaymentSettingsOzone | None:
         return None
 
     return await p_s_o.first()
-
-

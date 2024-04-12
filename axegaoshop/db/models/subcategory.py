@@ -8,14 +8,16 @@ from tortoise import fields
 class Subcategory(Model):
     """таблица с подкатегориями
     (Операционные системы -> *Windows*, *Linux*...)"""
+
     id = fields.IntField(pk=True)
 
     created_datetime = fields.DatetimeField(default=datetime.now)
 
     title = fields.CharField(max_length=500)
 
-    category: fields.ForeignKeyRelation = fields.ForeignKeyField("axegaoshop.Category",
-                                                                 related_name="subcategories")
+    category: fields.ForeignKeyRelation = fields.ForeignKeyField(
+        "axegaoshop.Category", related_name="subcategories"
+    )
 
     order_id = fields.IntField(null=False)
 
@@ -40,13 +42,15 @@ class Subcategory(Model):
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
         if not kwargs.get("repeat"):
-            last_cat_id = (await Subcategory.filter(category_id=self.category_id).order_by("id"))
+            last_cat_id = await Subcategory.filter(
+                category_id=self.category_id
+            ).order_by("id")
             if not last_cat_id:
                 self.order_id = 1
             else:
                 self.order_id = last_cat_id[-1].id + 1
         else:
-            del kwargs['repeat']
+            del kwargs["repeat"]
         await super().save(*args, **kwargs)
 
 

@@ -21,4 +21,4 @@ class SubcategoryUpdate(BaseModel):
     category_id: typing.Optional[int] = None
 
 
-SubcategoryIn_Pydantic = pydantic_model_creator(Subcategory, exclude=("category", ))
+SubcategoryIn_Pydantic = pydantic_model_creator(Subcategory, exclude=("category",))

@@ -1,13 +1,14 @@
-from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
 
-import aioyagmail
 import yagmail
 
 from axegaoshop.services.notifications.mailing.utils import render_template
 from axegaoshop.settings import settings
 
 
+@dataclass
 class MessageTypes:
+    """типы почтовых сообщений"""
     RESET_PASSWORD = "reset.html"
     SHIPPING = "shipping.html"
     PURCHASE = "purchase.html"
@@ -26,10 +27,7 @@ class Mailer:
         # получатель письма
         self.recipient = recipient
 
-    def send_reset(
-            self,
-            reset_url: str
-    ):
+    def send_reset(self, reset_url: str):
         """письмо на сброс пароля"""
         self.mailer_.send(
             self.recipient,
@@ -38,17 +36,15 @@ class Mailer:
         )
 
     def send_shipping(
-            self,
-            parameters: list[dict],
-            total_sum: float,
-            total_count: int,
-            hand: bool = True
+        self,
+        parameters: list[dict],
+        total_sum: float,
+        total_count: int,
+        hand: bool = True,
     ):
         """письмо на покупку товара"""
-        print(parameters)
-        print(total_count, total_sum)
         for p in parameters:
-            p['photo'] = "http://fileshare.su:8000/api/uploads/L3ZKA1tU667CvcJn.png"
+            p["photo"] = "http://fileshare.su:8000/api/uploads/L3ZKA1tU667CvcJn.png"
         if not hand:
             self.mailer_.send(
                 self.recipient,
@@ -57,7 +53,7 @@ class Mailer:
                     MessageTypes.PURCHASE,
                     parameters=parameters,
                     total_sum=total_sum,
-                    total_count=total_count
+                    total_count=total_count,
                 ),
             )
         else:
@@ -68,20 +64,14 @@ class Mailer:
                     MessageTypes.SHIPPING,
                     parameters=parameters,
                     total_sum=total_sum,
-                    total_count=total_count
+                    total_count=total_count,
                 ),
             )
 
     def send_ticket_message(self, content: str):
+        """отправка сообщения из тикета"""
         self.mailer_.send(
             self.recipient,
             subject="LoftSoft Сообщение от Поддержки",
-            contents=render_template(
-                MessageTypes.TICKET_MESSAGE,
-                content=content
-            ),
+            contents=render_template(MessageTypes.TICKET_MESSAGE, content=content),
         )
-#
-# m = Mailer(recipient="homycoder@gmail.com")
-#
-# m.send_reset("https://google.com")

@@ -10,8 +10,12 @@ async def clear_amount_of_purchasing() -> None:
     """завершение заказов и заявок на пополнения для освобождения
     суммы с копейками"""
     ten_minutes_delta = datetime.datetime.now() - timedelta(minutes=10)
-    orders = Order.filter(created_datetime__lt=ten_minutes_delta, status="waiting_payment")
-    replenishes = Replenish.filter(created_datetime__lt=ten_minutes_delta, status="waiting_payment")
+    orders = Order.filter(
+        created_datetime__lt=ten_minutes_delta, status="waiting_payment"
+    )
+    replenishes = Replenish.filter(
+        created_datetime__lt=ten_minutes_delta, status="waiting_payment"
+    )
 
     await orders.update(status="canceled")
     await orders.update(status="canceled")
@@ -23,4 +27,3 @@ async def clear_amount_of_purchasing() -> None:
 
     for value in total:
         await rem_amount(float(value[0]) if value[0] else None)
-

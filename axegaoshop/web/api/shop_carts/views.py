@@ -20,13 +20,17 @@ router = APIRouter()
     dependencies=[Depends(JWTBearer())],
     response_model=UserCart_Pydantic,
 )
-async def add_or_create_cart(data: ProductToCart, user: User = Depends(get_current_user)):
+async def add_or_create_cart(
+    data: ProductToCart, user: User = Depends(get_current_user)
+):
     """
     Работа с корзиной пользователя
     1. В count указывать **полное** количество товара (не инкремент/декремент).
     2. При передаче count=0 происходит **удаление товара** из корзины.
     """
-    if not await Product.get_or_none(id=data.product_id, parameters__id=data.parameter_id):
+    if not await Product.get_or_none(
+        id=data.product_id, parameters__id=data.parameter_id
+    ):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
     await add_to_cart(user.id, data.product_id, data.parameter_id, data.count)
@@ -36,6 +40,7 @@ async def add_or_create_cart(data: ProductToCart, user: User = Depends(get_curre
     # [await order.cancel() for order in orders]
 
     return await UserCart_Pydantic.from_queryset_single(User.filter(id=user.id).first())
+
 
 # @router.patch(
 #     path="/photo/{id}",

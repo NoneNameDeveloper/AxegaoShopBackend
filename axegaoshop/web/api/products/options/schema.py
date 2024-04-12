@@ -18,4 +18,4 @@ class OptionCreate(BaseModel):
     is_pk: typing.Optional[bool] = False
 
 
-OptionIn_Pydantic = pydantic_model_creator(Option, exclude=("product", ))
+OptionIn_Pydantic = pydantic_model_creator(Option, exclude=("product",))

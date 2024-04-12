@@ -6,6 +6,7 @@ from tortoise import fields
 class Category(Model):
     """таблица с категориями
     (Операционные системы, Офис, Безопасность...)"""
+
     id = fields.IntField(pk=True)
 
     created_datetime = fields.DatetimeField(auto_now_add=True)
@@ -31,13 +32,13 @@ class Category(Model):
             return 0
 
     class PydanticMeta:
-        computed = ("subcategories_count", )
-        exclude = ("subcategories.products.shop_cart", )
+        computed = ("subcategories_count",)
+        exclude = ("subcategories.products.shop_cart",)
         max_recursion = 3
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
-        last_cat_id = (await Category.all().order_by("id"))
+        last_cat_id = await Category.all().order_by("id")
 
         if not last_cat_id:
             self.order_id = 1

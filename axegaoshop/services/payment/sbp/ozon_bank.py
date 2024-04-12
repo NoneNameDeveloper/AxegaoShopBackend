@@ -1,18 +1,21 @@
-import asyncio
+import datetime
+from dataclasses import dataclass
 
 import aiohttp
-import datetime
 
 from pydantic import BaseModel, Field, computed_field
 
 OZONE_BASE_URL = "https://finance.ozon.ru"
 
 
+@dataclass
 class OzoneMethods:
+    """методы API озона, которые используем"""
     AUTH_LOGIN: str = "/api/v2/auth_login"
     CLIENT_OPERATIONS: str = "/api/v2/clientOperations"
 
 
+@dataclass
 class EffectTypes:
     """тип платежей в истории (поступление, отправка)"""
     INPUT: str = "EFFECT_CREDIT"
@@ -20,6 +23,7 @@ class EffectTypes:
 
 
 class PaymentModel(BaseModel):
+    """модель возвращаемого ответа от сервера Ozone Bank"""
     id: str
     operation_id: str = Field(str, alias="operationId")
     sender: str = Field(str, alias="purpose")  # отправитель
@@ -35,6 +39,11 @@ class PaymentModel(BaseModel):
 
 
 class OzoneBank:
+    """класс для работы с приватным API Ozone Bank-а
+
+     - проверка платежей
+     - идентификация платежа по копейкам
+    """
     def __init__(self, pin_code: str, secure_refresh_token: str):
         self.pin_code: str = pin_code
         self.secure_refresh_token: str = secure_refresh_token
@@ -42,9 +51,9 @@ class OzoneBank:
         self.obank_session_token: str | None = None
 
         self.headers = {
-            'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0',
-            'Accept': 'application/json',
-            'Accept-Language': 'en-US,en;q=0.5',
+            "User-Agent": "Mozilla/5.0 (X11; Linux x86_64; rv:122.0) Gecko/20100101 Firefox/122.0",
+            "Accept": "application/json",
+            "Accept-Language": "en-US,en;q=0.5",
         }
 
     async def prepare(self):
@@ -57,7 +66,7 @@ class OzoneBank:
 
     async def __get_refresh_cookies(self) -> dict:
         """getting cookies for refreshing access token"""
-        return {'__Secure-refresh-token': self.secure_refresh_token}
+        return {"__Secure-refresh-token": self.secure_refresh_token}
 
     async def __refresh_obank_token(self) -> str | None:
         """
@@ -67,12 +76,13 @@ class OzoneBank:
             None - invalid data
         """
         json_data = {
-            'pincode': '1593',
+            "pincode": "1593",
         }
-        async with aiohttp.ClientSession(cookies=await self.__get_refresh_cookies(), headers=self.headers) as session:
+        async with aiohttp.ClientSession(
+            cookies=await self.__get_refresh_cookies(), headers=self.headers
+        ) as session:
             async with session.post(
-                    url=OZONE_BASE_URL + OzoneMethods.AUTH_LOGIN,
-                    json=json_data
+                url=OZONE_BASE_URL + OzoneMethods.AUTH_LOGIN, json=json_data
             ) as response:
 
                 if response.status == 200:
@@ -89,30 +99,34 @@ class OzoneBank:
 
     async def __get_auth_cookies(self) -> dict:
         """getting every request cookies"""
-        return {'__OBANK_session': self.obank_session_token}
+        return {"__OBANK_session": self.obank_session_token}
 
     async def __get_client_operations(self) -> list[PaymentModel] | None:
         """get payment history"""
         json_data = {
-            'cursors': {
-                'next': None,
-                'prev': None,
+            "cursors": {
+                "next": None,
+                "prev": None,
             },
-            'perPage': 100,
-            'filter': {
-                'categories': [],
-                'effect': EffectTypes.INPUT,
+            "perPage": 100,
+            "filter": {
+                "categories": [],
+                "effect": EffectTypes.INPUT,
             },
         }
-        async with aiohttp.ClientSession(cookies=await self.__get_auth_cookies()) as session:
+        async with aiohttp.ClientSession(
+            cookies=await self.__get_auth_cookies()
+        ) as session:
             async with session.post(
-                    url=OZONE_BASE_URL + OzoneMethods.CLIENT_OPERATIONS,
-                    json=json_data
+                url=OZONE_BASE_URL + OzoneMethods.CLIENT_OPERATIONS, json=json_data
             ) as response:
                 if response.status == 200:
                     response_json = await response.json(content_type=None)
 
-                    return [PaymentModel.model_validate(data) for data in response_json['items']]
+                    return [
+                        PaymentModel.model_validate(data)
+                        for data in response_json["items"]
+                    ]
                 else:
                     return None
 
@@ -123,7 +137,9 @@ class OzoneBank:
         if not client_operations:
             return False
 
-        client_operations = filter((lambda x: x.pay_datetime > datetime_from), client_operations)
+        client_operations = filter(
+            (lambda x: x.pay_datetime > datetime_from), client_operations
+        )
         for client_operation in client_operations:
 
             if str(client_operation.amount) == str(total_sum):

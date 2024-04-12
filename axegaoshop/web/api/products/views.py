@@ -6,11 +6,23 @@ from fastapi import APIRouter, Depends, HTTPException
 from tortoise.expressions import Q
 from tortoise.functions import Avg, Coalesce
 
-from axegaoshop.db.models.product import Product, Parameter, Option, ProductPhoto, ProductData, change_product_order
+from axegaoshop.db.models.product import (
+    Product,
+    Parameter,
+    Option,
+    ProductPhoto,
+    ProductData,
+    change_product_order,
+)
 from axegaoshop.db.models.review import Review
 from axegaoshop.db.models.subcategory import Subcategory
 
-from axegaoshop.web.api.products.schema import ProductCreate, ProductIn_Pydantic, ProductUpdate, ProductDataOut
+from axegaoshop.web.api.products.schema import (
+    ProductCreate,
+    ProductIn_Pydantic,
+    ProductUpdate,
+    ProductDataOut,
+)
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
@@ -20,22 +32,21 @@ router = APIRouter()
 
 def transliterate_query(query: str) -> str:
     query = query.lower()
-    return translit(query, "ru", reversed=True) if "вин" not in query else (translit(query, "ru", reversed=True).
-                                                                            replace("v", "w"))
+    return (
+        translit(query, "ru", reversed=True)
+        if "вин" not in query
+        else (translit(query, "ru", reversed=True).replace("v", "w"))
+    )
 
 
-@router.get(
-    "/products",
-    status_code=200,
-    response_model=list[ProductIn_Pydantic]
-)
+@router.get("/products", status_code=200, response_model=list[ProductIn_Pydantic])
 async def get_products(
-        price_sort: typing.Optional[bool] = None,
-        rating_sort: typing.Optional[bool] = None,
-        sale_sort: typing.Optional[bool] = None,
-        query: typing.Optional[str] = None,
-        limit: int = 20,
-        offset: int = 0,
+    price_sort: typing.Optional[bool] = None,
+    rating_sort: typing.Optional[bool] = None,
+    sale_sort: typing.Optional[bool] = None,
+    query: typing.Optional[str] = None,
+    limit: int = 20,
+    offset: int = 0,
 ):
     """
     Поиск карточек товара в базе данных для админа и пользователей:
@@ -49,11 +60,9 @@ async def get_products(
 
     if not query:
 
-        sorted_products = (Product.filter().all()
-                           .prefetch_related()
-                           .limit(limit)
-                           .offset(offset)
-                           )
+        sorted_products = (
+            Product.filter().all().prefetch_related().limit(limit).offset(offset)
+        )
         if price_sort:
             price_sort = "card_price"
         elif price_sort == False:
@@ -68,7 +77,10 @@ async def get_products(
         elif rating_sort is None:
             rating_sort = ""
 
-        sortings = [price_sort if price_sort else None, rating_sort if rating_sort else None]
+        sortings = [
+            price_sort if price_sort else None,
+            rating_sort if rating_sort else None,
+        ]
         sortings = list(filter(lambda x: x is not None, sortings))
 
         if price_sort or rating_sort:
@@ -83,22 +95,29 @@ async def get_products(
             # .order_by(
             #     *sortings
             # ))
-            sorted_products = (sorted_products
-            .annotate(
-                reviews_avg=Coalesce(Avg(
-                    'parameters__order_parameters__order__reviews__rate',
-                    _filter=(Q(Q(parameters__order_parameters__order__reviews__status="accepted")))),
+            sorted_products = sorted_products.annotate(
+                reviews_avg=Coalesce(
+                    Avg(
+                        "parameters__order_parameters__order__reviews__rate",
+                        _filter=(
+                            Q(
+                                Q(
+                                    parameters__order_parameters__order__reviews__status="accepted"
+                                )
+                            )
+                        ),
+                    ),
                     0,
                 )
-            )
-            .order_by(
-                *sortings
-            ))
+            ).order_by(*sortings)
 
-        sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
-            sorted_products
+        sorted_products = (
+            sorted_products.filter(card_has_sale=True) if sale_sort else sorted_products
+        )
 
-        rev = await Review.filter(status="accepted").values_list("product_id", flat=True)
+        rev = await Review.filter(status="accepted").values_list(
+            "product_id", flat=True
+        )
 
         result_ = []
 
@@ -116,15 +135,19 @@ async def get_products(
     else:
         trans_query: str = transliterate_query(query)
         print(trans_query)
-        return await ProductIn_Pydantic.from_queryset(Product.filter(Q(title__istartswith=query) | Q(title__istartswith=trans_query)).
-                                                      limit(limit).
-                                                      offset(offset))
+        return await ProductIn_Pydantic.from_queryset(
+            Product.filter(
+                Q(title__istartswith=query) | Q(title__istartswith=trans_query)
+            )
+            .limit(limit)
+            .offset(offset)
+        )
 
 
 @router.get(
     "/product/{id}/data",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=list[ProductDataOut]
+    response_model=list[ProductDataOut],
 )
 async def items_by_product_get(id: int):
     """получение данных по товарам (строк) для админки"""
@@ -137,9 +160,13 @@ async def items_by_product_get(id: int):
 
     for parameter in await parameters_all.all():
         parameter_id = parameter.id
-        items = await ProductData.filter(parameter_id=parameter_id, parameter__give_type__not="hand", is_active=True).values('value')
-        items_list = [item['value'] for item in items]
-        response_data.append(ProductDataOut(parameter_id=parameter_id, items=items_list))
+        items = await ProductData.filter(
+            parameter_id=parameter_id, parameter__give_type__not="hand", is_active=True
+        ).values("value")
+        items_list = [item["value"] for item in items]
+        response_data.append(
+            ProductDataOut(parameter_id=parameter_id, items=items_list)
+        )
 
     return response_data
 
@@ -147,7 +174,7 @@ async def items_by_product_get(id: int):
 @router.patch(
     "/product/{id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=ProductIn_Pydantic
+    response_model=ProductIn_Pydantic,
 )
 async def update_product(id: int, data: ProductUpdate):
     """обновление данных о товаре (только данных о товаре)"""
@@ -160,16 +187,15 @@ async def update_product(id: int, data: ProductUpdate):
 
 
 @router.get(
-    "/subcategory/{subcategory_id}/products",
-    response_model=list[ProductIn_Pydantic]
+    "/subcategory/{subcategory_id}/products", response_model=list[ProductIn_Pydantic]
 )
 async def subcategory_products_get(
-        subcategory_id: int,
-        price_sort: typing.Optional[bool] = None,
-        rating_sort: typing.Optional[bool] = None,
-        sale_sort: typing.Optional[bool] = None,
-        limit: int = 20,
-        offset: int = 0,
+    subcategory_id: int,
+    price_sort: typing.Optional[bool] = None,
+    rating_sort: typing.Optional[bool] = None,
+    sale_sort: typing.Optional[bool] = None,
+    limit: int = 20,
+    offset: int = 0,
 ):
     """
     Получение товаров из поджкатегории
@@ -181,11 +207,13 @@ async def subcategory_products_get(
     if not await Subcategory.get_or_none(id=subcategory_id):
         raise HTTPException(status_code=404, detail="SUBCATEGORY_NOT_FOUND")
 
-    sorted_products = (Product.filter(subcategory_id=subcategory_id).all()
-                       .prefetch_related()
-                       .limit(limit)
-                       .offset(offset)
-                       )
+    sorted_products = (
+        Product.filter(subcategory_id=subcategory_id)
+        .all()
+        .prefetch_related()
+        .limit(limit)
+        .offset(offset)
+    )
     if price_sort:
         price_sort = "card_price"
     elif price_sort == False:
@@ -200,7 +228,10 @@ async def subcategory_products_get(
     elif rating_sort is None:
         rating_sort = ""
 
-    sortings = [price_sort if price_sort else None, rating_sort if rating_sort else None]
+    sortings = [
+        price_sort if price_sort else None,
+        rating_sort if rating_sort else None,
+    ]
     sortings = list(filter(lambda x: x is not None, sortings))
 
     if price_sort or rating_sort:
@@ -215,20 +246,25 @@ async def subcategory_products_get(
         # .order_by(
         #     *sortings
         # ))
-        sorted_products = (sorted_products
-        .annotate(
-            reviews_avg=Coalesce(Avg(
-                'parameters__order_parameters__order__reviews__rate',
-                _filter=(Q(Q(parameters__order_parameters__order__reviews__status="accepted")))),
+        sorted_products = sorted_products.annotate(
+            reviews_avg=Coalesce(
+                Avg(
+                    "parameters__order_parameters__order__reviews__rate",
+                    _filter=(
+                        Q(
+                            Q(
+                                parameters__order_parameters__order__reviews__status="accepted"
+                            )
+                        )
+                    ),
+                ),
                 0,
             )
-        )
-        .order_by(
-            *sortings
-        ))
+        ).order_by(*sortings)
 
-    sorted_products = sorted_products.filter(card_has_sale=True) if sale_sort else \
-        sorted_products
+    sorted_products = (
+        sorted_products.filter(card_has_sale=True) if sale_sort else sorted_products
+    )
 
     rev = await Review.filter(status="accepted").values_list("product_id", flat=True)
 
@@ -249,11 +285,9 @@ async def subcategory_products_get(
 @router.post(
     "/product/",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=201
+    status_code=201,
 )
-async def create_product(
-        product_data: ProductCreate
-):
+async def create_product(product_data: ProductCreate):
     """
     *give_type* - тип выдачи.
       - string - обычные строки
@@ -281,19 +315,22 @@ async def create_product(
         card_price=product_data.card_price,
         card_has_sale=parameters_[0].has_sale,
         card_sale_price=float(parameters_[0].sale_price),
-        subcategory=subcategory
+        subcategory=subcategory,
     )
 
     await product.save()
-    parameters = [Parameter(
-        title=p.title,
-        description=p.description,
-        price=p.price,
-        has_sale=p.has_sale,
-        give_type=p.give_type,
-        sale_price=float(p.sale_price),
-        product=product
-    ) for p in parameters_]
+    parameters = [
+        Parameter(
+            title=p.title,
+            description=p.description,
+            price=p.price,
+            has_sale=p.has_sale,
+            give_type=p.give_type,
+            sale_price=float(p.sale_price),
+            product=product,
+        )
+        for p in parameters_
+    ]
 
     param_cache = []
 
@@ -303,19 +340,14 @@ async def create_product(
 
     for param_idx, p in enumerate(parameters_, start=0):
         for d in p.data:
-            p_d = ProductData(
-                parameter=param_cache[param_idx],
-                value=d
-            )
+            p_d = ProductData(parameter=param_cache[param_idx], value=d)
             await p_d.save()
 
     if options_:
-        options = [Option(
-            title=o.title,
-            value=o.value,
-            is_pk=o.is_pk,
-            product=product
-        ) for o in options_]
+        options = [
+            Option(title=o.title, value=o.value, is_pk=o.is_pk, product=product)
+            for o in options_
+        ]
 
         # saving options
         if all([await opt.is_available() for opt in options]):
@@ -323,11 +355,10 @@ async def create_product(
                 await opt.save()
 
     # добавление фото товара и назначение первой фотографии main
-    product_photo = [ProductPhoto(
-        photo=pp,
-        product=product,
-        main=True if idx == 0 else False
-    ) for idx, pp in enumerate(photos_, start=0)]
+    product_photo = [
+        ProductPhoto(photo=pp, product=product, main=True if idx == 0 else False)
+        for idx, pp in enumerate(photos_, start=0)
+    ]
 
     for pht in product_photo:
         await pht.save()
@@ -335,10 +366,7 @@ async def create_product(
     return {"id": product.id}
 
 
-@router.get(
-    "/product/{id}",
-    response_model=ProductIn_Pydantic
-)
+@router.get("/product/{id}", response_model=ProductIn_Pydantic)
 async def get_product(id: int):
     product_ = await Product.get_or_none(id=id)
 
@@ -349,9 +377,7 @@ async def get_product(id: int):
 
 
 @router.delete(
-    "/product/{id}",
-    description="Delete product and all related data",
-    status_code=200
+    "/product/{id}", description="Delete product and all related data", status_code=200
 )
 async def delete_product(id: int):
     product_ = await Product.get_or_none(id=id)
@@ -365,7 +391,7 @@ async def delete_product(id: int):
 @router.post(
     "/product/order",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def change_product_order_router(product_ids: list[int]):
     res = await change_product_order(product_ids)

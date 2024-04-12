@@ -4,6 +4,7 @@ from tortoise import fields
 
 class TelegramSetting(Model):
     """таблица с данными об уведомлениях в телеграмм"""
+
     id = fields.IntField(pk=True)
 
     token = fields.TextField(null=False)  # токен бота
@@ -14,6 +15,7 @@ class TelegramSetting(Model):
 
 class TelegramReciever(Model):
     """таблица с получателями уведов в телеграммк"""
+
     id = fields.IntField(pk=True)
 
     telegram_id = fields.BigIntField(null=False)  # ID в телеграмме
@@ -44,6 +46,3 @@ async def get_tg_recievers() -> list[TelegramReciever] | None:
         return []
 
     return await recievers.all()
-
-
-

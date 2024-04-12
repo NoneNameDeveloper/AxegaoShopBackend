@@ -5,6 +5,7 @@ from tortoise import fields
 
 class PasswordReset(Model):
     """таблица сбросов пароля (можно использовать ссылку единожды)"""
+
     id = fields.UUIDField(pk=True)
 
     email = fields.TextField(null=False)

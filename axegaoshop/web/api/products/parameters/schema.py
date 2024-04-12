@@ -35,8 +35,9 @@ class ParameterCreate(BaseModel):
                     "has_sale": False,
                     "give_type": "string",
                     "data": [
-                        "FWBFIWEF-FWEF-W-EFWE-F-WE", "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE"
-                    ]
+                        "FWBFIWEF-FWEF-W-EFWE-F-WE",
+                        "QWEQE-QEQWEQW-EQWEQWEQW-GERGRE",
+                    ],
                 }
             ]
         }
@@ -57,4 +58,4 @@ class ParameterOrderChange(BaseModel):
     param_2: int
 
 
-ParameterIn_Pydantic = pydantic_model_creator(Parameter, exclude=("product", ))
+ParameterIn_Pydantic = pydantic_model_creator(Parameter, exclude=("product",))

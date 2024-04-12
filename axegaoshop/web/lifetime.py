@@ -20,6 +20,9 @@ def register_startup_event(
 
     @app.on_event("startup")
     async def _startup() -> None:
-        async_scheduler.add_job(clear_amount_of_purchasing, 'interval', seconds=4, misfire_grace_time=10)
+        async_scheduler.add_job(
+            clear_amount_of_purchasing, "interval", seconds=4, misfire_grace_time=10
+        )
         async_scheduler.start()
+
     return _startup

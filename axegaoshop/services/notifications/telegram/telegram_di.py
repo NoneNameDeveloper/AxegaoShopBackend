@@ -3,6 +3,7 @@ from .service import TelegramService
 
 
 async def get_telegram_data():
+    """получение данных по телеграмму для уведов"""
     telegram_settings = await get_tg_settings()
 
     error = False

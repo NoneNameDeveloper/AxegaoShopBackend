@@ -11,13 +11,18 @@ from axegaoshop.db.models.user import User
 
 class Ticket(Model):
     """таблица с данными по тикетам"""
+
     id = fields.IntField(pk=True, unique=True)
 
     user = fields.ForeignKeyField("axegaoshop.User", related_name="tickets")
 
-    status = fields.TextField(null=False, default="opened")  # статусы тикета: opened, closed
+    status = fields.TextField(
+        null=False, default="opened"
+    )  # статусы тикета: opened, closed
 
-    created_at = fields.DatetimeField(auto_now_add=True, null=False)  # дата-время закрытия
+    created_at = fields.DatetimeField(
+        auto_now_add=True, null=False
+    )  # дата-время закрытия
     closed_at = fields.DatetimeField(null=True)  # дата-время закрытия
 
     messages: fields.ReverseRelation["TicketMessage"]
@@ -34,11 +39,21 @@ class Ticket(Model):
         ordering = ["created_at"]
 
     class PydanticMeta:
-        computed = ("last_message", )
-        exclude = ("user.reviews", "user.orders", "user.shop_cart",
-                   "user.tickets", "user.reg_datetime", "user.balance",
-                   "user.username", "user.is_active", "user.is_anonymous",
-                   "user.is_admin", "user.photo", "user.replenishes",)
+        computed = ("last_message",)
+        exclude = (
+            "user.reviews",
+            "user.orders",
+            "user.shop_cart",
+            "user.tickets",
+            "user.reg_datetime",
+            "user.balance",
+            "user.username",
+            "user.is_active",
+            "user.is_anonymous",
+            "user.is_admin",
+            "user.photo",
+            "user.replenishes",
+        )
 
     async def close(self):
         """закрытие тикета"""
@@ -49,6 +64,7 @@ class Ticket(Model):
 
 class TicketMessage(Model):
     """таблица с диалогами и сообщениями админа/юзера"""
+
     id = fields.IntField(pk=True, unique=True)
 
     ticket = fields.ForeignKeyField("axegaoshop.Ticket", related_name="messages")
@@ -68,11 +84,14 @@ class TicketMessage(Model):
 
 class TicketMessageAttachment(Model):
     """прикрепленные файлы к сообщениям в ТП"""
+
     id = fields.IntField(pk=True, unique=True)
 
     file = fields.TextField(null=False)  # айди файла из /uploads
 
-    ticket_message = fields.ForeignKeyField("axegaoshop.TicketMessage", related_name="attachments")
+    ticket_message = fields.ForeignKeyField(
+        "axegaoshop.TicketMessage", related_name="attachments"
+    )
 
     class Meta:
         table = "ticket_attachments"
@@ -89,13 +108,15 @@ async def get_user_all_dialog(user: User) -> list[dict]:
     all_messages = await TicketMessage.filter(ticket__user=user).all()
 
     for message in all_messages:
-        data.append({
-            "role": message.role,
-            "message": message.text,
-            "created_at": message.created_at,
-            "attachments": await message.attachments.all().values_list("file", flat=True)
-        })
+        data.append(
+            {
+                "role": message.role,
+                "message": message.text,
+                "created_at": message.created_at,
+                "attachments": await message.attachments.all().values_list(
+                    "file", flat=True
+                ),
+            }
+        )
 
     return data
-
-

@@ -11,8 +11,12 @@ from axegaoshop.web.api.products.parameters.schema import ParameterCreate
 
 class ProductSorting(BaseModel):
     price: typing.Optional[bool] = False  # сортировка по цене (false - возрастание)
-    rating: typing.Optional[bool] = False  # сортировка по рейтингу (false - возрастание)
-    sale: typing.Optional[bool] = False  # сортировка по скидке (false - все товары, true - только со скидками)
+    rating: typing.Optional[bool] = (
+        False  # сортировка по рейтингу (false - возрастание)
+    )
+    sale: typing.Optional[bool] = (
+        False  # сортировка по скидке (false - все товары, true - только со скидками)
+    )
 
 
 class ProductCreate(BaseModel):
@@ -101,6 +105,9 @@ class ProductDataOut(BaseModel):
 ProductIn_Pydantic = pydantic_model_creator(
     Product,
     exclude=(
-        "parameters.data.id", "parameters.cart_product",
-        "cart_product", "product_photos.id"
-    ))
+        "parameters.data.id",
+        "parameters.cart_product",
+        "cart_product",
+        "product_photos.id",
+    ),
+)

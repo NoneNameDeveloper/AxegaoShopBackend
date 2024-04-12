@@ -8,8 +8,7 @@ from axegaoshop.services.utils import random_string
 
 
 def create_user_photo(username: str) -> str:
-    """генерация аватарки пользователя стандартной (первая буква логина)
-    """
+    """генерация аватарки пользователя стандартной (первая буква логина)"""
     avatar = Avatar().generate(200, string=username, filetype="PNG")
 
     file_uid = f"{random_string()}.png"

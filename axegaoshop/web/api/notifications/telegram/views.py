@@ -2,12 +2,23 @@ import asyncio
 
 from fastapi import APIRouter, HTTPException, Depends
 
-from axegaoshop.db.models.telegram_settings import get_tg_settings, get_tg_recievers, TelegramSetting, TelegramReciever
+from axegaoshop.db.models.telegram_settings import (
+    get_tg_settings,
+    get_tg_recievers,
+    TelegramSetting,
+    TelegramReciever,
+)
 from axegaoshop.services.notifications.telegram import TelegramService
-from axegaoshop.services.notifications.telegram.telegram_di import check_valid, get_telegram_data
+from axegaoshop.services.notifications.telegram.telegram_di import (
+    check_valid,
+    get_telegram_data,
+)
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
-from axegaoshop.web.api.notifications.telegram.schema import TelegramSettingUpdate, TelegramSettingIn
+from axegaoshop.web.api.notifications.telegram.schema import (
+    TelegramSettingUpdate,
+    TelegramSettingIn,
+)
 
 router = APIRouter()
 
@@ -15,7 +26,7 @@ router = APIRouter()
 @router.get(
     "/telegram/settings",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    response_model=TelegramSettingIn
+    response_model=TelegramSettingIn,
 )
 async def get_telegram_settings():
     telegram_settings = await get_tg_settings()
@@ -23,22 +34,22 @@ async def get_telegram_settings():
 
     if not telegram_settings:
         return TelegramSettingIn(
-            token="",
-            telegram_ids=[r.telegram_id for r in recievers]
+            token="", telegram_ids=[r.telegram_id for r in recievers]
         )
 
     return TelegramSettingIn(
-        token=telegram_settings.token,
-        telegram_ids=[r.telegram_id for r in recievers]
+        token=telegram_settings.token, telegram_ids=[r.telegram_id for r in recievers]
     )
 
 
 @router.post(
     "/telegram/settings/test",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
-async def test_notify_telegram(tg_service: TelegramService = Depends(get_telegram_data)):
+async def test_notify_telegram(
+    tg_service: TelegramService = Depends(get_telegram_data),
+):
     """отправка тестового уведомления"""
     if not tg_service:
         raise HTTPException(404, detail="CONFIGURE_TELEGRAM_SETTINGS")
@@ -49,7 +60,7 @@ async def test_notify_telegram(tg_service: TelegramService = Depends(get_telegra
 @router.post(
     "/telegram/settings",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def create_or_update_telegram_settings(data: TelegramSettingUpdate):
     """обновляет или созает данные по уведам в тг"""
@@ -62,9 +73,7 @@ async def create_or_update_telegram_settings(data: TelegramSettingUpdate):
 
     # записей нет, создаем новую
     if not telegram_settings:
-        await TelegramSetting.create(
-            token=data.token
-        )
+        await TelegramSetting.create(token=data.token)
 
     # обновление
     else:
@@ -73,15 +82,19 @@ async def create_or_update_telegram_settings(data: TelegramSettingUpdate):
     for r in recievers:
         if r not in data.telegram_ids:
             await TelegramReciever.filter(telegram_id=r).delete()
-    
+
     # создание получателей
-    [await TelegramReciever.create(telegram_id=id_) for id_ in data.telegram_ids if id_ not in recievers]
+    [
+        await TelegramReciever.create(telegram_id=id_)
+        for id_ in data.telegram_ids
+        if id_ not in recievers
+    ]
 
 
 @router.delete(
     "/telegram/settings/reciever/{telegram_id}",
     dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
-    status_code=200
+    status_code=200,
 )
 async def delete_reciever(telegram_id: int):
     """удаление получателя рассылок (telegran_id - айди человека в телеге)"""

@@ -23,8 +23,6 @@ async def get_upload(uid: str) -> FileResponse:
     file_: str = settings.storage_folder_images + "/" + uid
 
     if os.path.exists(settings.storage_folder_images + "/" + uid):
-        return FileResponse(
-            file_, status_code=200
-        )
+        return FileResponse(file_, status_code=200)
     else:
         raise HTTPException(status_code=404, detail="NOT_FOUND")

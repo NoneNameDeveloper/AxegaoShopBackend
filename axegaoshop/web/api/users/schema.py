@@ -29,7 +29,7 @@ class UserDropPassword(BaseModel):
 
 
 class UserReplenishBalance(BaseModel):
-    payment_type: typing.Literal['sbp']
+    payment_type: typing.Literal["sbp"]
     amount: float
 
 
@@ -68,21 +68,35 @@ class UserProductsComment(BaseModel):
     order_id: int  # айди заказа
 
 
-UserIn_Pydantic = pydantic_model_creator(User, exclude=("replenishes", "shop_cart.id", "shop_cart.items.id", "shop_cart.cart_product"))
+UserIn_Pydantic = pydantic_model_creator(
+    User,
+    exclude=(
+        "replenishes",
+        "shop_cart.id",
+        "shop_cart.items.id",
+        "shop_cart.cart_product",
+    ),
+)
 
-UserForAdmin_Pydantic = pydantic_model_creator(User, exclude=("shop_cart", "orders", "reviews", "replenishes"))
+UserForAdmin_Pydantic = pydantic_model_creator(
+    User, exclude=("shop_cart", "orders", "reviews", "replenishes")
+)
 
 UserCart_Pydantic = pydantic_model_creator(
     User,
     exclude=(
-        "shop_cart.id", "shop_cart.product.options", "shop_cart.product.category",
-        "shop_cart.product.parameters", "shop_cart.parameter.data", "shop_cart.parameter.id"
-        "shop_cart.product.category_id", "shop_cart.product.product_photos.id",
-        "shop_cart.parameter.product", "shop_cart.reviews", "orders", "replenishes"
-    )
+        "shop_cart.id",
+        "shop_cart.product.options",
+        "shop_cart.product.category",
+        "shop_cart.product.parameters",
+        "shop_cart.parameter.data",
+        "shop_cart.parameter.id" "shop_cart.product.category_id",
+        "shop_cart.product.product_photos.id",
+        "shop_cart.parameter.product",
+        "shop_cart.reviews",
+        "orders",
+        "replenishes",
+    ),
 )
 
-UserReplenish_Pydantic = pydantic_model_creator(
-    Replenish
-)
-
+UserReplenish_Pydantic = pydantic_model_creator(Replenish)

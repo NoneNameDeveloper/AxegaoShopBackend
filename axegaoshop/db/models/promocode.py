@@ -7,6 +7,7 @@ from tortoise import fields
 
 class Promocode(Model):
     """таблица с промокодами"""
+
     id = fields.IntField(pk=True)
 
     name = fields.CharField(max_length=100, unique=True)
@@ -26,7 +27,9 @@ class Promocode(Model):
     async def use(self):
         """используем промокод"""
         if not self.activations_count == -1:
-            await Promocode.filter(id=self.id).update(activations_count=F('activations_count') - 1)
+            await Promocode.filter(id=self.id).update(
+                activations_count=F("activations_count") - 1
+            )
 
     async def active(self):
         """проверка на активность промокода"""

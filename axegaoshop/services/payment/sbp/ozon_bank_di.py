@@ -10,8 +10,7 @@ async def get_ozone_bank() -> OzoneBank | None:
         return None
 
     return await OzoneBank(
-        pin_code=data.pin_code,
-        secure_refresh_token=data.token
+        pin_code=data.pin_code, secure_refresh_token=data.token
     ).prepare()
 
 
@@ -22,7 +21,4 @@ async def get_ozone_bank_raw(token: str, pin_code: str) -> OzoneBank | None:
     if not data:
         return None
 
-    return await OzoneBank(
-        pin_code=pin_code,
-        secure_refresh_token=token
-    ).prepare()
+    return await OzoneBank(pin_code=pin_code, secure_refresh_token=token).prepare()
