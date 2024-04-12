@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     host: str = "fileshare.su"
     port: int = 8000
 
-    front_hostname: str = "http://fileshare.su:3000"
+    front_hostname: str = ""
 
     # количество воркеров uvicorn
     workers_count: int = 1
