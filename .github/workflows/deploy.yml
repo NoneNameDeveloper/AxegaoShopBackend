@@ -21,6 +21,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Cat healthcheck
+        run: cat ./axegaoshop/web/api/healthcheck/views.py
+
       - name: Build Docker image
         run: docker build -t axegaoshop:latest .
 
