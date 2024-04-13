@@ -46,7 +46,7 @@ jobs:
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop.tar && rm -f ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop.tar
+          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop.tar # && rm -f ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop.tar
 
       - name: Transfer Docker image to remote server
         uses: appleboy/scp-action@v0.1.7
@@ -66,7 +66,7 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
           script: |
-            docker-compose down
+            docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml down
             docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml up -d
             docker rmi -f $(docker images -q)
 
