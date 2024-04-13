@@ -3,7 +3,7 @@ version: '3.9'
 services:
 
   web:
-    build: axegaoshop:latest
+    image: axegaoshop:latest
     container_name: axegaoshop_api
     command: python -m axegaoshop
     volumes:
