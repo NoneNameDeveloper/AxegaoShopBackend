@@ -74,7 +74,9 @@ async def register_user(
         raise HTTPException(status_code=401, detail="LOGIN_EXISTS")
 
     if user.email:
-        email_exists: bool = await User.filter(email__iexact=user.email).exists()
+        email_exists: bool = await User.filter(
+            email__iexact=user.email.strip()
+        ).exists()
 
         if email_exists:
             raise HTTPException(status_code=401, detail="EMAIL_EXISTS")
@@ -103,7 +105,9 @@ async def register_user(
     encrypted_password = get_hashed_password(user.password)
 
     new_user = User(
-        username=user.username, password=encrypted_password, email=user.email.lower()
+        username=user.username,
+        password=encrypted_password,
+        email=user.email.lower().strip(),
     )
     new_user.photo = create_user_photo(user.username)
     await new_user.save()
@@ -116,7 +120,7 @@ async def login_user(request: TokenRequest):
     """
     для получения access token для анонима (неавторизованного человека) передать username без пароля
     """
-    user = await User.filter(email__iexact=request.email).get_or_none()
+    user = await User.filter(email__iexact=request.email.strip()).get_or_none()
 
     if not user:
         raise HTTPException(status_code=401, detail="User not found")

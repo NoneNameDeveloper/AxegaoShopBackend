@@ -164,7 +164,6 @@ axegaoshop/db/migrations
 
 deploy/docker-compose.yml
 deploy/Dockerfile
-pyproject.toml
 deploy/deploy.sh
 .dockerignore
 axegaoshop/tests/
