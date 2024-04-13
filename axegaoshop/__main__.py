@@ -4,7 +4,7 @@ from axegaoshop.settings import settings
 
 
 def main() -> None:
-    """Entrypoint of the application."""
+    """Entrypoint of the application to start uvicorn"""
     uvicorn.run(
         "axegaoshop.web.application:get_app",
         workers=settings.workers_count,
