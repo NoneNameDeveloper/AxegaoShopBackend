@@ -14,9 +14,9 @@ services:
       - DATABASE_URL=postgres://postgres:postgres@web-db:5432/web
     depends_on:
       db:
-          condition: service_started
+        condition: service_started
       redis:
-        condition: service_healthy
+        condition: service_started
 
   db:
     image: postgres:alpine
