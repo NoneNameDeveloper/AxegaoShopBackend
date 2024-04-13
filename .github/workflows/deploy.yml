@@ -9,10 +9,13 @@ on:
       - master
 
 jobs:
+  lint:
+    uses: ./.github/workflows/lint.yml
+
   deploy:
     runs-on: ubuntu-latest
 
-    needs: lint
+    needs: [lint]
 
     steps:
       - name: Checkout code
