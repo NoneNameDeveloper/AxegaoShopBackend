@@ -6,8 +6,6 @@ services:
     image: axegaoshop:latest
     container_name: axegaoshop_api
     command: python -m axegaoshop
-    volumes:
-      - .:/code
     ports:
       - "8000:8000"
     environment:
