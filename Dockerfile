@@ -10,3 +10,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copying actuall application
 COPY . .
+COPY ./.env .
