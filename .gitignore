@@ -165,7 +165,6 @@ axegaoshop/db/migrations
 deploy/docker-compose.yml
 deploy/Dockerfile
 deploy/deploy.sh
-.dockerignore
 axegaoshop/tests/
 
 utils/mailing/

@@ -8,8 +8,6 @@ services:
     command: python -m axegaoshop
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@web-db:5432/web
     depends_on:
       db:
         condition: service_started
