@@ -23,8 +23,8 @@ jobs:
 
       - name: Define env vars
         run: |
-          echo ${PROD_ENV_VARS}
-          echo ${PROD_ENV_VARS} > .env
+          cat "${PROD_ENV_VARS}"
+          echo "${{ PROD_ENV_VARS }}" > .env
 
       - name: Build Docker image
         run: docker build -t axegaoshop:latest .
