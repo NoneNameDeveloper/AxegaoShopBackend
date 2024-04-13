@@ -14,12 +14,12 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build Docker image
-        run: docker build -t axegaoshop_test:latest .
+        run: docker build -t axegaoshop:latest .
 
       - name: Save Docker image as tar file
         run: |
-          docker save -o axegaoshop_test.tar axegaoshop_test:latest
-          chmod 664 axegaoshop_test.tar
+          docker save -o axegaoshop.tar axegaoshop:latest
+          chmod 664 axegaoshop.tar
 
       - name: Transfer Docker image to remote server
         uses: appleboy/scp-action@v0.1.7
@@ -28,7 +28,7 @@ jobs:
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: axegaoshop_test.tar
+          source: axegaoshop.tar
           target: ${{ secrets.REMOTE_SERVER_PATH }}
 
       - name: Creating docker image
@@ -38,7 +38,7 @@ jobs:
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop_test.tar && rm ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop_test.tar
+          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop.tar && rm ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshops.tar
 
       - name: Transfer Docker image to remote server
         uses: appleboy/scp-action@v0.1.7
