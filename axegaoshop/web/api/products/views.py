@@ -65,14 +65,14 @@ async def get_products(
         )
         if price_sort:
             price_sort = "card_price"
-        elif price_sort == False:
+        elif not price_sort:
             price_sort = "-card_price"
         elif price_sort is None:
             price_sort = ""
 
         if rating_sort:
             rating_sort = "reviews_avg"
-        elif rating_sort == False:
+        elif not rating_sort:
             rating_sort = "-reviews_avg"
         elif rating_sort is None:
             rating_sort = ""
@@ -84,17 +84,6 @@ async def get_products(
         sortings = list(filter(lambda x: x is not None, sortings))
 
         if price_sort or rating_sort:
-            # sorted_products = (sorted_products
-            # .annotate(
-            #     reviews_avg=Coalesce(Avg(
-            #         'parameters__order_parameters__order__reviews__rate',
-            #         _filter=(Q(Q(parameters__order_parameters__order__reviews__status="accepted") & Q(parameters__order_parameters__order__reviews__product_id=F("products.id"))))),
-            #         0,
-            #     )
-            # )
-            # .order_by(
-            #     *sortings
-            # ))
             sorted_products = sorted_products.annotate(
                 reviews_avg=Coalesce(
                     Avg(
@@ -134,7 +123,6 @@ async def get_products(
         return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
     else:
         trans_query: str = transliterate_query(query)
-        print(trans_query)
         return await ProductIn_Pydantic.from_queryset(
             Product.filter(
                 Q(title__istartswith=query) | Q(title__istartswith=trans_query)
@@ -216,14 +204,14 @@ async def subcategory_products_get(
     )
     if price_sort:
         price_sort = "card_price"
-    elif price_sort == False:
+    elif not price_sort:
         price_sort = "-card_price"
     elif price_sort is None:
         price_sort = ""
 
     if rating_sort:
         rating_sort = "reviews_avg"
-    elif rating_sort == False:
+    elif not rating_sort:
         rating_sort = "-reviews_avg"
     elif rating_sort is None:
         rating_sort = ""
@@ -235,17 +223,6 @@ async def subcategory_products_get(
     sortings = list(filter(lambda x: x is not None, sortings))
 
     if price_sort or rating_sort:
-        # sorted_products = (sorted_products
-        # .annotate(
-        #     reviews_avg=Coalesce(Avg(
-        #         'parameters__order_parameters__order__reviews__rate',
-        #         _filter=(Q(Q(parameters__order_parameters__order__reviews__status="accepted") & Q(parameters__order_parameters__order__reviews__product_id=F("products.id"))))),
-        #         0,
-        #     )
-        # )
-        # .order_by(
-        #     *sortings
-        # ))
         sorted_products = sorted_products.annotate(
             reviews_avg=Coalesce(
                 Avg(
@@ -277,7 +254,8 @@ async def subcategory_products_get(
         else:
             result_.append(value)
 
-    result_ = sorted(result_, key=lambda x: x.reviews_avg)
+    if len(result_) > 0 and hasattr(result_[0], "reviews_avg"):
+        result_ = sorted(result_, key=lambda x: x.reviews_avg)
 
     return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
 
