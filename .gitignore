@@ -159,17 +159,6 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-axegaoshop/db/migrations/
-axegaoshop/db/migrations
-
-deploy/docker-compose.yml
-deploy/Dockerfile
-deploy/deploy.sh
-axegaoshop/tests/
-
-utils/mailing/
-
-data/storage/uploads
 /axegaoshop/data/storage/uploads/
 /axegaoshop/data/storage
 /axegaoshop/data/storage/*

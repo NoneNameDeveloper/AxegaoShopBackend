@@ -33,6 +33,9 @@ async def add_or_create_cart(
     ):
         raise HTTPException(status_code=404, detail="NOT_FOUND")
 
+    if data.count < 0:
+        raise HTTPException(status_code=400, detail="BAD_COUNT")
+
     await add_to_cart(user.id, data.product_id, data.parameter_id, data.count)
 
     # orders = await Order.filter(user=user, status="waiting_payment").all()

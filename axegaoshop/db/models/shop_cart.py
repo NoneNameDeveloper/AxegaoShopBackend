@@ -37,7 +37,7 @@ async def add_to_cart(
 
     if not _cart:
         _cart = await ShopCart.create(
-            user=user, product=product, parameter=parameter, quantity=1
+            user=user, product=product, parameter=parameter, quantity=quantity
         )
 
     else:
