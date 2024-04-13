@@ -9,7 +9,7 @@ services:
     volumes:
       - .:/code
     ports:
-      - "8002:8000"
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgres://postgres:postgres@web-db:5432/web
     depends_on:
