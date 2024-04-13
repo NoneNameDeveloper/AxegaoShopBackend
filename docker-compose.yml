@@ -13,8 +13,10 @@ services:
     environment:
       - DATABASE_URL=postgres://postgres:postgres@web-db:5432/web
     depends_on:
-      - db
-#        condition: service_healthy
+      db:
+          condition: service_started
+      redis:
+        condition: service_healthy
 
   db:
     image: postgres:alpine
@@ -25,11 +27,6 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=axegaoshopdb
-#    healthcheck:
-#       test: "pg_isready"
-#       interval: 10s
-#       timeout: 5s
-#       retries: 5
 
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -38,9 +35,13 @@ services:
     image: redis:6-alpine
     container_name: axegaoshop_redis
     restart: always
+    volumes:
+      - redis-data:/data
     ports:
       - "127.0.0.1:6380:6379"
 
 
 volumes:
   pgdata:
+
+  redis-data:
