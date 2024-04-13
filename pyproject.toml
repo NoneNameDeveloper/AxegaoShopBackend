@@ -4,4 +4,4 @@ location = "/axegaoshop/db/migrations"
 src_folder = "./."
 
 [tool.black]
-target_versions = ['py311']
+target_version = ['py311']

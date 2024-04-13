@@ -11,12 +11,12 @@ from axegaoshop.web.api.products.parameters.schema import ParameterCreate
 
 class ProductSorting(BaseModel):
     price: typing.Optional[bool] = False  # сортировка по цене (false - возрастание)
-    rating: typing.Optional[
-        bool
-    ] = False  # сортировка по рейтингу (false - возрастание)
-    sale: typing.Optional[
-        bool
-    ] = False  # сортировка по скидке (false - все товары, true - только со скидками)
+    rating: typing.Optional[bool] = (
+        False  # сортировка по рейтингу (false - возрастание)
+    )
+    sale: typing.Optional[bool] = (
+        False  # сортировка по скидке (false - все товары, true - только со скидками)
+    )
 
 
 class ProductCreate(BaseModel):
