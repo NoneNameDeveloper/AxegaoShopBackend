@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends
 from tortoise.functions import Coalesce, Count
 
+from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.promocode import Promocode
+from axegaoshop.db.models.user import User
 
 from axegaoshop.web.api.promocodes.schema import (
     PromocodeIn_Pydantic,
@@ -11,7 +13,7 @@ from axegaoshop.web.api.promocodes.schema import (
 )
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import current_user_is_admin
+from axegaoshop.services.security.users import current_user_is_admin, get_current_user
 
 router = APIRouter()
 
@@ -75,7 +77,7 @@ async def delete_promocode(id: int):
 @router.get(
     path="/promocode/{name}/use", response_model=PromocodeIn_Pydantic, status_code=200
 )
-async def apply_promocode(name: str):
+async def apply_promocode(name: str, user: User = Depends(get_current_user)):
     """name - введенный пользователем промокод"""
     promocode: Promocode = await Promocode.get_or_none(name=name)
 
@@ -85,7 +87,10 @@ async def apply_promocode(name: str):
     if not await promocode.active():
         raise HTTPException(status_code=404, detail="PROMO_INACTIVE")
 
-    await promocode.use()
+    if user:
+        order = Order.filter(promocode=promocode, user=user, status="finished")
+        if await order.exists():
+            raise HTTPException(status_code=404, detail="PROMO_ALREADY_USED")
 
     await promocode.refresh_from_db()
 

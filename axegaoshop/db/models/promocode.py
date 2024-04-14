@@ -1,4 +1,3 @@
-from tortoise.exceptions import NoValuesFetched
 from tortoise.expressions import F
 from tortoise.fields import ReverseRelation
 from tortoise.models import Model
