@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_cache.decorator import cache
 
 from axegaoshop.db.models.partner import Partner
 
@@ -35,5 +36,6 @@ async def delete_partner(id: int):
 
 
 @router.get("/partners", response_model=list[PartnerIn_Pydantic], status_code=200)
+@cache(expire=10)
 async def get_partners():
     return await PartnerIn_Pydantic.from_queryset(Partner.all())

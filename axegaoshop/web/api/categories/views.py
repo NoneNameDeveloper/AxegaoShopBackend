@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi_cache.decorator import cache
 from tortoise.functions import Count
 
 from axegaoshop.db.models.category import Category, change_category_order
@@ -31,6 +32,7 @@ async def category_create(category: CategoryCreate):
 
 
 @router.get("/categories", response_model=list[CategoryIn_Pydantic])
+@cache(expire=20)
 async def category_get(empty_filter: bool = True):
     """empty filter - если True, возвращает только категории, в которых есть подкатегории
     False - возвращает все категории"""

@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=".env.local",
         env_prefix="AXEGAOSHOP_",
         env_file_encoding="utf-8",
     )
@@ -83,6 +83,8 @@ class Settings(BaseSettings):
     # конфигурация Redis
     redis_host: str = "localhost"
     redis_port: int = 6379
+    # дб редиса для кеша
+    redis_cache_db: int = 2
 
     redis_amounts_key: str = "payment:amounts"
 
