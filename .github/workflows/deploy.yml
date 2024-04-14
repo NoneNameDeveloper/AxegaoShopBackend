@@ -82,7 +82,7 @@ jobs:
             set -a
             source ${{ secrets.REMOTE_SERVER_PATH }}/.env
             set +a
-            if [ "$PULL_UPLOADS" = "true" ]; then docker cp axegaoshop/data/storage/uploads/. axegaoshop_api:/code/axegaoshop/data/storage/uploads/; echo "Файлы успешно перенесены в контейнер."; else echo "Переменная окружения PULL_UPLOADS не установлена в true. Пропускаем перенос файлов."; fi
+            if [ "$PULL_UPLOADS" = "true" ]; then docker cp ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop/data/storage/uploads/. axegaoshop_api:/code/axegaoshop/data/storage/uploads/; echo "Файлы успешно перенесены в контейнер."; else echo "Переменная окружения PULL_UPLOADS не установлена в true. Пропускаем перенос файлов."; fi
 
       - name: Starting migrations
         uses: appleboy/ssh-action@v1.0.3

@@ -248,6 +248,7 @@ async def check_order(
             "status": "waiting",
             "remaining_time": 600
             - ((datetime.now(tz=pytz.UTC) - order.created_datetime).total_seconds()),
+            "amount": str(order.result_price),
         },
     )
 
