@@ -47,4 +47,6 @@ volumes:
   axegaoshop-uploads:
     driver: local
     driver_opts:
+      o: bind
+      type: none
       device: ./axegaoshop/data/storage/uploads
