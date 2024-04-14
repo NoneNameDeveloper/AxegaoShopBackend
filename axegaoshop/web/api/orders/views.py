@@ -27,7 +27,7 @@ from axegaoshop.web.api.orders.schema import (
 )
 
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import get_current_user
+from axegaoshop.services.security.users import get_current_user, current_user_is_admin
 
 router = APIRouter()
 
@@ -160,6 +160,9 @@ async def check_order(
 
     order = await order.get()
 
+    if order.promocode:
+        promocode: Promocode = await order.promocode
+
     # проверка на то что заказ НЕ завершен / отменен
     if order.status == "canceled":
         raise HTTPException(status_code=404, detail="ORDER_CANCELED")
@@ -189,6 +192,11 @@ async def check_order(
 
         # очищение корзины
         await ShopCart.filter(user=user).delete()
+
+        # деактивация промо
+        if order.promocode:
+            promocode: Promocode = await order.promocode
+            await promocode.use()
 
         res_data = OrderFinishOut.model_validate(items)
 
@@ -274,7 +282,7 @@ async def cancel_order(id: int):
 
 @router.get(
     "/orders",
-    # dependencies=[Depends(JWTBearer), Depends(current_user_is_admin)],
+    dependencies=[Depends(JWTBearer), Depends(current_user_is_admin)],
     status_code=200,
     response_model=list[OrderDataHistory],
 )
