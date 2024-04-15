@@ -3,7 +3,6 @@ import typing
 from transliterate import translit
 
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi_cache.decorator import cache
 
 from tortoise.expressions import Q
 from tortoise.functions import Avg, Coalesce
@@ -256,8 +255,8 @@ async def subcategory_products_get(
         else:
             result_.append(value)
 
-    if len(result_) > 0 and hasattr(result_[0], "reviews_avg"):
-        result_ = sorted(result_, key=lambda x: x.reviews_avg)
+    # if len(result_) > 0 and hasattr(result_[0], "reviews_avg"):
+    #     result_ = sorted(result_, key=lambda x: x.reviews_avg)
 
     return [await ProductIn_Pydantic.from_tortoise_orm(u) for u in result_]
 
