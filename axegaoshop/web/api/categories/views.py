@@ -31,7 +31,6 @@ async def category_create(category: CategoryCreate):
 
 
 @router.get("/categories", response_model=list[CategoryIn_Pydantic])
-@cache(expire=20)
 async def category_get(empty_filter: bool = False):
     """empty filter - если True, возвращает только категории, в которых есть подкатегории
     False - возвращает все категории"""
