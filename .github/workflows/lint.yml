@@ -12,4 +12,3 @@ jobs:
       - uses: psf/black@24.3.0
         with:
           src: "./axegaoshop"
-          use_pyproject: true
