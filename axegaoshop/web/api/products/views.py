@@ -42,7 +42,6 @@ def transliterate_query(query: str) -> str:
 
 
 @router.get("/products", status_code=200, response_model=list[ProductIn_Pydantic])
-@cache(expire=10)
 async def get_products(
     price_sort: typing.Optional[bool] = None,
     rating_sort: typing.Optional[bool] = None,
@@ -180,7 +179,6 @@ async def update_product(id: int, data: ProductUpdate):
 @router.get(
     "/subcategory/{subcategory_id}/products", response_model=list[ProductIn_Pydantic]
 )
-@cache(expire=10)
 async def subcategory_products_get(
     subcategory_id: int,
     price_sort: typing.Optional[bool] = None,
