@@ -7,7 +7,7 @@ services:
     container_name: axegaoshop_api
     command: python -m axegaoshop
     volumes:
-      - axegaoshop-uploads:/code/axegaoshop/data/storage/uploads # volumes for uploads
+      - ./axegaoshop/data/storage/uploads:/code/axegaoshop/data/storage/uploads # volumes for uploads
     ports:
       - "8000:8000"
     depends_on:
@@ -43,10 +43,3 @@ volumes:
   pgdata:
 
   redis-data:
-
-  axegaoshop-uploads:
-#    driver: local
-#    driver_opts:
-#      o: bind
-#      type: none
-#      device: ./axegaoshop/data/storage/uploads
