@@ -7,7 +7,6 @@ from axegaoshop.db.models.category import Category, change_category_order
 from axegaoshop.web.api.categories.schema import (
     CategoryIn_Pydantic,
     CategoryCreate,
-    CategoryOrderChange,
     CategoryUpdate,
 )
 
@@ -33,17 +32,16 @@ async def category_create(category: CategoryCreate):
 
 @router.get("/categories", response_model=list[CategoryIn_Pydantic])
 @cache(expire=20)
-async def category_get(empty_filter: bool = True):
+async def category_get(empty_filter: bool = False):
     """empty filter - если True, возвращает только категории, в которых есть подкатегории
     False - возвращает все категории"""
-    if empty_filter:
-        return await CategoryIn_Pydantic.from_queryset(
-            Category.annotate(subcategories_count=Count("subcategories"))
-            .filter(subcategories_count__not=0)
-            .all()
-        )
-    else:
-        return await CategoryIn_Pydantic.from_queryset(Category.all())
+    # if empty_filter:
+    # return await CategoryIn_Pydantic.from_queryset(
+    #     Category.annotate(subcategories_count=Count("subcategories"))
+    #     .all()
+    # )
+    # else:
+    return await CategoryIn_Pydantic.from_queryset(Category.all())
 
 
 @router.patch(
