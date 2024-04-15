@@ -1,4 +1,5 @@
 from tortoise.exceptions import NoValuesFetched
+from tortoise.fields import JSONField
 from tortoise.models import Model
 from tortoise import fields
 
@@ -13,6 +14,7 @@ class Category(Model):
 
     title = fields.CharField(max_length=500)
     photo = fields.CharField(max_length=200, null=True)
+    colors = JSONField(default=[])  # цвета в HEX
 
     order_id = fields.IntField(null=False)
 

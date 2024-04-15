@@ -19,6 +19,7 @@ class CategoryOrderChange(BaseModel):
 class CategoryUpdate(BaseModel):
     title: typing.Optional[str] = None
     photo: typing.Optional[str] = None
+    colors: typing.Optional[list[str]] = None
 
 
 # :TODO: переделать возврат фулл товаров на айдишники товаров
