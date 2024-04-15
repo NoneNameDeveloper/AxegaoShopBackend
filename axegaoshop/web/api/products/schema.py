@@ -108,6 +108,5 @@ ProductIn_Pydantic = pydantic_model_creator(
         "parameters.data.id",
         "parameters.cart_product",
         "cart_product",
-        "product_photos.id",
     ),
 )
