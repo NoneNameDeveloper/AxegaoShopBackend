@@ -108,7 +108,6 @@ async def get_unaccepted_reviews(limit: int = 20, offset: int = 0):
 
 
 @router.get("/reviews", response_model=list[ReviewOutput])
-@cache(expire=15)
 async def get_reviews_handler(limit: int = 20, offset: int = 0):
     return await get_reviews("accepted", limit, offset)
 
