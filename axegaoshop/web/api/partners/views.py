@@ -1,5 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi_cache.decorator import cache
 
 from axegaoshop.db.models.partner import Partner
 

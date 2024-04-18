@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=".env.local",
         env_prefix="AXEGAOSHOP_",
         env_file_encoding="utf-8",
         extra="ignore",

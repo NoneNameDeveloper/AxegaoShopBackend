@@ -1,6 +1,4 @@
 from fastapi import APIRouter, Depends, HTTPException
-from fastapi_cache.decorator import cache
-from tortoise.functions import Count
 
 from axegaoshop.db.models.category import Category, change_category_order
 

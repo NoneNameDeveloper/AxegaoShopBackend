@@ -1,8 +1,6 @@
 from typing import Awaitable, Callable
 
 from fastapi import FastAPI
-from fastapi_cache import FastAPICache
-from fastapi_cache.backends.redis import RedisBackend
 from loguru import logger
 
 from axegaoshop.services.crons.clear_database import clear_amount_of_purchasing
@@ -34,7 +32,6 @@ def register_startup_event(
         redis = aioredis.from_url(
             f"redis://{settings.redis_host}:{settings.redis_port}/{settings.redis_cache_db}"
         )
-        FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
 
         logger.info("Cache initialized")
 

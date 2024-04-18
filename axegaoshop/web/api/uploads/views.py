@@ -1,7 +1,6 @@
 import os.path
 
 from fastapi import APIRouter, HTTPException, UploadFile, File
-from fastapi_cache.decorator import cache
 from starlette.responses import FileResponse
 
 from axegaoshop.settings import settings
