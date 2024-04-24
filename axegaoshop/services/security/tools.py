@@ -72,4 +72,4 @@ def decode_jwt(token: str) -> dict:
 
 def generate_password_drop_link(uid: str):
     """генерация ссылки для сброса пароля, которая передается в письме на почту"""
-    return f"/api/user/password/reset/{uid}"
+    return f"/user/password/reset/{uid}"

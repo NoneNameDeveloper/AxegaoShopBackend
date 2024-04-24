@@ -45,8 +45,8 @@ class Mailer:
         hand: bool = True,
     ):
         """письмо на покупку товара"""
-        for p in parameters:
-            p["photo"] = "http://fileshare.su:8000/api/uploads/L3ZKA1tU667CvcJn.png"
+        #for p in parameters:
+        #    p["photo"] = "http://fileshare.su:8000/api/uploads/L3ZKA1tU667CvcJn.png"
         if not hand:
             self.mailer_.send(
                 self.recipient,

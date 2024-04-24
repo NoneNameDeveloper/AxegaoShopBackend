@@ -44,9 +44,9 @@ def get_app() -> FastAPI:
 
     app = FastAPI(
         title="Axegao Shop",
-        docs_url="/api/docs",
-        redoc_url="/api/redoc",
-        openapi_url="/api/openapi.json",
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
         default_response_class=UJSONResponse,
     )
 
@@ -73,6 +73,6 @@ def get_app() -> FastAPI:
     from axegaoshop.web.api.router import api_router
 
     # Загрузка всех роутеров из головного
-    app.include_router(router=api_router, prefix="/api")
+    app.include_router(router=api_router, prefix="")
 
     return app

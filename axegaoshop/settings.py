@@ -45,7 +45,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env.local",
+        env_file=".env",
         env_prefix="AXEGAOSHOP_",
         env_file_encoding="utf-8",
         extra="ignore",
@@ -58,7 +58,7 @@ class Settings(BaseSettings):
 
     # host name of front server
     front_hostname: str = "http://fileshare.su:3000"
-
+    back_hostname: str = ""
     # количество воркеров uvicorn
     workers_count: int = 1
 
@@ -77,8 +77,8 @@ class Settings(BaseSettings):
     db_host: str = "localhost"
     db_port: int = 5432
     db_user: str = "postgres"
-    db_password: str = "postgres"
-    db_base: str = "axegaoshopdb"
+    db_password: str = "159326"
+    db_base: str = "axegaoshop"
     db_echo: bool = 0
 
     # конфигурация Redis

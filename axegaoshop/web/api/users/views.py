@@ -330,8 +330,7 @@ async def replenish_balance(
 @router.get(
     "/user/balance/replenish/{number}",
     dependencies=[Depends(JWTBearer())],
-    status_code=200,
-    response_model=UserReplenishOut,
+    status_code=200
 )
 async def replenish_balance_check(
     number: str,
@@ -354,17 +353,14 @@ async def replenish_balance_check(
         await user.add_balance(replenish.result_price)
         await replenish.finish()
 
-    return UserReplenishOut(
-        number=replenish.number,
-        result_price=replenish.result_price,
-        payment_type=replenish.payment_type,
-        status=replenish.status,
-        created_datetime=replenish.created_datetime,
-        remaining_time=(
-            600
-            - ((datetime.now(tz=pytz.UTC) - replenish.created_datetime).total_seconds())
-        ),
-    )
+    return {
+        "number": replenish.number,
+        "result_price": replenish.result_price,
+        "payment_type": replenish.payment_type,
+        "status": replenish.status,
+        "created_datetime": replenish.created_datetime,
+        "remaining_time": 600 - ((datetime.now(tz=pytz.UTC) - replenish.created_datetime).total_seconds())
+    }
 
 
 @router.post(
