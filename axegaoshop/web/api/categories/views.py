@@ -29,15 +29,8 @@ async def category_create(category: CategoryCreate):
 
 
 @router.get("/categories", response_model=list[CategoryIn_Pydantic])
-async def category_get(empty_filter: bool = False):
-    """empty filter - если True, возвращает только категории, в которых есть подкатегории
-    False - возвращает все категории"""
-    # if empty_filter:
-    # return await CategoryIn_Pydantic.from_queryset(
-    #     Category.annotate(subcategories_count=Count("subcategories"))
-    #     .all()
-    # )
-    # else:
+async def category_get():
+
     return await CategoryIn_Pydantic.from_queryset(Category.all())
 
 

@@ -57,7 +57,7 @@ class Settings(BaseSettings):
     port: int = 8000
 
     # host name of front server
-    front_hostname: str = "http://fileshare.su:3000"
+    front_hostname: str = ""
     back_hostname: str = ""
     # количество воркеров uvicorn
     workers_count: int = 1
@@ -76,8 +76,8 @@ class Settings(BaseSettings):
     # Данные от базы данных
     db_host: str = "localhost"
     db_port: int = 5432
-    db_user: str = "postgres"
-    db_password: str = "159326"
+    db_user: str = ""
+    db_password: str = ""
     db_base: str = "axegaoshop"
     db_echo: bool = 0
 
@@ -101,7 +101,7 @@ class Settings(BaseSettings):
     storage_folder: str = "axegaoshop/data/storage"
 
     # картинки сайта
-    storage_folder_images: str = storage_folder + "/uploads"
+    storage_folder_uploads: str = storage_folder + "/uploads"
 
     jwt_secret_key: str = "jwt_key"
     jwt_refresh_secret_key: str = "jwt_refresh_key"
@@ -127,11 +127,11 @@ class Settings(BaseSettings):
             path=f"/{self.db_base}",
         )
 
-    def __call__(self) -> None:
+    def __build__(self) -> None:
         """создание папок для хранилища"""
         os.makedirs(self.storage_folder, exist_ok=True)
-        os.makedirs(self.storage_folder_images, exist_ok=True)
+        os.makedirs(self.storage_folder_uploads, exist_ok=True)
 
 
 settings = Settings()
-settings.__call__()
+settings.__build__()

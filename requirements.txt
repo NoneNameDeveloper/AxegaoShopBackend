@@ -28,3 +28,4 @@ aiogram~=3.4.1
 pytz~=2023.3.post1
 transliterate~=1.10.2
 yagmail~=0.15.293
+redis

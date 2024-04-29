@@ -34,8 +34,14 @@ class Subcategory(Model):
         except (NoValuesFetched, AttributeError):
             return 0
 
+    def slug(self) -> str:
+        """
+        slug для подкатегории
+        """
+        return self.title.replace(" ", "-").lower() + "-" + str(self.id)
+
     class PydanticMeta:
-        computed = ("product_count",)
+        computed = ("product_count", "slug")
         allow_cycles = True
         max_recursion = 3
 

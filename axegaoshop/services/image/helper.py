@@ -19,7 +19,7 @@ async def handle_upload(file: UploadFile) -> str:
     """
     _, ext = os.path.splitext(file.filename)
 
-    img_dir: str = settings.storage_folder_images
+    img_dir: str = settings.storage_folder_uploads
 
     if not os.path.exists(img_dir):
         os.makedirs(img_dir)

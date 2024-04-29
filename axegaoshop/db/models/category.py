@@ -1,3 +1,4 @@
+import transliterate
 from tortoise.exceptions import NoValuesFetched
 from tortoise.fields import JSONField
 from tortoise.models import Model
@@ -33,8 +34,14 @@ class Category(Model):
         except NoValuesFetched:
             return 0
 
+    def slug(self) -> str:
+        """
+        slug для категории
+        """
+        return self.title.replace(" ", "-").lower() + "-" + str(self.id)
+
     class PydanticMeta:
-        computed = ("subcategories_count",)
+        computed = ("subcategories_count", "slug")
         exclude = ("subcategories.products.shop_cart",)
         max_recursion = 3
 

@@ -5,6 +5,8 @@ from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.replenish import Replenish
 from axegaoshop.services.cache.redis_service import rem_amount
 
+from axegaoshop.logging import logger
+
 
 async def clear_amount_of_purchasing() -> None:
     """завершение заказов и заявок на пополнения для освобождения
@@ -25,5 +27,12 @@ async def clear_amount_of_purchasing() -> None:
 
     total = order_amounts + replenish_amounts
 
+    pruned_count: int = 0
+
     for value in total:
-        await rem_amount(float(value[0]) if value[0] else None)
+        if len(value) != 0 and value[0]:
+            pruned_count += 1
+            await rem_amount(float(value[0]))
+
+    if pruned_count != 0:
+        logger.success(f"Pruned orders successfully: {pruned_count}")

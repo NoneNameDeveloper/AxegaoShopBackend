@@ -12,7 +12,7 @@ def create_user_photo(username: str) -> str:
     avatar = Avatar().generate(200, string=username, filetype="PNG")
 
     file_uid = f"{random_string()}.png"
-    file_path = os.path.join(settings.storage_folder_images, file_uid)
+    file_path = os.path.join(settings.storage_folder_uploads, file_uid)
 
     with open(file_path, "wb") as f:
         f.write(avatar)

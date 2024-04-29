@@ -39,15 +39,19 @@ class Product(Model):
 
         return 100 - int((self.card_sale_price * 100) / self.card_price)
 
-    class PydanticMeta:
-        exclude = ("subcategory", "shop_cart", "created_datetime", "reviews")
-        computed = [
-            "sale_percent",
-        ]
+    def slug(self) -> str:
+        """
+        slug для товара
+        """
+        return self.title.replace(" ", "-").lower() + "-" + str(self.id)
 
     class Meta:
         table = "products"
         ordering = ["order_id"]
+
+    class PydanticMeta:
+        exclude = ("subcategory", "shop_cart", "created_datetime", "reviews")
+        computed = ("sale_percent", "slug")
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
