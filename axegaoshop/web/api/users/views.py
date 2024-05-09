@@ -4,9 +4,8 @@ from datetime import datetime
 from typing import Annotated
 
 import pytz
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordBearer
-from fastapi import APIRouter, HTTPException, Depends, Request
-
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
@@ -15,38 +14,35 @@ from axegaoshop.db.models.password_reset import PasswordReset
 from axegaoshop.db.models.replenish import Replenish
 from axegaoshop.db.models.token import Token
 from axegaoshop.db.models.user import User
+from axegaoshop.services.image.avatar import create_user_photo
 from axegaoshop.services.notifications.mailing.mailing import Mailer
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
-from axegaoshop.settings import settings, executor
-from axegaoshop.web.api.orders.schema import OrderIn_Pydantic
-
-from axegaoshop.web.api.tokens.schema import TokenCreated, TokenRequest
-from axegaoshop.web.api.users.schema import (
-    UserCreate,
-    UserOutput,
-    UserUpdate,
-    UserIn_Pydantic,
-    UserCart_Pydantic,
-    UserForAdmin_Pydantic,
-    UserUpdateAdmin,
-    UserDropPassword,
-    UserReplenishBalance,
-    UserReplenishOut,
-    UserReplenish_Pydantic,
-)
-
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.tools import (
+    create_access_token,
+    create_refresh_token,
+    generate_password_drop_link,
     get_hashed_password,
     verify_password,
-    create_refresh_token,
-    create_access_token,
-    generate_password_drop_link,
 )
-
-from axegaoshop.services.image.avatar import create_user_photo
-from axegaoshop.services.security.users import get_current_user, current_user_is_admin
+from axegaoshop.services.security.users import current_user_is_admin, get_current_user
+from axegaoshop.settings import executor, settings
+from axegaoshop.web.api.orders.schema import OrderIn_Pydantic
+from axegaoshop.web.api.tokens.schema import TokenCreated, TokenRequest
+from axegaoshop.web.api.users.schema import (
+    UserCart_Pydantic,
+    UserCreate,
+    UserDropPassword,
+    UserForAdmin_Pydantic,
+    UserIn_Pydantic,
+    UserOutput,
+    UserReplenish_Pydantic,
+    UserReplenishBalance,
+    UserReplenishOut,
+    UserUpdate,
+    UserUpdateAdmin,
+)
 
 router = APIRouter()
 
@@ -330,7 +326,7 @@ async def replenish_balance(
 @router.get(
     "/user/balance/replenish/{number}",
     dependencies=[Depends(JWTBearer())],
-    status_code=200
+    status_code=200,
 )
 async def replenish_balance_check(
     number: str,
@@ -359,7 +355,8 @@ async def replenish_balance_check(
         "payment_type": replenish.payment_type,
         "status": replenish.status,
         "created_datetime": replenish.created_datetime,
-        "remaining_time": 600 - ((datetime.now(tz=pytz.UTC) - replenish.created_datetime).total_seconds())
+        "remaining_time": 600
+        - ((datetime.now(tz=pytz.UTC) - replenish.created_datetime).total_seconds()),
     }
 
 

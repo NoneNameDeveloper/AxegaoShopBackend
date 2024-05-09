@@ -1,8 +1,8 @@
 import typing
 from datetime import datetime
 
-from tortoise.models import Model
 from tortoise import fields
+from tortoise.models import Model
 
 from axegaoshop.db.models.user import User
 

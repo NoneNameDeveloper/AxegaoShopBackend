@@ -4,13 +4,13 @@ from collections import defaultdict
 from decimal import Decimal
 from typing import Any
 
-from tortoise.models import Model
 from tortoise import fields
+from tortoise.models import Model
 
 from axegaoshop.db.models.product import Parameter, get_items_data_for_order
 from axegaoshop.db.models.review import Review
 from axegaoshop.services.cache.redis_service import rem_amount
-from axegaoshop.services.utils import random_upper_string, generate_unique_sum_postfix
+from axegaoshop.services.utils import generate_unique_sum_postfix, random_upper_string
 
 
 class Order(Model):

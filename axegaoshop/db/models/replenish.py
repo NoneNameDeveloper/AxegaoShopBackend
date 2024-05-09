@@ -1,5 +1,5 @@
-from tortoise.models import Model
 from tortoise import fields
+from tortoise.models import Model
 
 from axegaoshop.services.cache.redis_service import rem_amount
 from axegaoshop.services.utils import generate_unique_sum_postfix, random_upper_string

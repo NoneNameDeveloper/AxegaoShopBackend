@@ -1,8 +1,8 @@
 from datetime import datetime
 
+from tortoise import fields
 from tortoise.expressions import Q
 from tortoise.models import Model
-from tortoise import fields
 
 from axegaoshop.db.models.order import OrderParameters
 from axegaoshop.db.models.review import Review

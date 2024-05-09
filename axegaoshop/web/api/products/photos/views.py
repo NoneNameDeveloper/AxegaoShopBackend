@@ -1,15 +1,14 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from tortoise.expressions import Q
 
-from axegaoshop.db.models.product import ProductPhoto, Product
-from axegaoshop.web.api.products.photos.schema import (
-    PhotoIn_Pydantic,
-    PhotoCreate,
-    PhotoUpdate,
-)
-
+from axegaoshop.db.models.product import Product, ProductPhoto
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
+from axegaoshop.web.api.products.photos.schema import (
+    PhotoCreate,
+    PhotoIn_Pydantic,
+    PhotoUpdate,
+)
 
 router = APIRouter()
 

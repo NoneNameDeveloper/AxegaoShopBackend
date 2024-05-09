@@ -1,8 +1,8 @@
 from datetime import datetime
 
+from tortoise import fields
 from tortoise.exceptions import NoValuesFetched
 from tortoise.models import Model
-from tortoise import fields
 
 
 class Subcategory(Model):

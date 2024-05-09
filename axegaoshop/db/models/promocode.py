@@ -1,7 +1,7 @@
+from tortoise import fields
 from tortoise.expressions import F
 from tortoise.fields import ReverseRelation
 from tortoise.models import Model
-from tortoise import fields
 
 
 class Promocode(Model):

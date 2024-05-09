@@ -26,5 +26,6 @@ def register_startup_event(
         )
 
         async_scheduler.start()
+        logger.success("Clearing jobs created successfully!")
 
     return _startup

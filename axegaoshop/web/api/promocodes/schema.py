@@ -1,7 +1,6 @@
 import typing
 
 from pydantic import BaseModel
-
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from axegaoshop.db.models.promocode import Promocode

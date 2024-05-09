@@ -1,15 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from axegaoshop.db.models.category import Category, change_category_order
-
-from axegaoshop.web.api.categories.schema import (
-    CategoryIn_Pydantic,
-    CategoryCreate,
-    CategoryUpdate,
-)
-
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
+from axegaoshop.web.api.categories.schema import (
+    CategoryCreate,
+    CategoryIn_Pydantic,
+    CategoryUpdate,
+)
 
 router = APIRouter()
 

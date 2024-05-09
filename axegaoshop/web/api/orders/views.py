@@ -16,18 +16,16 @@ from axegaoshop.services.notifications.telegram import TelegramService
 from axegaoshop.services.notifications.telegram.telegram_di import get_telegram_data
 from axegaoshop.services.payment.sbp.ozon_bank import OzoneBank
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank
+from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
+from axegaoshop.services.security.users import current_user_is_admin, get_current_user
 from axegaoshop.settings import PaymentType, executor
-
 from axegaoshop.web.api.orders.schema import (
     OrderCreate,
+    OrderDataHistory,
+    OrderFinishOut,
     OrderIn_Pydantic,
     OrderStatus,
-    OrderFinishOut,
-    OrderDataHistory,
 )
-
-from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import get_current_user, current_user_is_admin
 
 router = APIRouter()
 

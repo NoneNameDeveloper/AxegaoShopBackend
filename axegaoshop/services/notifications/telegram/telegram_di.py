@@ -1,4 +1,5 @@
-from axegaoshop.db.models.telegram_settings import get_tg_settings, get_tg_recievers
+from axegaoshop.db.models.telegram_settings import get_tg_recievers, get_tg_settings
+
 from .service import TelegramService
 
 

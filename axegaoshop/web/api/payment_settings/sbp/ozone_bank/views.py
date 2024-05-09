@@ -5,14 +5,13 @@ from axegaoshop.db.models.payment_settings import (
     get_ozone_bank_data,
 )
 from axegaoshop.services.payment.sbp.ozon_bank_di import get_ozone_bank_raw
+from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
+from axegaoshop.services.security.users import current_user_is_admin
 from axegaoshop.web.api.payment_settings.sbp.ozone_bank.schema import (
     PaymentSettingsCreate,
     PaymentSettingsIn,
     PaymentSettingsUser,
 )
-
-from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import current_user_is_admin
 
 router = APIRouter()
 

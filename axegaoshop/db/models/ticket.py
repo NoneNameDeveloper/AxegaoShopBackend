@@ -3,7 +3,6 @@ from datetime import datetime
 from tortoise import fields
 from tortoise.exceptions import NoValuesFetched
 from tortoise.expressions import Q
-
 from tortoise.models import Model
 
 from axegaoshop.db.models.user import User
