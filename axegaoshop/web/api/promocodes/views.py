@@ -1,19 +1,17 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from tortoise.functions import Coalesce, Count
 
 from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.promocode import Promocode
 from axegaoshop.db.models.user import User
-
-from axegaoshop.web.api.promocodes.schema import (
-    PromocodeIn_Pydantic,
-    CreatePromocode,
-    UpdatePromocode,
-    PromocodeIn,
-)
-
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin, get_current_user
+from axegaoshop.web.api.promocodes.schema import (
+    CreatePromocode,
+    PromocodeIn,
+    PromocodeIn_Pydantic,
+    UpdatePromocode,
+)
 
 router = APIRouter()
 

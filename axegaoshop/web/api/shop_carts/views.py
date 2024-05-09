@@ -1,16 +1,13 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.product import Product
 from axegaoshop.db.models.shop_cart import add_to_cart
 from axegaoshop.db.models.user import User
-
-from axegaoshop.web.api.products.schema import ProductToCart
-from axegaoshop.web.api.users.schema import UserCart_Pydantic
-
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import get_current_user
-
+from axegaoshop.web.api.products.schema import ProductToCart
+from axegaoshop.web.api.users.schema import UserCart_Pydantic
 
 router = APIRouter()
 

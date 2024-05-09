@@ -2,7 +2,6 @@ import datetime
 from dataclasses import dataclass
 
 import aiohttp
-
 from pydantic import BaseModel, Field, computed_field
 
 OZONE_BASE_URL = "https://finance.ozon.ru"

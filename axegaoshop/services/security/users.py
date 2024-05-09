@@ -1,4 +1,4 @@
-from fastapi import HTTPException, Depends
+from fastapi import Depends, HTTPException
 from starlette.requests import Request
 
 from axegaoshop.db.models.token import Token

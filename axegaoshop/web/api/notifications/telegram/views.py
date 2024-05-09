@@ -1,12 +1,12 @@
 import asyncio
 
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from axegaoshop.db.models.telegram_settings import (
-    get_tg_settings,
-    get_tg_recievers,
-    TelegramSetting,
     TelegramReciever,
+    TelegramSetting,
+    get_tg_recievers,
+    get_tg_settings,
 )
 from axegaoshop.services.notifications.telegram import TelegramService
 from axegaoshop.services.notifications.telegram.telegram_di import (
@@ -16,8 +16,8 @@ from axegaoshop.services.notifications.telegram.telegram_di import (
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
 from axegaoshop.web.api.notifications.telegram.schema import (
-    TelegramSettingUpdate,
     TelegramSettingIn,
+    TelegramSettingUpdate,
 )
 
 router = APIRouter()

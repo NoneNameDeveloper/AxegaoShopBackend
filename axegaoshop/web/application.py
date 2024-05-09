@@ -1,15 +1,13 @@
 import logging
 
 import sentry_sdk
-
 from fastapi import FastAPI
 from fastapi.responses import UJSONResponse
-
+from loguru import logger
 from sentry_sdk.integrations.fastapi import FastApiIntegration
 from sentry_sdk.integrations.logging import LoggingIntegration
 from starlette.middleware.cors import CORSMiddleware
 from tortoise import Tortoise
-
 from tortoise.contrib.fastapi import register_tortoise
 
 import axegaoshop.db.config
@@ -26,6 +24,7 @@ def get_app() -> FastAPI:
     configure_logging()
 
     if settings.sentry_dsn:
+        logger.info("Initializing Sentry connection...")
         # Интеграция с sentry
         sentry_sdk.init(
             dsn=settings.sentry_dsn,
@@ -41,6 +40,8 @@ def get_app() -> FastAPI:
                 ),
             ],
         )
+
+        logger.success("Sentry connected successfully!")
 
     app = FastAPI(
         title="Axegao Shop",

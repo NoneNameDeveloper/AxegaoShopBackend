@@ -1,5 +1,5 @@
 import logging
-import sys
+import os
 from typing import Union
 
 from loguru import logger
@@ -61,7 +61,10 @@ def configure_logging() -> None:  # pragma: no cover
 
     # set logs output, level and format
     logger.remove()
+
     logger.add(
-        sys.stdout,
+        str(os.path.join(settings.logs_dir, settings.log_level.value + ".log")),
         level=settings.log_level.value,
+        rotation="500 MB",
+        compression="zip",
     )

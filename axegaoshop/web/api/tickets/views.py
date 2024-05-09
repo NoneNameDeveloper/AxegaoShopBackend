@@ -6,14 +6,14 @@ from tortoise.expressions import Q
 
 from axegaoshop.db.models.ticket import (
     Ticket,
-    get_or_create_ticket,
     TicketMessage,
     TicketMessageAttachment,
+    get_or_create_ticket,
 )
 from axegaoshop.db.models.user import User
 from axegaoshop.services.notifications.mailing.mailing import Mailer
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import get_current_user, current_user_is_admin
+from axegaoshop.services.security.users import current_user_is_admin, get_current_user
 from axegaoshop.settings import executor
 from axegaoshop.web.api.tickets.schema import TicketIn_Pydantic, TicketMessageSend
 

@@ -1,32 +1,28 @@
 import typing
 
-from transliterate import translit
-
 from fastapi import APIRouter, Depends, HTTPException
-
 from tortoise.expressions import Q
 from tortoise.functions import Avg, Coalesce
+from transliterate import translit
 
 from axegaoshop.db.models.product import (
-    Product,
-    Parameter,
     Option,
-    ProductPhoto,
+    Parameter,
+    Product,
     ProductData,
+    ProductPhoto,
     change_product_order,
 )
 from axegaoshop.db.models.review import Review
 from axegaoshop.db.models.subcategory import Subcategory
-
-from axegaoshop.web.api.products.schema import (
-    ProductCreate,
-    ProductIn_Pydantic,
-    ProductUpdate,
-    ProductDataOut,
-)
-
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
+from axegaoshop.web.api.products.schema import (
+    ProductCreate,
+    ProductDataOut,
+    ProductIn_Pydantic,
+    ProductUpdate,
+)
 
 router = APIRouter()
 

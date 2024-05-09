@@ -2,9 +2,8 @@ import os
 
 from avatar_generator import Avatar
 
-from axegaoshop.settings import settings
-
 from axegaoshop.services.utils import random_string
+from axegaoshop.settings import settings
 
 
 def create_user_photo(username: str) -> str:

@@ -3,17 +3,14 @@ from tortoise.functions import Count
 
 from axegaoshop.db.models.category import Category
 from axegaoshop.db.models.subcategory import Subcategory, change_subcategory_order
-
-from axegaoshop.web.api.subcategories.schema import (
-    SubcategoryIn_Pydantic,
-    SubcategoryCreate,
-    SubcategoryUpdate,
-    SubcategoryOrderChange,
-)
-
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
-
+from axegaoshop.web.api.subcategories.schema import (
+    SubcategoryCreate,
+    SubcategoryIn_Pydantic,
+    SubcategoryOrderChange,
+    SubcategoryUpdate,
+)
 
 router = APIRouter()
 

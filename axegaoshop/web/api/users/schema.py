@@ -1,10 +1,8 @@
 import typing
+from datetime import datetime
 from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr
-
-from datetime import datetime
-
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from axegaoshop.db.models.replenish import Replenish

@@ -1,19 +1,17 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from axegaoshop.db.models.order import Order
 from axegaoshop.db.models.product import Product
 from axegaoshop.db.models.review import Review, ReviewPhoto
 from axegaoshop.db.models.user import User
-
+from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
+from axegaoshop.services.security.users import current_user_is_admin, get_current_user
 from axegaoshop.web.api.reviews.schema import (
-    ReviewIn_Pydantic,
     ReviewCreate,
+    ReviewIn_Pydantic,
     ReviewOutput,
     ReviewUpdate,
 )
-
-from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
-from axegaoshop.services.security.users import current_user_is_admin, get_current_user
 from axegaoshop.web.api.users.schema import UserProductsComment
 
 router = APIRouter()

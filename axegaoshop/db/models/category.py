@@ -1,8 +1,8 @@
 import transliterate
+from tortoise import fields
 from tortoise.exceptions import NoValuesFetched
 from tortoise.fields import JSONField
 from tortoise.models import Model
-from tortoise import fields
 
 
 class Category(Model):

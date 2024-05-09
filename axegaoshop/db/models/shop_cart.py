@@ -1,7 +1,7 @@
-from tortoise.models import Model
 from tortoise import fields
+from tortoise.models import Model
 
-from axegaoshop.db.models.product import Product, Parameter
+from axegaoshop.db.models.product import Parameter, Product
 from axegaoshop.db.models.user import User
 
 

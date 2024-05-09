@@ -1,12 +1,11 @@
 import time
-from typing import Union, Any
 from datetime import datetime, timedelta
+from typing import Any, Union
 
-from passlib.context import CryptContext
 from jose import jwt
+from passlib.context import CryptContext
 
 from axegaoshop.settings import settings
-
 
 ACCESS_TOKEN_EXPIRE_MINUTES: int = 66000
 REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 7

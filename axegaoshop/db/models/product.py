@@ -1,8 +1,8 @@
 from datetime import datetime
 
+from tortoise import fields
 from tortoise.expressions import Q
 from tortoise.models import Model
-from tortoise import fields
 from tortoise.queryset import QuerySet
 
 

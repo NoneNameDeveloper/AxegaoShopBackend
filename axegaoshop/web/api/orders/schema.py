@@ -1,11 +1,10 @@
 import typing
 from datetime import datetime
 
-from pydantic import BaseModel, field_validator, model_validator, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 from tortoise.contrib.pydantic import pydantic_model_creator
 
 from axegaoshop.db.models.order import Order
-
 from axegaoshop.settings import settings
 
 

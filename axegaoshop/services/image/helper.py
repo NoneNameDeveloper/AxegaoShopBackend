@@ -1,10 +1,10 @@
 import os
 
 import aiofiles
-from fastapi import UploadFile, HTTPException
+from fastapi import HTTPException, UploadFile
 
-from axegaoshop.settings import settings, ALLOWED_UPLOAD_TYPES
 from axegaoshop.services.utils import random_string
+from axegaoshop.settings import ALLOWED_UPLOAD_TYPES, settings
 
 
 async def handle_upload(file: UploadFile) -> str:

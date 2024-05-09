@@ -1,7 +1,7 @@
 import random
 import string
 
-from axegaoshop.services.cache.redis_service import amount_exists, add_amount
+from axegaoshop.services.cache.redis_service import add_amount, amount_exists
 
 
 def random_string(length: int = 16) -> str:  # noqa

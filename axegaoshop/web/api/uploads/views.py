@@ -1,12 +1,11 @@
 import os.path
 
-from fastapi import APIRouter, HTTPException, UploadFile, File
+from fastapi import APIRouter, File, HTTPException, UploadFile
 from starlette.responses import FileResponse
 
+from axegaoshop.services.image.helper import handle_upload
 from axegaoshop.settings import settings
 from axegaoshop.web.api.uploads.schema import UploadOut
-
-from axegaoshop.services.image.helper import handle_upload
 
 router = APIRouter(tags=["Uploads"])
 

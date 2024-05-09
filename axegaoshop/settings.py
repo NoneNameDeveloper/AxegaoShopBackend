@@ -106,6 +106,8 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "jwt_key"
     jwt_refresh_secret_key: str = "jwt_refresh_key"
 
+    logs_dir: str = "axegaoshop/data/logs"
+
     @property
     def base_hostname(self) -> URL:
         """создание хостнейма на сайт"""
@@ -131,6 +133,7 @@ class Settings(BaseSettings):
         """создание папок для хранилища"""
         os.makedirs(self.storage_folder, exist_ok=True)
         os.makedirs(self.storage_folder_uploads, exist_ok=True)
+        os.makedirs(self.logs_dir, exist_ok=True)
 
 
 settings = Settings()

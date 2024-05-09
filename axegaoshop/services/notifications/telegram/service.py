@@ -4,8 +4,8 @@ from aiogram import Bot
 from aiogram.utils.token import TokenValidationError
 
 from axegaoshop.services.notifications.telegram.templates import (
-    SELL_NOTIFY_TEMPLATE,
     NOTIFY_APPENDIX_TEMPLATE,
+    SELL_NOTIFY_TEMPLATE,
 )
 
 

@@ -1,20 +1,19 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, Depends, HTTPException
 
 from axegaoshop.db.models.product import (
-    Product,
     Parameter,
+    Product,
     change_parameter_order,
     update_parameter_data,
 )
-from axegaoshop.web.api.products.parameters.schema import (
-    ParameterIn_Pydantic,
-    ParameterCreate,
-    ParameterUpdate,
-    ParameterOrderChange,
-)
-
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
+from axegaoshop.web.api.products.parameters.schema import (
+    ParameterCreate,
+    ParameterIn_Pydantic,
+    ParameterOrderChange,
+    ParameterUpdate,
+)
 
 router = APIRouter()
 
