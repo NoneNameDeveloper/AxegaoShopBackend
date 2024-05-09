@@ -12,12 +12,13 @@ jobs:
       - uses: psf/black@24.3.0
         with:
           src: "./axegaoshop"
-isort:
-    steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
-        with:
-          python-version: 3.11
-      - uses: isort/isort-action@master
-        with:
-          requirementsFiles: "requirements.txt"
+  isort:
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v2
+        - uses: actions/setup-python@v2
+          with:
+            python-version: 3.11
+        - uses: isort/isort-action@master
+          with:
+            requirementsFiles: "requirements.txt"
