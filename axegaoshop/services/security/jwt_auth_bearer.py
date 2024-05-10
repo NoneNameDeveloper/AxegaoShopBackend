@@ -30,7 +30,7 @@ class JWTBearer(HTTPBearer):
 
     @staticmethod
     def verify_jwt(jwt_token: str) -> bool:
-        """проверка jwt на валидность"""
+        """проверка jwt токена на валидность"""
         is_token_valid: bool = False
 
         try:
