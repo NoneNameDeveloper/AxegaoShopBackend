@@ -28,7 +28,7 @@ jobs:
       - name: Save Docker image as tar file
         run: |
           docker save -o axegaoshop.tar axegaoshop:latest
-          chmod 664 axegaoshop.tar
+          chmod 664 ${{ secrets.PROJECT_NAME }}.tar
 
       - name: Transfer Docker image to remote server
         uses: appleboy/scp-action@v0.1.7
@@ -37,7 +37,7 @@ jobs:
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: axegaoshop.tar
+          source: ${{ secrets.PROJECT_NAME }}.tar
           target: ${{ secrets.REMOTE_SERVER_PATH }}
 
       - name: Creating docker image
@@ -47,7 +47,7 @@ jobs:
           username: ${{ secrets.REMOTE_SERVER_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: ${{ secrets.PORT }}
-          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop.tar && rm -f ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop.tar
+          script: docker load -i ${{ secrets.REMOTE_SERVER_PATH }}/${{ secrets.PROJECT_NAME }}.tar && rm -f ${{ secrets.REMOTE_SERVER_PATH }}/${{ secrets.PROJECT_NAME }}.tar
 
       - name: Transfer Docker image to remote server
         uses: appleboy/scp-action@v0.1.7
@@ -69,7 +69,7 @@ jobs:
           script: |
             docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml down
             docker-compose -f ${{ secrets.REMOTE_SERVER_PATH }}/docker-compose.yml up -d
-            docker image prune -a
+            docker system prune -a -y
 
       - name: Pulling uploading if needed
         uses: appleboy/ssh-action@v1.0.3
@@ -82,7 +82,7 @@ jobs:
             set -a
             source ${{ secrets.REMOTE_SERVER_PATH }}/.env
             set +a
-            if [ "$PULL_UPLOADS" = "true" ]; then docker cp ${{ secrets.REMOTE_SERVER_PATH }}/axegaoshop/data/storage/uploads/. axegaoshop_api:/code/axegaoshop/data/storage/uploads/; echo "Файлы успешно перенесены в контейнер."; else echo "Переменная окружения PULL_UPLOADS не установлена в true. Пропускаем перенос файлов."; fi
+            if [ "$PULL_UPLOADS" = "true" ]; then docker cp ${{ secrets.REMOTE_SERVER_PATH }}/${{ secrets.PROJECT_NAME }}/data/storage/uploads/. axegaoshop_api:/code/${{ secrets.PROJECT_NAME }}/data/storage/uploads/; echo "Файлы успешно перенесены в контейнер."; else echo "Переменная окружения PULL_UPLOADS не установлена в true. Пропускаем перенос файлов."; fi
 
       - name: Starting migrations
         uses: appleboy/ssh-action@v1.0.3

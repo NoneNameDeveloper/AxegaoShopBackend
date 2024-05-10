@@ -1,5 +1,6 @@
 .dockerignore
-#pyproject.toml
-#
-#axegaoshop/db/migrations/*
-#axegaoshop/db/migrations/
+
+venv/
+venv
+
+.idea/
