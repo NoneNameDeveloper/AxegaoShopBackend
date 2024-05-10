@@ -7,7 +7,7 @@ services:
     container_name: axegaoshop_api
     command: python -m axegaoshop
     volumes:
-      - ./axegaoshop/data/storage/uploads:/code/axegaoshop/data/storage/uploads # volumes for uploads
+      - ./axegaoshop/data/storage/uploads:/code/axegaoshop/data/storage/uploads
     ports:
       - "8000:8000"
     depends_on:
