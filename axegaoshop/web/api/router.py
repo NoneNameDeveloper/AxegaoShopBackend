@@ -2,6 +2,7 @@ from fastapi.routing import APIRouter
 
 from axegaoshop.web.api import (
     categories,
+    faqs,
     healthcheck,
     orders,
     partners,
@@ -34,6 +35,8 @@ api_router.include_router(router=photos.router, prefix="", tags=["Product photos
 api_router.include_router(
     router=parameters.router, prefix="", tags=["Product parameters"]
 )
+
+api_router.include_router(router=faqs.router, prefix="", tags=["User FAQ"])
 
 api_router.include_router(router=orders.router, prefix="", tags=["Orders"])
 

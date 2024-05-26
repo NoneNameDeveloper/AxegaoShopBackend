@@ -20,6 +20,7 @@ MODELS_MODULES: List[str] = [
     f"{MODELS_MODULES_PREFIX}.replenish",
     f"{MODELS_MODULES_PREFIX}.telegram_settings",
     f"{MODELS_MODULES_PREFIX}.ticket",
+    f"{MODELS_MODULES_PREFIX}.faq",
 ]
 
 TORTOISE_CONFIG = {
