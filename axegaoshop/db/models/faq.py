@@ -1,5 +1,6 @@
 from tortoise import fields
 from tortoise.models import Model
+from transliterate import translit
 
 
 class Faq(Model):
@@ -14,7 +15,13 @@ class Faq(Model):
         """
         slug для FAQ
         """
-        return self.title.replace(" ", "-").lower() + "-" + str(self.id)
+        return (
+            translit(
+                self.title.replace(" ", "-").lower(), language_code="ru", reversed=True
+            )
+            + "-"
+            + str(self.id)
+        )
 
     class PydanticMeta:
         computed = ("slug",)

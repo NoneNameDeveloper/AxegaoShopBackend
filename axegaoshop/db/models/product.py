@@ -4,6 +4,7 @@ from tortoise import fields
 from tortoise.expressions import Q
 from tortoise.models import Model
 from tortoise.queryset import QuerySet
+from transliterate import translit
 
 
 class Product(Model):
@@ -43,7 +44,13 @@ class Product(Model):
         """
         slug для товара
         """
-        return self.title.replace(" ", "-").lower() + "-" + str(self.id)
+        return (
+            translit(
+                self.title.replace(" ", "-").lower(), language_code="ru", reversed=True
+            )
+            + "-"
+            + str(self.id)
+        )
 
     class Meta:
         table = "products"

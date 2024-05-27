@@ -3,6 +3,7 @@ from tortoise import fields
 from tortoise.exceptions import NoValuesFetched
 from tortoise.fields import JSONField
 from tortoise.models import Model
+from transliterate import translit
 
 
 class Category(Model):
@@ -38,7 +39,13 @@ class Category(Model):
         """
         slug для категории
         """
-        return self.title.replace(" ", "-").lower() + "-" + str(self.id)
+        return (
+            translit(
+                self.title.replace(" ", "-").lower(), language_code="ru", reversed=True
+            )
+            + "-"
+            + str(self.id)
+        )
 
     class PydanticMeta:
         computed = ("subcategories_count", "slug")

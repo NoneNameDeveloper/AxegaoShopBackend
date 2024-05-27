@@ -3,6 +3,7 @@ from datetime import datetime
 from tortoise import fields
 from tortoise.exceptions import NoValuesFetched
 from tortoise.models import Model
+from transliterate import translit
 
 
 class Subcategory(Model):
@@ -38,7 +39,13 @@ class Subcategory(Model):
         """
         slug для подкатегории
         """
-        return self.title.replace(" ", "-").lower() + "-" + str(self.id)
+        return (
+            translit(
+                self.title.replace(" ", "-").lower(), language_code="ru", reversed=True
+            )
+            + "-"
+            + str(self.id)
+        )
 
     class PydanticMeta:
         computed = ("product_count", "slug")
