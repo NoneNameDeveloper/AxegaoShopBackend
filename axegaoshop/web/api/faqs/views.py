@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 
-from axegaoshop.db.models.faq import Faq
+from axegaoshop.db.models.faq import Faq, change_faq_order
 from axegaoshop.services.security.jwt_auth_bearer import JWTBearer
 from axegaoshop.services.security.users import current_user_is_admin
 from axegaoshop.web.api.faqs.schema import (
@@ -62,4 +62,19 @@ async def faqs_manipulate(faqs: list[FaqPydanticAdminCreate]):
 
 @router.get("/faq", response_model=list[Faqs_Pydantic])
 async def faq_get():
+    return await Faqs_Pydantic.from_queryset(Faq.all())
+
+
+@router.post(
+    "/faq/order",
+    dependencies=[Depends(JWTBearer()), Depends(current_user_is_admin)],
+    status_code=200,
+    response_model=list[Faqs_Pydantic],
+)
+async def change_faq_order_router(faq_ids: list[int]):
+    res = await change_faq_order(faq_ids)
+
+    if not res:
+        raise HTTPException(status_code=404, detail="NOT_FOUND")
+
     return await Faqs_Pydantic.from_queryset(Faq.all())
