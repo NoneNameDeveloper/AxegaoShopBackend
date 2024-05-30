@@ -26,6 +26,7 @@ class Faq(Model):
 
     class Meta:
         table = "faqs"
+        ordering = ["order_id"]
 
     async def save(self, *args, **kwargs):
         """сохраняем и назначаем order_id"""
@@ -42,7 +43,6 @@ class Faq(Model):
 async def change_faq_order(ids: list[int]) -> bool:
     """
     смена порядка в Faq
-
     """
     if not len(ids) == await Faq.all().count():
         return False
