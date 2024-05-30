@@ -27,6 +27,17 @@ class Faq(Model):
     class Meta:
         table = "faqs"
 
+    async def save(self, *args, **kwargs):
+        """сохраняем и назначаем order_id"""
+        last_faq_id = await Faq.all().order_by("id")
+
+        if not last_faq_id:
+            self.order_id = 1
+        else:
+            self.order_id = last_faq_id[-1].order_id + 1
+
+        await super().save(*args, **kwargs)
+
 
 async def change_faq_order(ids: list[int]) -> bool:
     """
